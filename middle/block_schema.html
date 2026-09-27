@@ -467,8 +467,8 @@
                 <td>${b !== null ? b : '—'}</td>
             `;
             traceBody.appendChild(tr);
-            // Прокручиваем таблицу вниз
-            traceBody.parentElement.scrollTop = traceBody.parentElement.scrollHeight;
+            // Прокручиваем к новой строке, чтобы её сразу было видно
+            tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
             // 6. Логика для стрелок
             if (step.id === 'condition') {
