@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лягушка и Кузнечик: Игра и Формула</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e0f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .site-nav {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            background: white;
+            color: #2c3e50;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .site-nav a:hover {
+            background: #eaf2f8;
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Левая колонка: Игра */
+        .game-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            flex: 1 1 600px;
+            max-width: 800px;
+        }
+
+        /* Правая колонка: Формула и Код */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex: 1 1 350px;
+            max-width: 450px;
+        }
+
+        h1, h2, h3 {
+            color: #00796b;
+            margin-top: 0;
+        }
+
+        h1 { text-align: center; font-size: 1.8em; }
+        h2 { font-size: 1.3em; border-bottom: 2px solid #b2dfdb; padding-bottom: 5px; }
+        h3 { font-size: 1.1em; color: #004d40; }
+
+        /* Панель настроек */
+        .settings-panel {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #ff9800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .settings-panel label {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .settings-panel input {
+            padding: 8px;
+            font-size: 1.1em;
+            border: 2px solid #ffb74d;
+            border-radius: 8px;
+            width: 80px;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .settings-panel button {
+            padding: 8px 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .settings-panel button:hover { background-color: #f57c00; }
+
+        /* Дорожка */
+        .track-wrapper {
+            overflow-x: auto;
+            padding: 20px 10px;
+            background: #f0fdf4;
+            border-radius: 15px;
+            border: 2px dashed #a5d6a7;
+            margin-bottom: 20px;
+        }
+
+        .track {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            min-width: fit-content;
+        }
+
+        .cell {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            font-size: 1.4em;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-shrink: 0;
+        }
+
+        .cell.frog { background-color: #c8e6c9; box-shadow: 0 4px 0 #81c784; }
+        .cell.grasshopper { background-color: #ffe0b2; box-shadow: 0 4px 0 #ffb74d; }
+        .cell.meeting { background-color: #e1bee7; box-shadow: 0 4px 0 #ce93d8; animation: bounce 0.5s infinite alternate; }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        /* Управление игрой */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button.action-btn {
+            padding: 12px 25px;
+            font-size: 1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        button.action-btn:active { transform: scale(0.95); }
+        button.action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-step { background-color: #4caf50; color: white; box-shadow: 0 4px 0 #388e3c; }
+        .btn-reset { background-color: #f44336; color: white; box-shadow: 0 4px 0 #d32f2f; }
+
+        /* Объяснение хода */
+        .explanation-box {
+            background-color: #fff8e1;
+            border: 2px solid #ffecb3;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 80px;
+            font-size: 1em;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        /* Блок с формулой */
+        .formula-box {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .formula-step {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        .formula-step.highlight {
+            background: #bbdefb;
+            font-weight: bold;
+            border: 1px solid #64b5f6;
+        }
+
+        .math-expr {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        /* Блок с кодом Python */
+        .code-box {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 15px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .code-keyword { color: #ff9ff3; }
+        .code-function { color: #feca57; }
+        .code-number { color: #ff9f43; }
+        .code-comment { color: #7f8c8d; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<div class="main-container">
+    
+    <!-- ЛЕВАЯ КОЛОНКА: ИГРА -->
+    <div class="game-panel">
+        <h1>🐸 Лягушка и Кузнечик 🦗</h1>
+        
+        <div class="settings-panel">
+            <label for="n-input">Длина дорожки (N):</label>
+            <input type="number" id="n-input" value="9" min="2" max="20">
+            <button onclick="resetStory()">Применить</button>
+        </div>
+
+        <div class="track-wrapper">
+            <div class="track" id="track"></div>
+        </div>
+
+        <div class="game-controls">
+            <button class="action-btn btn-step" id="step-btn" onclick="makeMove()">👣 Сделать ход</button>
+            <button class="action-btn btn-reset" onclick="resetStory()">🔄 Заново</button>
+        </div>
+
+        <div class="explanation-box" id="explanation">
+            Нажми «Сделать ход», чтобы начать!
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: ФОРМУЛА И КОД -->
+    <div class="info-panel">
+        
+        <!-- Блок с формулой -->
+        <div class="formula-box">
+            <h2>🧮 Как посчитать время?</h2>
+            <p>Давай выведем формулу вместе с ребенком:</p>
+            
+            <div class="formula-step">
+                <b>1. Начальное расстояние:</b><br>
+                Лягушка на 1, Кузнечик на N.<br>
+                Расстояние = <span class="math-expr" id="f-dist">N - 1</span>
+            </div>
+            
+            <div class="formula-step">
+                <b>2. Скорость сближения:</b><br>
+                Лягушка прыгает на 3, Кузнечик на 2.<br>
+                За 1 секунду они сближаются на: <span class="math-expr">3 + 2 = 5</span> клеток.
+            </div>
+            
+            <div class="formula-step highlight" id="f-final">
+                <b>3. Итоговая формула (целочисленное деление):</b><br>
+                Время = (Расстояние + 4) // 5<br>
+                <span class="math-expr" id="f-formula">Время = (N - 1 + 4) // 5</span><br>
+                <small>Прибавляем 4, чтобы округлить вверх при делении на 5.</small>
+            </div>
+            
+            <div id="f-example" style="margin-top: 10px; font-size: 0.9em; color: #555;">
+                Пример для N=9: (9 - 1 + 4) // 5 = 12 // 5 = <b>2 секунды</b>.
+            </div>
+        </div>
+
+        <!-- Блок с кодом -->
+        <div class="code-box">
+            <h2 style="color: #81ecec; border-bottom: 1px solid #636e72; margin-top:0;">💻 Решение на Python</h2>
+            <pre><code>
+<span class="code-comment"># Считываем длину дорожки</span>
+n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+
+<span class="code-comment"># Если дорожка короче 4 клеток,</span>
+<span class="code-comment"># они не смогут встретиться</span>
+<span class="code-keyword">if</span> n &lt; <span class="code-number">4</span>:
+    <span class="code-function">print</span>(-<span class="code-number">1</span>)
+<span class="code-keyword">else</span>:
+    <span class="code-comment"># Формула: (n - 1 + 4) // 5</span>
+    <span class="code-function">print</span>((n - <span class="code-number">1</span> + <span class="code-number">4</span>) // <span class="code-number">5</span>)
+            </code></pre>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let N = 9;
+    let frogPos = 0;
+    let grasshopperPos = N - 1;
+    let time = 0;
+    let isFinished = false;
+
+    const trackEl = document.getElementById('track');
+    const expEl = document.getElementById('explanation');
+    const stepBtn = document.getElementById('step-btn');
+    const nInput = document.getElementById('n-input');
+    
+    // Элементы формулы
+    const fDist = document.getElementById('f-dist');
+    const fFormula = document.getElementById('f-formula');
+    const fExample = document.getElementById('f-example');
+
+    function init() {
+        resetStory();
+    }
+
+    function resetStory() {
+        // Считываем N из инпута
+        N = parseInt(nInput.value);
+        if (isNaN(N) || N < 2) N = 2;
+        if (N > 20) N = 20; // Ограничение для визуализации
+        nInput.value = N;
+
+        frogPos = 0;
+        grasshopperPos = N - 1;
+        time = 0;
+        isFinished = false;
+        stepBtn.disabled = false;
+        
+        renderTrack();
+        
+        // Обновляем формулу
+        fDist.textContent = `${N} - 1 = ${N-1}`;
+        fFormula.textContent = `Время = (${N} - 1 + 4) // 5 = ${Math.floor((N-1+4)/5)}`;
+        
+        // Объяснение
+        if (N < 4) {
+            expEl.innerHTML = `Ой! Дорожка слишком короткая (всего ${N} клеток).<br>
+                               Лягушка и Кузнечик не смогут встретиться.<br>
+                               <b>Ответ: -1</b>`;
+            stepBtn.disabled = true;
+            fExample.innerHTML = `Пример для N=${N}: Встреча невозможна (N < 4). Ответ: -1.`;
+        } else {
+            expEl.innerHTML = `Итак, у нас есть дорожка из <b>${N}</b> клеток.<br>
+                               Лягушка сидит на клетке <b>1</b>, а Кузнечик — на клетке <b>${N}</b>.<br>
+                               Между ними расстояние: <span class="math">${N} - 1 = ${N-1}</span> клеток.<br>
+                               Нажми «Сделать ход», чтобы начать!`;
+            fExample.innerHTML = `Пример для N=${N}: (${N} - 1 + 4) // 5 = ${N-1+4} // 5 = <b>${Math.floor((N-1+4)/5)} секунд</b>.`;
+        }
+    }
+
+    function renderTrack() {
+        trackEl.innerHTML = '';
+        for (let i = 0; i < N; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            
+            // Номера клеток
+            cell.innerHTML = `<span style="font-size:0.4em; position:absolute; bottom:2px; right:4px; color:#aaa;">${i+1}</span>`;
+
+            if (i === frogPos && i === grasshopperPos) {
+                cell.classList.add('meeting');
+                cell.innerHTML += '🤝';
+            } else if (i === frogPos) {
+                cell.classList.add('frog');
+                cell.innerHTML += '🐸';
+            } else if (i === grasshopperPos) {
+                cell.classList.add('grasshopper');
+                cell.innerHTML += '🦗';
+            }
+            trackEl.appendChild(cell);
+        }
+    }
+
+    function makeMove() {
+        if (isFinished) return;
+
+        time++;
+
+        if (frogPos >= grasshopperPos) {
+            isFinished = true;
+            stepBtn.disabled = true;
+            renderTrack();
+            return;
+        }
+
+        let distance = grasshopperPos - frogPos;
+        let frogJump = 3;
+        let grasshopperJump = 2;
+
+        // Логика финального прыжка
+        if (distance <= 5) {
+            let meetingPoint = frogPos + Math.floor(distance / 2);
+            if (distance % 2 !== 0) {
+                meetingPoint = frogPos + Math.ceil(distance / 2);
+            }
+            
+            frogPos = meetingPoint;
+            grasshopperPos = meetingPoint;
+
+            expEl.innerHTML = `⏱️ <b>Секунда ${time}:</b><br>
+                               Расстояние стало маленьким (<b>${distance}</b> клеток).<br>
+                               Они прыгают навстречу и оказываются в одной клетке!<br>
+                               <span class="highlight">Ура! Они встретились! 🎉</span>`;
+            
+            renderTrack();
+            isFinished = true;
+            stepBtn.disabled = true;
+            return;
+        }
+
+        frogPos += frogJump;
+        grasshopperPos -= grasshopperJump;
+
+        if (frogPos > grasshopperPos) {
+            let mid = Math.floor((frogPos + grasshopperPos) / 2);
+            frogPos = mid;
+            grasshopperPos = mid;
+        }
+
+        renderTrack();
+
+        expEl.innerHTML = `⏱️ <b>Секунда ${time}:</b><br>
+                           Лягушка прыгнула на <b>3</b> клетки (теперь на ${frogPos + 1}).<br>
+                           Кузнечик прыгнул на <b>2</b> клетки (теперь на ${grasshopperPos + 1}).<br>
+                           Вместе они сократили расстояние на <b>5</b> клеток.<br>
+                           Осталось: <span class="math">${grasshopperPos - frogPos}</span> клеток.`;
+    }
+
+    // Слушатель изменения ввода
+    nInput.addEventListener('change', resetStory);
+
+    init();
+</script>
+
+</body>
+</html>

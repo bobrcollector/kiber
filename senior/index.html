@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Старшие (12-14 лет)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .site-nav {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            background: white;
+            color: #2c3e50;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .site-nav a:hover {
+            background: #eaf2f8;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 900px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            width: 260px;
+            text-decoration: none;
+            color: #333;
+            border-left: 5px solid #8e44ad;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .card .emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .card h2 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            color: #8e44ad;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="site-nav">
+        <a href="../index.html">🏠 Главная</a>
+    </nav>
+
+    <h1>🛡️ Старшие (12-14 лет)</h1>
+    <p class="subtitle">Выбери задачу</p>
+
+    <div class="cards">
+        <a class="card" href="straj.html">
+            <span class="emoji">🛡️</span>
+            <h2>Стражники</h2>
+            <p>Расставь стражников на сетке 7x7 так, чтобы в каждой улице их было не менее трёх, уложившись в лимит.</p>
+        </a>
+        <a class="card" href="calc.html">
+            <span class="emoji">🖩</span>
+            <h2>Исполнитель Калькулятор</h2>
+            <p>Составь программу из команд «Вычти 3» и «Умножь на 2», чтобы получить нужное число.</p>
+        </a>
+        <a class="card" href="lyagushka.html">
+            <span class="emoji">🐸</span>
+            <h2>Лягушка и Кузнечик</h2>
+            <p>Посмотри, как выводится формула встречи лягушки и кузнечика на дорожке, и разбери решение на Python.</p>
+        </a>
+    </div>
+
+</body>
+</html>

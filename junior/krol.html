@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача: Помоги зайцу добраться домой</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff; /* Светло-голубой фон */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 26px;
+        }
+
+        .task-description {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            max-width: 700px;
+            font-size: 15px;
+            line-height: 1.5;
+            border-left: 5px solid #f39c12;
+        }
+
+        .task-description strong {
+            color: #e67e22;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* --- Игровое поле (Дорожка) --- */
+        .track-panel {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 500px;
+            overflow-x: auto; /* Если экран узкий, появится скролл */
+        }
+
+        .track-title {
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+
+        .track {
+            display: flex;
+            align-items: flex-end;
+            gap: 0; /* Убираем отступы, чтобы клетки прилегали */
+            padding: 20px 10px;
+            background: #dcedc8; /* Светло-зеленая трава */
+            border-radius: 10px;
+            border: 2px solid #aed581;
+            position: relative;
+        }
+
+        .cell {
+            width: 60px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 30px;
+            user-select: none;
+        }
+
+        .cell .object {
+            position: absolute;
+            bottom: 15px;
+            transition: opacity 0.3s;
+        }
+
+        /* Стили для ям и кустов */
+        .cell .hole {
+            font-size: 36px;
+            position: absolute;
+            bottom: 5px;
+            z-index: 1;
+        }
+        .cell .bush {
+            font-size: 40px;
+            position: absolute;
+            bottom: 10px;
+            z-index: 1;
+        }
+        .cell .house {
+            font-size: 45px;
+            position: absolute;
+            bottom: 5px;
+            z-index: 1;
+        }
+
+        /* Зайчик */
+        .rabbit {
+            font-size: 40px;
+            position: absolute;
+            bottom: 25px; /* Чуть выше земли */
+            z-index: 10;
+            transition: left 0.3s ease-in-out, bottom 0.3s ease-in-out;
+            left: 10px; /* Начальная позиция */
+        }
+
+        /* --- Панель управления --- */
+        .controls-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 300px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            font-size: 18px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-run {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-run:hover { background-color: #27ae60; }
+        .btn-run:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-reset:hover { background-color: #c0392b; }
+
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .status-message.info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+            display: block;
+        }
+
+        /* Легенда */
+        .legend {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .legend ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+
+        .site-nav {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            background: white;
+            color: #2c3e50;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .site-nav a:hover {
+            background: #eaf2f8;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="site-nav">
+        <a href="../index.html">🏠 Главная</a>
+        <a href="index.html">⬆ К уровню «Младшие (6-8 лет)»</a>
+    </nav>
+
+    <h1>Помоги зайцу добраться домой</h1>
+    
+    <div class="task-description">
+        <p>Чтобы зайчик <strong>перепрыгнул лужу</strong>, напиши <strong>«0»</strong>, а чтобы он <strong>прополз под кустом</strong> — <strong>«1»</strong>.</p>
+        <p>Чтобы зайчик повторил несколько раз одно и то же действие подряд, напиши <strong>«плюс»</strong> и <strong>количество раз</strong>.</p>
+        <p><em>Например, пять раз перепрыгнуть лужу: <code>0+5</code></em></p>
+    </div>
+
+    <div class="game-container">
+        <!-- Игровое поле -->
+        <div class="track-panel">
+            <div class="track-title">Дорожка к домику</div>
+            <div class="track" id="track">
+                <!-- Клетки генерируются через JS -->
+                <div class="rabbit" id="rabbit">🐰</div>
+            </div>
+        </div>
+
+        <!-- Панель управления -->
+        <div class="controls-panel">
+            <div class="input-group">
+                <label for="command-input">Твоя последовательность команд:</label>
+                <input type="text" id="command-input" placeholder="Например: 0+3 1+2" autocomplete="off">
+            </div>
+            
+            <button id="btn-run" class="btn-run">Выполнить ▶</button>
+            <button id="btn-reset" class="btn-reset">Сбросить</button>
+
+            <div id="status-message" class="status-message"></div>
+
+            <div class="legend">
+                <strong>Подсказка:</strong>
+                <ul>
+                    <li><code>0</code> — прыжок через лужу</li>
+                    <li><code>1</code> — проползти под кустом</li>
+                    <li><code>+N</code> — повторить N раз</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Конфигурация дорожки ---
+        // 'S' - стартовая клетка (трава), 0 - лужа, 1 - куст, 'H' - домик
+        const trackConfig = ['S', 0, 1, 1, 0, 1, 1, 0, 'H'];
+        
+        // --- Состояние игры ---
+        let rabbitPosition = 0; // Индекс текущей клетки (0-based) - начинаем со старта
+        let isAnimating = false;
+        let animationTimeout = null;
+
+        // --- DOM элементы ---
+        const trackEl = document.getElementById('track');
+        const rabbitEl = document.getElementById('rabbit');
+        const commandInput = document.getElementById('command-input');
+        const btnRun = document.getElementById('btn-run');
+        const btnReset = document.getElementById('btn-reset');
+        const statusMessage = document.getElementById('status-message');
+
+        // --- Инициализация дорожки ---
+        function initTrack() {
+            trackEl.innerHTML = ''; // Очищаем, но оставляем зайца
+            trackEl.appendChild(rabbitEl); // Возвращаем зайца обратно
+
+            trackConfig.forEach((type, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = index;
+
+                if (type === 0) {
+                    cell.innerHTML = '<span class="hole">💧</span>';
+                } else if (type === 1) {
+                    cell.innerHTML = '<span class="bush">🌳</span>';
+                } else if (type === 'H') {
+                    cell.innerHTML = '<span class="house">🏠</span>';
+                } else if (type === 'S') {
+                    // Стартовая клетка, просто трава, ничего не рисуем
+                }
+                trackEl.appendChild(cell);
+            });
+            
+            // Устанавливаем зайца в начальную позицию (визуально)
+            updateRabbitPosition(0);
+        }
+
+        // --- Парсинг команд ---
+        function parseCommands(input) {
+            // Убираем пробелы и разбиваем по пробелам
+            const parts = input.trim().split(/\s+/);
+            if (parts.length === 0 || parts[0] === '') return null;
+
+            const commands = [];
+            for (let part of parts) {
+                // Проверяем формат X+Y
+                const repeatMatch = part.match(/^([01])\+(\d+)$/);
+                if (repeatMatch) {
+                    const action = parseInt(repeatMatch[1]);
+                    const count = parseInt(repeatMatch[2]);
+                    if (count <= 0) return null; // Нельзя повторять 0 или отрицательное число раз
+                    for (let i = 0; i < count; i++) {
+                        commands.push(action);
+                    }
+                } 
+                // Проверяем формат просто X
+                else if (part === '0' || part === '1') {
+                    commands.push(parseInt(part));
+                } 
+                // Если что-то не так
+                else {
+                    return null; 
+                }
+            }
+            return commands;
+        }
+
+        // --- Визуализация ---
+        function updateRabbitPosition(index) {
+            // Находим клетку по индексу
+            const cell = trackEl.children[index];
+            if (!cell) return;
+
+            // Вычисляем позицию относительно контейнера track
+            const trackRect = trackEl.getBoundingClientRect();
+            const cellRect = cell.getBoundingClientRect();
+            
+            // Смещение зайца относительно левого края track
+            const leftOffset = cellRect.left - trackRect.left + (cellRect.width / 2) - 20; // 20 - половина ширины зайца
+            
+            rabbitEl.style.left = `${leftOffset}px`;
+            
+            // Логика высоты: если куст (1) — заяц "пригибается", если лужа (0) — "подпрыгивает"
+            const type = trackConfig[index];
+            if (type === 1) {
+                rabbitEl.style.bottom = '15px'; // Пригнулся
+                rabbitEl.textContent = '🐇'; // Меняем эмодзи для эффекта
+            } else if (type === 0) {
+                rabbitEl.style.bottom = '45px'; // Прыжок
+                rabbitEl.textContent = '🐰'; 
+            } else {
+                rabbitEl.style.bottom = '25px'; // Обычная позиция (Старт или Домик)
+                rabbitEl.textContent = '🐰';
+            }
+        }
+
+        // --- Сброс игры ---
+        function resetGame() {
+            if (animationTimeout) clearTimeout(animationTimeout);
+            isAnimating = false;
+            rabbitPosition = 0;
+            commandInput.value = '';
+            commandInput.disabled = false;
+            btnRun.disabled = false;
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = '';
+            
+            // Сброс внешнего вида зайца
+            rabbitEl.textContent = '🐰';
+            rabbitEl.style.bottom = '25px';
+            
+            initTrack(); // Перерисовываем дорожку
+        }
+
+        // --- Показ сообщения ---
+        function showMessage(text, type) {
+            statusMessage.textContent = text;
+            statusMessage.className = `status-message ${type}`;
+        }
+
+        // --- Основная логика выполнения ---
+        async function runCommands() {
+            if (isAnimating) return;
+
+            const input = commandInput.value;
+            if (!input.trim()) {
+                showMessage('Напиши команды!', 'error');
+                return;
+            }
+
+            const commands = parseCommands(input);
+            if (!commands) {
+                showMessage('Ошибка в командах! Используй только 0, 1 и +число.', 'error');
+                return;
+            }
+
+            // Блокируем интерфейс
+            isAnimating = true;
+            btnRun.disabled = true;
+            commandInput.disabled = true;
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = 'Зайчик выполняет...';
+
+            // Сброс позиции перед стартом (на стартовую клетку)
+            rabbitPosition = 0;
+            updateRabbitPosition(0);
+
+            let success = false;
+
+            for (let i = 0; i < commands.length; i++) {
+                const command = commands[i];
+                
+                // Заяц пытается сделать шаг
+                const nextPosition = rabbitPosition + 1;
+                const expectedType = trackConfig[nextPosition];
+
+                // Проверка: закончилась ли дорожка?
+                if (nextPosition >= trackConfig.length) {
+                    showMessage('Зайчик убежал дальше домика! 🙈', 'error');
+                    isAnimating = false;
+                    btnRun.disabled = false;
+                    commandInput.disabled = false;
+                    return;
+                }
+
+                // Проверка: правильная ли команда?
+                // 0 - лужа (0), 1 - куст (1)
+                if (command !== expectedType) {
+                    const actionName = command === 0 ? 'перепрыгнуть лужу' : 'проползти под кустом';
+                    const obstacleName = expectedType === 0 ? 'лужа' : 'куст';
+                    showMessage(`Ой! Зайчик попытался ${actionName}, но там ${obstacleName}.`, 'error');
+                    
+                    // Визуальный "провал"
+                    rabbitEl.textContent = '💥';
+                    setTimeout(() => {
+                        isAnimating = false;
+                        btnRun.disabled = false;
+                        commandInput.disabled = false;
+                    }, 1000);
+                    return;
+                }
+
+                // Двигаем зайца
+                rabbitPosition = nextPosition;
+                updateRabbitPosition(rabbitPosition);
+
+                // Пауза между шагами
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, 600);
+                });
+
+                // Если дошли до домика (последний индекс)
+                if (rabbitPosition === trackConfig.length - 1) {
+                    // Проверяем, все ли команды выполнены
+                    if (i === commands.length - 1) {
+                        success = true;
+                        break;
+                    } else {
+                        // Если команд больше, чем шагов до домика
+                        showMessage('Зайчик уже дома, но ты дал еще команды! 🏠', 'error');
+                        isAnimating = false;
+                        btnRun.disabled = false;
+                        commandInput.disabled = false;
+                        return;
+                    }
+                }
+            }
+
+            // Финал
+            if (success) {
+                showMessage('🎉 Ура! Зайчик добрался до дома!', 'success');
+                rabbitEl.textContent = '🐰';
+                rabbitEl.style.bottom = '25px';
+            } else if (rabbitPosition < trackConfig.length - 1) {
+                showMessage('Зайчик не дошел до дома. Попробуй еще раз!', 'error');
+                isAnimating = false;
+                btnRun.disabled = false;
+                commandInput.disabled = false;
+            }
+        }
+
+        // --- Обработчики событий ---
+        btnRun.addEventListener('click', runCommands);
+        btnReset.addEventListener('click', resetGame);
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') runCommands();
+        });
+
+        // Запуск
+        initTrack();
+        resetGame();
+
+    </script>
+</body>
+</html>

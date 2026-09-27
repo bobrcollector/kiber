@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача: Исполнитель Калькулятор</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 26px;
+        }
+
+        .task-description {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            max-width: 800px;
+            font-size: 15px;
+            line-height: 1.5;
+            border-left: 5px solid #3498db;
+        }
+
+        .task-description strong {
+            color: #2980b9;
+        }
+
+        .task-description code {
+            background: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #c0392b;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* --- Панель Калькулятора --- */
+        .calculator-panel {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 320px;
+            flex-grow: 1;
+        }
+
+        .calculator-title {
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        .screen {
+            background-color: #34495e;
+            color: #2ecc71; /* Зеленый цвет цифр, как на старом калькуляторе */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 64px;
+            font-weight: bold;
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 5px solid #2c3e50;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            min-height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen.error {
+            color: #e74c3c;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .screen.success {
+            color: #f1c40f;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .history-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            align-self: flex-start;
+        }
+
+        .history-box {
+            width: 100%;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            height: 120px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-step {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 5px;
+            border-radius: 4px;
+        }
+
+        .history-step:nth-child(odd) {
+            background-color: #f1f1f1;
+        }
+
+        .history-step .cmd {
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .history-step .val {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        /* --- Панель управления --- */
+        .controls-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 350px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            font-size: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            letter-spacing: 4px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-run {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-run:hover { background-color: #27ae60; }
+        .btn-run:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-reset:hover { background-color: #c0392b; }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .status-message.info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+            display: block;
+        }
+
+        /* Легенда команд */
+        .commands-legend {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #555;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+        .commands-legend div {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .cmd-badge {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .site-nav {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            background: white;
+            color: #2c3e50;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .site-nav a:hover {
+            background: #eaf2f8;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="site-nav">
+        <a href="../index.html">🏠 Главная</a>
+        <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+    </nav>
+
+    <h1>Исполнитель Калькулятор</h1>
+    
+    <div class="task-description">
+        <p>У Исполнителя Калькулятор есть только две команды:</p>
+        <p><strong>1. Вычти 3</strong> (из числа на экране вычитается 3).</p>
+        <p><strong>2. Умножь на 2</strong> (число на экране умножается на 2).</p>
+        <p>Составьте алгоритм, содержащий <strong>не более пяти команд</strong>, который из числа <strong>5</strong> получает число <strong>25</strong>. Укажите лишь номера команд.</p>
+        <p><em>Пример: программа <code>22221</code> преобразует число 1 в число 13.</em></p>
+    </div>
+
+    <div class="game-container">
+        <!-- Панель Калькулятора -->
+        <div class="calculator-panel">
+            <div class="calculator-title">Экран калькулятора</div>
+            <div class="screen" id="screen">5</div>
+            
+            <div class="history-label">История вычислений:</div>
+            <div class="history-box" id="history">
+                <div style="color: #999; text-align: center; margin-top: 30px;">Здесь появятся шаги...</div>
+            </div>
+        </div>
+
+        <!-- Панель управления -->
+        <div class="controls-panel">
+            <div class="input-group">
+                <label for="command-input">Введи программу (только 1 и 2):</label>
+                <input type="text" id="command-input" placeholder="Введи цифры" autocomplete="off" maxlength="5">
+            </div>
+            
+            <div class="btn-group">
+                <button id="btn-run" class="btn-run">Выполнить ▶</button>
+                <button id="btn-reset" class="btn-reset">Сброс</button>
+            </div>
+
+            <div id="status-message" class="status-message"></div>
+
+            <div class="commands-legend">
+                <strong>Доступные команды:</strong>
+                <div><span class="cmd-badge">1</span> Вычти 3</div>
+                <div><span class="cmd-badge">2</span> Умножь на 2</div>
+                <div style="color: #e74c3c; font-size: 12px; margin-top: 5px;">* Максимум 5 команд</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Состояние игры ---
+        const START_VALUE = 5;
+        const TARGET_VALUE = 25;
+        const MAX_COMMANDS = 5;
+        
+        let currentValue = START_VALUE;
+        let isAnimating = false;
+        let animationTimeout = null;
+
+        // --- DOM элементы ---
+        const screenEl = document.getElementById('screen');
+        const historyEl = document.getElementById('history');
+        const commandInput = document.getElementById('command-input');
+        const btnRun = document.getElementById('btn-run');
+        const btnReset = document.getElementById('btn-reset');
+        const statusMessage = document.getElementById('status-message');
+
+        // --- Сброс игры ---
+        function resetGame() {
+            if (animationTimeout) clearTimeout(animationTimeout);
+            isAnimating = false;
+            currentValue = START_VALUE;
+            commandInput.value = '';
+            commandInput.disabled = false;
+            btnRun.disabled = false;
+            
+            screenEl.textContent = currentValue;
+            screenEl.className = 'screen';
+            
+            historyEl.innerHTML = '<div style="color: #999; text-align: center; margin-top: 30px;">Здесь появятся шаги...</div>';
+            
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = '';
+        }
+
+        // --- Показ сообщения ---
+        function showMessage(text, type) {
+            statusMessage.textContent = text;
+            statusMessage.className = `status-message ${type}`;
+        }
+
+        // --- Добавление записи в историю ---
+        function addHistoryStep(stepNum, command, oldValue, newValue) {
+            // Убираем заглушку, если есть
+            if (historyEl.firstChild && historyEl.firstChild.style.color === 'rgb(153, 153, 153)') {
+                historyEl.innerHTML = '';
+            }
+
+            const actionName = command === '1' ? 'Вычти 3' : 'Умножь на 2';
+            
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'history-step';
+            stepDiv.innerHTML = `
+                <span class="cmd">${stepNum}) ${actionName} (${command})</span>
+                <span class="val">${oldValue} → ${newValue}</span>
+            `;
+            historyEl.appendChild(stepDiv);
+            historyEl.scrollTop = historyEl.scrollHeight; // Прокрутка вниз
+        }
+
+        // --- Основная логика выполнения ---
+        async function runCommands() {
+            if (isAnimating) return;
+
+            const input = commandInput.value.trim();
+            if (!input) {
+                showMessage('Введи программу!', 'error');
+                return;
+            }
+
+            // Валидация ввода
+            if (!/^[12]+$/.test(input)) {
+                showMessage('Ошибка! Используй только цифры 1 и 2.', 'error');
+                screenEl.className = 'screen error';
+                setTimeout(() => screenEl.className = 'screen', 500);
+                return;
+            }
+
+            if (input.length > MAX_COMMANDS) {
+                showMessage(`Ошибка! Программа должна содержать не более ${MAX_COMMANDS} команд.`, 'error');
+                screenEl.className = 'screen error';
+                setTimeout(() => screenEl.className = 'screen', 500);
+                return;
+            }
+
+            // Блокируем интерфейс
+            isAnimating = true;
+            btnRun.disabled = true;
+            commandInput.disabled = true;
+            statusMessage.className = 'status-message';
+            statusMessage.textContent = 'Выполнение...';
+            
+            // Сброс перед стартом
+            currentValue = START_VALUE;
+            screenEl.textContent = currentValue;
+            screenEl.className = 'screen';
+            historyEl.innerHTML = '';
+
+            let steps = input.split('');
+            let success = false;
+
+            for (let i = 0; i < steps.length; i++) {
+                const command = steps[i];
+                const oldValue = currentValue;
+
+                // Выполняем команду
+                if (command === '1') {
+                    currentValue = currentValue - 3;
+                } else if (command === '2') {
+                    currentValue = currentValue * 2;
+                }
+
+                // Обновляем экран и историю
+                screenEl.textContent = currentValue;
+                addHistoryStep(i + 1, command, oldValue, currentValue);
+
+                // Небольшая пауза для визуализации
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, 500);
+                });
+
+                // Проверка на успех
+                if (currentValue === TARGET_VALUE) {
+                    if (i === steps.length - 1) {
+                        // Успех! Дошли до цели и команды закончились
+                        success = true;
+                        break;
+                    } else {
+                        // Дошли до цели, но есть еще команды
+                        showMessage(`Число 25 достигнуто, но у тебя остались лишние команды!`, 'error');
+                        screenEl.className = 'screen error';
+                        isAnimating = false;
+                        btnRun.disabled = false;
+                        commandInput.disabled = false;
+                        return;
+                    }
+                }
+            }
+
+            // Финал
+            if (success) {
+                showMessage('🎉 Поздравляем! Ты получил число 25!', 'success');
+                screenEl.className = 'screen success';
+            } else {
+                showMessage(`Программа завершена. Получилось число ${currentValue}, а нужно 25.`, 'error');
+                screenEl.className = 'screen error';
+            }
+
+            // Разблокируем интерфейс
+            isAnimating = false;
+            btnRun.disabled = false;
+            commandInput.disabled = false;
+        }
+
+        // --- Обработчики событий ---
+        btnRun.addEventListener('click', runCommands);
+        btnReset.addEventListener('click', resetGame);
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') runCommands();
+        });
+
+        // Запуск
+        resetGame();
+
+    </script>
+</body>
+</html>
