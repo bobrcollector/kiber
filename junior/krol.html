@@ -128,6 +128,11 @@
             left: 10px; /* Начальная позиция */
         }
 
+        /* Мгновенное перемещение без анимации (для сброса на старт) */
+        .rabbit.no-transition {
+            transition: none;
+        }
+
         /* --- Панель управления --- */
         .controls-panel {
             background: white;
@@ -320,6 +325,7 @@
         let rabbitPosition = 0; // Индекс текущей клетки (0-based) - начинаем со старта
         let isAnimating = false;
         let animationTimeout = null;
+        let cellElements = []; // Ссылки на DOM-клетки по индексу (без зайца)
 
         // --- DOM элементы ---
         const trackEl = document.getElementById('track');
@@ -331,8 +337,8 @@
 
         // --- Инициализация дорожки ---
         function initTrack() {
-            trackEl.innerHTML = ''; // Очищаем, но оставляем зайца
-            trackEl.appendChild(rabbitEl); // Возвращаем зайца обратно
+            trackEl.innerHTML = ''; // Полностью очищаем дорожку
+            cellElements = [];
 
             trackConfig.forEach((type, index) => {
                 const cell = document.createElement('div');
@@ -349,10 +355,15 @@
                     // Стартовая клетка, просто трава, ничего не рисуем
                 }
                 trackEl.appendChild(cell);
+                cellElements.push(cell);
             });
-            
-            // Устанавливаем зайца в начальную позицию (визуально)
-            updateRabbitPosition(0);
+
+            // Заяц добавляется последним, чтобы не сбивать индексацию клеток
+            // (z-index у зайца и так рисует его поверх дорожки)
+            trackEl.appendChild(rabbitEl);
+
+            // Устанавливаем зайца в начальную позицию (без анимации)
+            snapRabbitTo(0);
         }
 
         // --- Парсинг команд ---
@@ -388,7 +399,7 @@
         // --- Визуализация ---
         function updateRabbitPosition(index) {
             // Находим клетку по индексу
-            const cell = trackEl.children[index];
+            const cell = cellElements[index];
             if (!cell) return;
 
             // Вычисляем позицию относительно контейнера track
@@ -412,6 +423,15 @@
                 rabbitEl.style.bottom = '25px'; // Обычная позиция (Старт или Домик)
                 rabbitEl.textContent = '🐰';
             }
+        }
+
+        // --- Мгновенная установка позиции без анимации (для старта/сброса) ---
+        function snapRabbitTo(index) {
+            rabbitEl.classList.add('no-transition');
+            updateRabbitPosition(index);
+            // Принудительный reflow, чтобы браузер применил стиль без анимации
+            void rabbitEl.offsetWidth;
+            rabbitEl.classList.remove('no-transition');
         }
 
         // --- Сброс игры ---
@@ -461,27 +481,32 @@
             statusMessage.className = 'status-message';
             statusMessage.textContent = 'Зайчик выполняет...';
 
-            // Сброс позиции перед стартом (на стартовую клетку)
+            // Сброс позиции перед стартом (на стартовую клетку, без анимации)
             rabbitPosition = 0;
-            updateRabbitPosition(0);
+            snapRabbitTo(0);
+
+            // Последний индекс — домик ('H'), в него нельзя "прыгнуть" или "проползти" -
+            // туда заяц забегает сам, как только преодолены все препятствия.
+            const lastObstaclePosition = trackConfig.length - 2;
 
             let success = false;
 
             for (let i = 0; i < commands.length; i++) {
                 const command = commands[i];
-                
+
                 // Заяц пытается сделать шаг
                 const nextPosition = rabbitPosition + 1;
-                const expectedType = trackConfig[nextPosition];
 
-                // Проверка: закончилась ли дорожка?
-                if (nextPosition >= trackConfig.length) {
-                    showMessage('Зайчик убежал дальше домика! 🙈', 'error');
+                // Проверка: все препятствия уже пройдены, а команды еще остались?
+                if (nextPosition > lastObstaclePosition) {
+                    showMessage('Зайчик уже преодолел все препятствия! Лишние команды не нужны.', 'error');
                     isAnimating = false;
                     btnRun.disabled = false;
                     commandInput.disabled = false;
                     return;
                 }
+
+                const expectedType = trackConfig[nextPosition];
 
                 // Проверка: правильная ли команда?
                 // 0 - лужа (0), 1 - куст (1)
@@ -489,7 +514,7 @@
                     const actionName = command === 0 ? 'перепрыгнуть лужу' : 'проползти под кустом';
                     const obstacleName = expectedType === 0 ? 'лужа' : 'куст';
                     showMessage(`Ой! Зайчик попытался ${actionName}, но там ${obstacleName}.`, 'error');
-                    
+
                     // Визуальный "провал"
                     rabbitEl.textContent = '💥';
                     setTimeout(() => {
@@ -508,22 +533,18 @@
                 await new Promise(resolve => {
                     animationTimeout = setTimeout(resolve, 600);
                 });
+            }
 
-                // Если дошли до домика (последний индекс)
-                if (rabbitPosition === trackConfig.length - 1) {
-                    // Проверяем, все ли команды выполнены
-                    if (i === commands.length - 1) {
-                        success = true;
-                        break;
-                    } else {
-                        // Если команд больше, чем шагов до домика
-                        showMessage('Зайчик уже дома, но ты дал еще команды! 🏠', 'error');
-                        isAnimating = false;
-                        btnRun.disabled = false;
-                        commandInput.disabled = false;
-                        return;
-                    }
-                }
+            // Если все препятствия пройдены - заяц сам забегает в домик
+            if (rabbitPosition === lastObstaclePosition) {
+                rabbitPosition = trackConfig.length - 1;
+                updateRabbitPosition(rabbitPosition);
+
+                await new Promise(resolve => {
+                    animationTimeout = setTimeout(resolve, 600);
+                });
+
+                success = true;
             }
 
             // Финал
@@ -531,7 +552,8 @@
                 showMessage('🎉 Ура! Зайчик добрался до дома!', 'success');
                 rabbitEl.textContent = '🐰';
                 rabbitEl.style.bottom = '25px';
-            } else if (rabbitPosition < trackConfig.length - 1) {
+                // Кнопки остаются заблокированными - для новой попытки нужно нажать "Сбросить"
+            } else {
                 showMessage('Зайчик не дошел до дома. Попробуй еще раз!', 'error');
                 isAnimating = false;
                 btnRun.disabled = false;
