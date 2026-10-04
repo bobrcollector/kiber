@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Волки и лисы на берегу</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1050px;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 8px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 18px;
+        text-align: center;
+        max-width: 800px;
+    }
+
+    /* ---- Правила в виде карточек ---- */
+    .rules-cards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 1050px;
+        margin-bottom: 20px;
+    }
+
+    .rule-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        padding: 12px 16px;
+        width: 240px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 13px;
+        color: #444;
+        border-left: 5px solid #2980b9;
+    }
+
+    .rule-card .ricon {
+        font-size: 26px;
+        flex-shrink: 0;
+    }
+
+    .rule-card b { color: #2c3e50; }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1100px;
+    }
+
+    .river-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        flex: 1;
+        min-width: 620px;
+    }
+
+    .progress-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 14px;
+        background: #ecf0f1;
+        border-radius: 7px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #2ecc71, #27ae60);
+        transition: width 0.4s ease;
+    }
+
+    .river {
+        display: flex;
+        align-items: stretch;
+        min-height: 250px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid #d6e9f5;
+    }
+
+    .bank {
+        flex: 1;
+        background: #e8f5e9;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bank.right { background: #fff8e1; }
+
+    .bank-title {
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #2c3e50;
+        font-size: 15px;
+    }
+
+    .animals-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 10px;
+        justify-content: center;
+        align-content: flex-start;
+        min-height: 150px;
+    }
+
+    .water {
+        width: 150px;
+        background: linear-gradient(180deg, #74b9e8, #2980b9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        position: relative;
+    }
+
+    .boat-direction {
+        font-size: 22px;
+    }
+
+    .boat-side-text {
+        font-size: 12px;
+        background: rgba(255,255,255,0.25);
+        padding: 3px 8px;
+        border-radius: 10px;
+    }
+
+    .boat {
+        background: rgba(255,255,255,0.18);
+        border: 2px dashed white;
+        border-radius: 12px;
+        padding: 8px;
+        min-height: 90px;
+        width: 120px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .seat {
+        width: 48px;
+        height: 70px;
+        border-radius: 8px;
+        border: 2px dashed rgba(255,255,255,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: rgba(255,255,255,0.6);
+    }
+
+    .seat.filled {
+        border-style: solid;
+        border-color: white;
+        background: rgba(255,255,255,0.12);
+    }
+
+    /* ---- Карточка зверя ---- */
+    .animal-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 70px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .animal-card.not-selectable { cursor: default; }
+
+    .animal {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #fdfdfd;
+        border: 3px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        position: relative;
+        transition: all 0.15s ease;
+    }
+
+    .animal.wolf { border-color: #7f8c8d; }
+    .animal.fox { border-color: #e67e22; }
+
+    .animal-card.selected .animal {
+        border-color: #2ecc71;
+        box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.35);
+        transform: translateY(-4px);
+    }
+
+    .animal-card.selectable .animal:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .animal-card.not-selectable .animal {
+        opacity: 0.5;
+        filter: grayscale(40%);
+    }
+
+    .badge {
+        position: absolute;
+        bottom: -6px;
+        right: -4px;
+        font-size: 13px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .animal-name {
+        margin-top: 6px;
+        font-size: 11px;
+        font-weight: bold;
+        color: #444;
+        text-align: center;
+        line-height: 1.2;
+    }
+
+    .select-order {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        background: #2ecc71;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .legend {
+        font-size: 13px;
+        color: #2c3e50;
+        text-align: center;
+        margin-top: 14px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 8px;
+    }
+
+    .controls-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 320px;
+    }
+
+    .status {
+        font-size: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        min-height: 44px;
+        line-height: 1.4;
+    }
+
+    .status.error {
+        background: #fdecea;
+        border-color: #e74c3c;
+        color: #c0392b;
+        font-weight: bold;
+    }
+
+    .status.success {
+        background: #eafaf1;
+        border-color: #2ecc71;
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    button {
+        padding: 13px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+    .btn-cross {
+        background-color: #2980b9;
+        color: white;
+    }
+    .btn-cross:hover:not(:disabled) { background-color: #216a94; }
+    .btn-cross:disabled {
+        background-color: #bdc3c7;
+        cursor: not-allowed;
+    }
+
+    .btn-reset {
+        background-color: #e74c3c;
+        color: white;
+    }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .btn-hint {
+        background-color: #f1c40f;
+        color: #7d5a00;
+    }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .moves-count {
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+    }
+
+    .log-container {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    .log-container ol {
+        margin: 0;
+        padding: 10px 10px 10px 26px;
+    }
+
+    .log-container li {
+        margin-bottom: 4px;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🦊🐺 Задача: Волки и лисы на берегу</h1>
+<p class="subtitle">Перевезите всех зверей на правый берег на лодке, которая вмещает только двух зверей.</p>
+
+<div class="rules-cards">
+    <div class="rule-card">
+        <span class="ricon">🚣</span>
+        <div>Грести умеют только <b>Лисица</b> и <b>Лисёнок 1</b> (отмечены значком 🚣). В каждой поездке в лодке должен быть один из них.</div>
+    </div>
+    <div class="rule-card">
+        <span class="ricon">⚠️</span>
+        <div>Детёныш <b>не может</b> оставаться без своей мамы там, где есть чужая мама — ни на берегу, ни в лодке.</div>
+    </div>
+    <div class="rule-card">
+        <span class="ricon">🚤</span>
+        <div>В лодке помещается только <b>2 места</b>. Выберите 1–2 зверя на том берегу, где сейчас лодка.</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="river-panel">
+        <div class="progress-wrap">
+            <span>🏁 Переправлено:</span>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <span id="progress-text">0/6</span>
+        </div>
+
+        <div class="river">
+            <div class="bank left" id="bank-left">
+                <div class="bank-title">🌳 Левый берег</div>
+                <div class="animals-row" id="row-left"></div>
+            </div>
+            <div class="water">
+                <div class="boat-direction" id="boat-direction">⛵</div>
+                <div class="boat-side-text" id="boat-side-text">лодка слева</div>
+                <div class="boat" id="boat">
+                    <div class="seat" id="seat-0">💺</div>
+                    <div class="seat" id="seat-1">💺</div>
+                </div>
+            </div>
+            <div class="bank right" id="bank-right">
+                <div class="bank-title">🏖️ Правый берег</div>
+                <div class="animals-row" id="row-right"></div>
+            </div>
+        </div>
+        <p class="legend" id="hint-text">👉 Нажмите на 1–2 зверя на берегу, где стоит лодка, чтобы посадить их в лодку.</p>
+    </div>
+
+    <div class="controls-panel">
+        <div class="status" id="status">Выберите зверей для первой поездки.</div>
+        <button id="btn-cross" class="btn-cross" disabled>Переправить ▶</button>
+        <button id="btn-reset" class="btn-reset">🔄 Начать заново</button>
+        <button id="btn-hint" class="btn-hint">💡 Показать решение (9 ходов)</button>
+        <div class="moves-count">Поездок сделано: <span id="moves">0</span></div>
+        <div class="log-container">
+            <ol id="log"></ol>
+        </div>
+    </div>
+</div>
+
+<script>
+const ANIMALS = [
+    { id: 'W',  name: 'Волчица',    emoji: '🐺', group: 'wolf', adult: true,  canRow: false },
+    { id: 'w1', name: 'Волчонок 1', emoji: '🐺', group: 'wolf', adult: false, canRow: false },
+    { id: 'w2', name: 'Волчонок 2', emoji: '🐺', group: 'wolf', adult: false, canRow: false },
+    { id: 'F',  name: 'Лисица',     emoji: '🦊', group: 'fox',  adult: true,  canRow: true },
+    { id: 'f1', name: 'Лисёнок 1',  emoji: '🦊', group: 'fox',  adult: false, canRow: true },
+    { id: 'f2', name: 'Лисёнок 2',  emoji: '🦊', group: 'fox',  adult: false, canRow: false },
+];
+
+let animalSide = {};   // id -> 'left' | 'right'
+let boatSide = 'left';
+let selected = [];
+let moves = 0;
+let finished = false;
+
+const rowLeft = document.getElementById('row-left');
+const rowRight = document.getElementById('row-right');
+const seat0 = document.getElementById('seat-0');
+const seat1 = document.getElementById('seat-1');
+const boatDirection = document.getElementById('boat-direction');
+const boatSideText = document.getElementById('boat-side-text');
+const statusEl = document.getElementById('status');
+const btnCross = document.getElementById('btn-cross');
+const movesEl = document.getElementById('moves');
+const logEl = document.getElementById('log');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
+const hintText = document.getElementById('hint-text');
+
+function isSafe(ids) {
+    const has = id => ids.includes(id);
+    const wolfAdult = has('W');
+    const foxAdult = has('F');
+    if ((has('w1') || has('w2')) && foxAdult && !wolfAdult) return false;
+    if ((has('f1') || has('f2')) && wolfAdult && !foxAdult) return false;
+    return true;
+}
+
+function idsAt(side) {
+    return ANIMALS.filter(a => animalSide[a.id] === side).map(a => a.id);
+}
+
+function makeAnimalCard(a, options) {
+    const card = document.createElement('div');
+    card.className = 'animal-card';
+
+    const circle = document.createElement('div');
+    circle.className = 'animal ' + a.group;
+    circle.textContent = a.emoji;
+
+    if (a.canRow) {
+        const b = document.createElement('span');
+        b.className = 'badge';
+        b.textContent = '🚣';
+        circle.appendChild(b);
+    }
+
+    if (options.orderNum) {
+        const o = document.createElement('span');
+        o.className = 'select-order';
+        o.textContent = options.orderNum;
+        circle.appendChild(o);
+    }
+
+    const name = document.createElement('div');
+    name.className = 'animal-name';
+    name.textContent = (a.adult ? '👑 ' : '👶 ') + a.name;
+
+    card.appendChild(circle);
+    card.appendChild(name);
+
+    if (options.selectable) {
+        card.classList.add('selectable');
+        card.classList.toggle('selected', selected.includes(a.id));
+        card.addEventListener('click', () => toggleSelect(a.id));
+    } else if (options.dim) {
+        card.classList.add('not-selectable');
+    }
+
+    return card;
+}
+
+function render() {
+    rowLeft.innerHTML = '';
+    rowRight.innerHTML = '';
+
+    ANIMALS.forEach(a => {
+        if (animalSide[a.id] !== 'left' && animalSide[a.id] !== 'right') return;
+        const side = animalSide[a.id];
+        const onBoatSide = side === boatSide && !finished;
+        const card = makeAnimalCard(a, { selectable: onBoatSide, dim: !onBoatSide });
+        if (side === 'left') rowLeft.appendChild(card);
+        else rowRight.appendChild(card);
+    });
+
+    [seat0, seat1].forEach((seat, i) => {
+        const id = selected[i];
+        if (id) {
+            const a = ANIMALS.find(x => x.id === id);
+            seat.textContent = a.emoji;
+            seat.classList.add('filled');
+        } else {
+            seat.textContent = '💺';
+            seat.classList.remove('filled');
+        }
+    });
+
+    boatDirection.textContent = boatSide === 'left' ? '⛵➡' : '⬅⛵';
+    boatSideText.textContent = boatSide === 'left' ? 'лодка слева' : 'лодка справа';
+
+    movesEl.textContent = moves;
+
+    const rightCount = ANIMALS.filter(a => animalSide[a.id] === 'right').length;
+    progressFill.style.width = (rightCount / ANIMALS.length * 100) + '%';
+    progressText.textContent = rightCount + '/' + ANIMALS.length;
+
+    btnCross.disabled = finished || selected.length === 0;
+    btnCross.textContent = boatSide === 'left' ? 'Переправить на правый берег ▶' : '◀ Переправить на левый берег';
+
+    if (finished) {
+        hintText.textContent = '🎉 Все звери на правом берегу!';
+    } else if (selected.length === 0) {
+        hintText.textContent = '👉 Нажмите на 1–2 зверя на берегу, где стоит лодка, чтобы посадить их в лодку.';
+    } else {
+        hintText.textContent = `В лодке: ${selected.length}/2. Нажмите «Переправить», когда будете готовы.`;
+    }
+}
+
+function toggleSelect(id) {
+    if (finished) return;
+    const idx = selected.indexOf(id);
+    if (idx >= 0) {
+        selected.splice(idx, 1);
+    } else {
+        if (selected.length >= 2) return;
+        selected.push(id);
+    }
+    render();
+}
+
+function setStatus(text, type) {
+    statusEl.textContent = text;
+    statusEl.className = 'status' + (type ? ' ' + type : '');
+}
+
+function cross() {
+    if (selected.length === 0 || finished) return;
+
+    const canRow = selected.some(id => ANIMALS.find(a => a.id === id).canRow);
+    if (!canRow) {
+        setStatus('❌ В лодке должен быть тот, кто умеет грести: Лисица 🦊🚣 или Лисёнок 1 🚣!', 'error');
+        return;
+    }
+
+    if (!isSafe(selected)) {
+        setStatus('❌ В лодке опасно! Детёныш не может плыть с чужой мамой без своей.', 'error');
+        return;
+    }
+
+    const newSide = boatSide === 'left' ? 'right' : 'left';
+    const remainingOldSide = idsAt(boatSide).filter(id => !selected.includes(id));
+    if (!isSafe(remainingOldSide)) {
+        setStatus('❌ Так нельзя — на берегу, который вы покидаете, детёныш останется в опасности!', 'error');
+        return;
+    }
+
+    const arrivingNewSide = idsAt(newSide).concat(selected);
+    if (!isSafe(arrivingNewSide)) {
+        setStatus('❌ Так нельзя — на берегу, куда плывёте, детёныш окажется в опасности!', 'error');
+        return;
+    }
+
+    selected.forEach(id => { animalSide[id] = newSide; });
+    boatSide = newSide;
+    moves++;
+
+    const names = selected.map(id => ANIMALS.find(a => a.id === id).name).join(' и ');
+    const li = document.createElement('li');
+    li.textContent = `${moves}) Переправили: ${names} — ${boatSide === 'right' ? '➡ на правый берег' : '⬅ на левый берег'}`;
+    logEl.appendChild(li);
+    logEl.parentElement.scrollTop = logEl.parentElement.scrollHeight;
+
+    selected = [];
+
+    const allRight = ANIMALS.every(a => animalSide[a.id] === 'right');
+    if (allRight) {
+        finished = true;
+        setStatus(`🎉 Победа! Все звери переправлены за ${moves} поездок!`, 'success');
+    } else {
+        setStatus('✅ Отлично, продолжайте! Выберите зверей для следующей поездки.', '');
+    }
+
+    render();
+}
+
+function resetGame() {
+    animalSide = {};
+    ANIMALS.forEach(a => { animalSide[a.id] = 'left'; });
+    boatSide = 'left';
+    selected = [];
+    moves = 0;
+    finished = false;
+    logEl.innerHTML = '';
+    setStatus('Выберите зверей для первой поездки.', '');
+    render();
+}
+
+const SOLUTION = [
+    ['f1', 'f2'],
+    ['f1'],
+    ['F', 'f1'],
+    ['F'],
+    ['F', 'W'],
+    ['f1'],
+    ['f1', 'w1'],
+    ['f1'],
+    ['f1', 'w2'],
+];
+
+function playHint() {
+    resetGame();
+    let i = 0;
+    const step = () => {
+        if (i >= SOLUTION.length) return;
+        selected = SOLUTION[i].slice();
+        render();
+        setTimeout(() => {
+            cross();
+            i++;
+            setTimeout(step, 900);
+        }, 600);
+    };
+    step();
+}
+
+document.getElementById('btn-cross').addEventListener('click', cross);
+document.getElementById('btn-reset').addEventListener('click', resetGame);
+document.getElementById('btn-hint').addEventListener('click', playHint);
+
+resetGame();
+</script>
+</body>
+</html>

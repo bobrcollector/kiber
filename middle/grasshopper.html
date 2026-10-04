@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Кузнечик</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .rules {
+        font-size: 14px;
+        color: #555;
+        background: #eaf2f8;
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 750px;
+        margin-bottom: 25px;
+    }
+
+    .rules b { color: #2980b9; }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 750px;
+        box-sizing: border-box;
+    }
+
+    .track-wrap {
+        overflow-x: auto;
+        padding: 30px 10px 10px 10px;
+    }
+
+    .track {
+        position: relative;
+        height: 90px;
+        min-width: 560px;
+        margin: 0 20px;
+    }
+
+    .line {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #bdc3c7;
+        border-radius: 2px;
+    }
+
+    .cell {
+        position: absolute;
+        top: 30px;
+        width: 44px;
+        height: 44px;
+        margin-left: -22px;
+        border-radius: 50%;
+        background: #ecf0f1;
+        border: 2px solid #bdc3c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #555;
+        font-size: 15px;
+        transition: all 0.2s ease;
+    }
+
+    .cell.out-of-range {
+        background: #fdecea;
+        border-color: #e74c3c;
+        color: #c0392b;
+    }
+
+    .cell.visited {
+        background: #d5f5e3;
+        border-color: #2ecc71;
+        color: #27ae60;
+    }
+
+    .cell.goal {
+        box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.5);
+    }
+
+    .grasshopper {
+        position: absolute;
+        top: -22px;
+        width: 46px;
+        height: 46px;
+        margin-left: -23px;
+        font-size: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: left 0.4s cubic-bezier(.4,1.4,.6,1);
+    }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 14px 22px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s, opacity 0.2s;
+        color: white;
+    }
+
+    .btn1 { background-color: #2980b9; }
+    .btn1:hover { background-color: #216a94; }
+
+    .btn2 { background-color: #e67e22; }
+    .btn2:hover { background-color: #cf711c; }
+
+    button:disabled {
+        background-color: #bdc3c7 !important;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .btn-reset {
+        background-color: #e74c3c;
+    }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 18px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success {
+        background: #eafaf1;
+        border-color: #2ecc71;
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .program {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+        min-height: 24px;
+        word-break: break-word;
+    }
+
+    .program b { color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🦗 Задача: Кузнечик</h1>
+<p class="subtitle">Исполнитель КУЗНЕЧИК прыгает вдоль числовой оси. У него две команды. Составьте программу, чтобы кузнечик побывал на всех числах от 1 до 5 и закончил путь в точке 5, не выходя за пределы отрезка [0; 5].</p>
+<div class="rules">
+    <b>Команда 1</b> — прыжок на 4 вправо. &nbsp; <b>Команда 2</b> — прыжок на 1 влево.<br>
+    Начальное положение — точка <b>0</b>. Кузнечик не может прыгать за пределы отрезка от 0 до 5.
+</div>
+
+<div class="panel">
+    <div class="track-wrap">
+        <div class="track" id="track">
+            <div class="line"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="btn1" class="btn1">Команда 1: Вправо 4 ▶</button>
+        <button id="btn2" class="btn2">◀ Команда 2: Влево 1</button>
+        <button id="btn-reset" class="btn-reset">Сбросить</button>
+    </div>
+
+    <div class="status" id="status">Кузнечик стоит на точке 0. Доберитесь до всех чисел от 1 до 5!</div>
+    <div class="program" id="program"></div>
+</div>
+
+<script>
+const MIN = 0, MAX = 5, GOAL = 5;
+const CELL_SPACING = 70;
+
+let pos = 0;
+let visited = new Set([0]);
+let commands = [];
+let finished = false;
+
+const trackEl = document.getElementById('track');
+const statusEl = document.getElementById('status');
+const programEl = document.getElementById('program');
+const btn1 = document.getElementById('btn1');
+const btn2 = document.getElementById('btn2');
+
+const cells = {};
+let hopperEl;
+
+function buildTrack() {
+    trackEl.style.width = (CELL_SPACING * (MAX - MIN) + 40) + 'px';
+    for (let i = MIN; i <= MAX; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = i;
+        cell.style.left = (20 + (i - MIN) * CELL_SPACING) + 'px';
+        if (i === GOAL) cell.classList.add('goal');
+        trackEl.appendChild(cell);
+        cells[i] = cell;
+    }
+    hopperEl = document.createElement('div');
+    hopperEl.className = 'grasshopper';
+    hopperEl.textContent = '🦗';
+    trackEl.appendChild(hopperEl);
+}
+
+function updateView() {
+    for (let i = MIN; i <= MAX; i++) {
+        cells[i].classList.toggle('visited', visited.has(i));
+    }
+    hopperEl.style.left = (20 + (pos - MIN) * CELL_SPACING) + 'px';
+
+    const remaining = [1,2,3,4,5].filter(n => !visited.has(n));
+    if (finished) {
+        statusEl.className = 'status success';
+        statusEl.textContent = `🎉 Отлично! Кузнечик побывал на всех числах от 1 до 5 и закончил на точке 5 за ${commands.length} команд!`;
+    } else if (remaining.length === 0 && pos === GOAL) {
+        finished = true;
+        updateView();
+        return;
+    } else {
+        statusEl.className = 'status';
+        statusEl.textContent = `Кузнечик на точке ${pos}. Осталось побывать: ${remaining.length ? remaining.join(', ') : 'все пройдены, дойдите до 5'}.`;
+    }
+
+    programEl.innerHTML = commands.length ? ('<b>Программа:</b> ' + commands.join(' ')) : '';
+
+    btn1.disabled = finished || (pos + 4 > MAX);
+    btn2.disabled = finished || (pos - 1 < MIN);
+}
+
+function doCommand(num) {
+    if (finished) return;
+    const newPos = num === 1 ? pos + 4 : pos - 1;
+    if (newPos < MIN || newPos > MAX) return;
+    pos = newPos;
+    visited.add(pos);
+    commands.push(num);
+    updateView();
+}
+
+function reset() {
+    pos = 0;
+    visited = new Set([0]);
+    commands = [];
+    finished = false;
+    updateView();
+}
+
+btn1.addEventListener('click', () => doCommand(1));
+btn2.addEventListener('click', () => doCommand(2));
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+buildTrack();
+updateView();
+</script>
+</body>
+</html>
