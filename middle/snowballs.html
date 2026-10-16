@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Снежки</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .rules {
+        font-size: 14px;
+        color: #555;
+        background: #eaf2f8;
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 750px;
+        margin-bottom: 25px;
+    }
+
+    .rules b { color: #2980b9; }
+
+    .panel {
+        background: linear-gradient(180deg, #eaf4fb 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 560px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pyramid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .row {
+        display: flex;
+        gap: 2px;
+        margin-top: -6px;
+    }
+
+    .ball {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 2px solid #7f8c8d;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        box-sizing: border-box;
+        overflow: hidden;
+        box-shadow: inset -4px -4px 8px rgba(41, 128, 185, 0.12);
+    }
+
+    .ball input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2980b9;
+        outline: none;
+        border-radius: 50%;
+        -moz-appearance: textfield;
+    }
+
+    .ball input::-webkit-outer-spin-button,
+    .ball input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .ball.input-ball { border-color: #2980b9; border-style: dashed; }
+    .ball input:focus { background: #fff8e1; }
+    .ball.right { background: #eafaf1; border-color: #2ecc71; border-style: solid; }
+    .ball.right input { color: #27ae60; }
+    .ball.wrong { background: #fdecea; border-color: #e74c3c; border-style: solid; }
+    .ball.wrong input { color: #c0392b; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 22px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 18px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 420px) {
+        .ball { width: 48px; height: 48px; font-size: 17px; }
+        .ball input { font-size: 15px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>❄️ Задача: Снежки</h1>
+<p class="subtitle">Даша играла с друзьями в снежки. Они сложили все снежки в пирамиду и написали на них числа по правилу: верхний снежок равен сумме двух нижних. Запишите значения всех снежков.</p>
+<div class="rules">
+    <b>Правило:</b> число на снежке = сумма чисел на двух снежках под ним. Например, <b>7 = 4 + 3</b>.<br>
+    Если известен верхний снежок и один из нижних, второй нижний найдёшь вычитанием: <b>верхний − известный нижний</b>.
+</div>
+
+<div class="panel">
+    <div class="pyramid" id="pyramid"></div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сбросить</button>
+    </div>
+
+    <div class="status" id="status">Впиши числа в пустые снежки.</div>
+</div>
+
+<script>
+// Ряды сверху вниз
+const GIVEN = [
+    [null],
+    [null, null],
+    [null, null, null],
+    [10, null, 15, null],
+    [null, null, 7, null, 10],
+    [null, 2, 4, 3, null, null]
+];
+const ANSWER = [
+    [112],
+    [51, 61],
+    [23, 28, 33],
+    [10, 13, 15, 18],
+    [4, 6, 7, 8, 10],
+    [2, 2, 4, 3, 5, 5]
+];
+
+const pyramidEl = document.getElementById('pyramid');
+const statusEl = document.getElementById('status');
+const balls = [];
+
+function build() {
+    GIVEN.forEach((row, r) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+        balls[r] = [];
+        row.forEach((val, c) => {
+            const ball = document.createElement('div');
+            ball.className = 'ball';
+            let input = null;
+            if (val !== null) {
+                ball.textContent = val;
+            } else {
+                ball.classList.add('input-ball');
+                input = document.createElement('input');
+                input.type = 'number';
+                input.inputMode = 'numeric';
+                input.addEventListener('input', () => {
+                    ball.classList.remove('right', 'wrong');
+                    statusEl.className = 'status';
+                    statusEl.textContent = 'Впиши числа в пустые снежки.';
+                });
+                ball.appendChild(input);
+            }
+            rowEl.appendChild(ball);
+            balls[r][c] = { ball, input };
+        });
+        pyramidEl.appendChild(rowEl);
+    });
+}
+
+function forEachInput(fn) {
+    balls.forEach((row, r) => row.forEach((b, c) => { if (b.input) fn(b, r, c); }));
+}
+
+function check() {
+    let empty = 0, wrong = 0;
+    forEachInput((b, r, c) => {
+        const v = b.input.value.trim();
+        if (v === '') { empty++; b.ball.classList.remove('right', 'wrong'); return; }
+        const ok = Number(v) === ANSWER[r][c];
+        b.ball.classList.toggle('right', ok);
+        b.ball.classList.toggle('wrong', !ok);
+        if (!ok) wrong++;
+    });
+    if (wrong > 0) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Ошибок: ${wrong}. Проверь красные снежки — сложи два снежка под ними.`;
+    } else if (empty > 0) {
+        statusEl.className = 'status';
+        statusEl.textContent = `Пока всё верно! Осталось заполнить снежков: ${empty}.`;
+    } else {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Отлично! Все снежки подписаны верно. На верхнем снежке — 112!';
+    }
+}
+
+function showAnswer() {
+    forEachInput((b, r, c) => {
+        b.input.value = ANSWER[r][c];
+        b.ball.classList.remove('wrong');
+        b.ball.classList.add('right');
+    });
+    statusEl.className = 'status';
+    statusEl.textContent = 'Сначала нижние ряды: 2 + 4 = 6, 10 − 6 = 4, 4 − 2 = 2, 15 − 7 = 8, 8 − 3 = 5, 10 − 5 = 5. Затем складываем снизу вверх.';
+}
+
+function reset() {
+    forEachInput(b => {
+        b.input.value = '';
+        b.ball.classList.remove('right', 'wrong');
+    });
+    statusEl.className = 'status';
+    statusEl.textContent = 'Впиши числа в пустые снежки.';
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+build();
+</script>
+</body>
+</html>

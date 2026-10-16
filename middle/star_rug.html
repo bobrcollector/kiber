@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Коврик со звёздочкой</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .rules {
+        font-size: 14px;
+        color: #555;
+        background: #eaf2f8;
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 750px;
+        margin-bottom: 25px;
+    }
+
+    .rules b { color: #2980b9; }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 500px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .palette {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .swatch {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background: white;
+    }
+
+    .swatch.selected { border-color: #2c3e50; transform: scale(1.1); }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(4, 76px);
+        grid-template-rows: repeat(4, 76px);
+        user-select: none;
+        touch-action: none;
+    }
+
+    .cell {
+        box-sizing: border-box;
+        border: 1px solid #bbb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        cursor: pointer;
+        background: white;
+        transition: background 0.15s;
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 22px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 18px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 420px) {
+        .board {
+            grid-template-columns: repeat(4, 64px);
+            grid-template-rows: repeat(4, 64px);
+        }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>⭐ Задача: Коврик со звёздочкой</h1>
+<p class="subtitle">Как разделить коврик на четыре одинаковые части так, чтобы в каждой части было только по одной звёздочке?</p>
+<div class="rules">
+    Выбери цвет и закрашивай клетки — каждый цвет будет одной частью коврика.
+    Все <b>4 части</b> должны быть <b>одинаковыми</b> по форме и размеру (их можно поворачивать и переворачивать),
+    и в каждой — <b>ровно одна звёздочка</b>. Повторный щелчок по клетке стирает цвет.
+</div>
+
+<div class="panel">
+    <div class="palette" id="palette"></div>
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сбросить</button>
+    </div>
+
+    <div class="status" id="status">Раскрась коврик в 4 цвета.</div>
+</div>
+
+<script>
+const ROWS = 4, COLS = 4;
+const STARS = new Set(['2,1', '2,3', '3,1', '3,3']);
+const COLORS = ['#f9d56e', '#8fd3f4', '#f7a8b8', '#a8e6a1'];
+const ANSWER = [
+    [1, 1, 3, 3],
+    [0, 1, 2, 3],
+    [0, 1, 2, 3],
+    [0, 0, 2, 2]
+];
+
+const boardEl = document.getElementById('board');
+const paletteEl = document.getElementById('palette');
+const statusEl = document.getElementById('status');
+
+let grid = [];
+let current = 0;
+let painting = false;
+let paintValue = null;
+const cellEls = [];
+
+function buildPalette() {
+    COLORS.forEach((color, i) => {
+        const sw = document.createElement('div');
+        sw.className = 'swatch';
+        sw.style.background = color;
+        sw.addEventListener('click', () => { current = i; renderPalette(); });
+        paletteEl.appendChild(sw);
+    });
+    renderPalette();
+}
+
+function renderPalette() {
+    [...paletteEl.children].forEach((sw, i) => sw.classList.toggle('selected', i === current));
+}
+
+function buildBoard() {
+    for (let r = 0; r < ROWS; r++) {
+        cellEls[r] = [];
+        for (let c = 0; c < COLS; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (STARS.has(r + ',' + c)) cell.textContent = '⭐';
+            cell.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                painting = true;
+                paintValue = grid[r][c] === current ? null : current;
+                paint(r, c);
+            });
+            cell.addEventListener('pointerenter', () => { if (painting) paint(r, c); });
+            boardEl.appendChild(cell);
+            cellEls[r][c] = cell;
+        }
+    }
+    document.addEventListener('pointerup', () => { painting = false; });
+}
+
+function paint(r, c) {
+    grid[r][c] = paintValue;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Раскрась коврик в 4 цвета.';
+    render();
+}
+
+function render() {
+    const at = (r, c) => (r < 0 || c < 0 || r >= ROWS || c >= COLS) ? 'out' : grid[r][c];
+    const edge = (a, b) => (a !== b && (a !== null || b !== null)) ? '3px solid #2c3e50' : '1px solid #bbb';
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const v = grid[r][c];
+            const el = cellEls[r][c];
+            el.style.background = v === null ? 'white' : COLORS[v];
+            el.style.borderTop = r === 0 ? '3px solid #2c3e50' : edge(v, at(r - 1, c));
+            el.style.borderBottom = r === ROWS - 1 ? '3px solid #2c3e50' : edge(v, at(r + 1, c));
+            el.style.borderLeft = c === 0 ? '3px solid #2c3e50' : edge(v, at(r, c - 1));
+            el.style.borderRight = c === COLS - 1 ? '3px solid #2c3e50' : edge(v, at(r, c + 1));
+        }
+    }
+}
+
+// Приводим фигуру к стандартному виду с учётом поворотов и отражений
+function normalize(cells) {
+    let best = null;
+    for (let t = 0; t < 8; t++) {
+        const pts = cells.map(([r, c]) => {
+            for (let k = 0; k < t % 4; k++) [r, c] = [c, -r];
+            if (t >= 4) c = -c;
+            return [r, c];
+        });
+        const mr = Math.min(...pts.map(p => p[0]));
+        const mc = Math.min(...pts.map(p => p[1]));
+        const key = pts.map(([r, c]) => (r - mr) + ',' + (c - mc)).sort().join(';');
+        if (best === null || key < best) best = key;
+    }
+    return best;
+}
+
+function isConnected(cells) {
+    const set = new Set(cells.map(p => p.join(',')));
+    const seen = new Set([cells[0].join(',')]);
+    const stack = [cells[0]];
+    while (stack.length) {
+        const [r, c] = stack.pop();
+        for (const [dr, dc] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+            const k = (r + dr) + ',' + (c + dc);
+            if (set.has(k) && !seen.has(k)) { seen.add(k); stack.push([r + dr, c + dc]); }
+        }
+    }
+    return seen.size === cells.length;
+}
+
+function check() {
+    const parts = COLORS.map(() => []);
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (grid[r][c] === null) return fail('Закрась все клетки коврика.');
+            parts[grid[r][c]].push([r, c]);
+        }
+    }
+    if (parts.some(p => p.length === 0)) return fail('Нужно использовать все 4 цвета — 4 части.');
+    if (parts.some(p => p.length !== 4)) return fail('Части должны быть одного размера: по 4 клетки в каждой.');
+    if (parts.some(p => !isConnected(p))) return fail('Каждая часть должна быть цельной, а не из кусочков.');
+    if (parts.some(p => p.filter(([r, c]) => STARS.has(r + ',' + c)).length !== 1))
+        return fail('В каждой части должна быть ровно одна звёздочка.');
+    const shapes = parts.map(normalize);
+    if (shapes.some(s => s !== shapes[0])) return fail('Части разной формы. Они должны быть одинаковыми.');
+
+    statusEl.className = 'status success';
+    statusEl.textContent = '🎉 Отлично! Четыре одинаковые части, и в каждой по одной звёздочке!';
+}
+
+function fail(msg) {
+    statusEl.className = 'status error';
+    statusEl.textContent = msg;
+}
+
+function showAnswer() {
+    grid = ANSWER.map(row => row.slice());
+    render();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Каждая часть — «уголок» из 4 клеток.';
+}
+
+function reset() {
+    grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+    statusEl.className = 'status';
+    statusEl.textContent = 'Раскрась коврик в 4 цвета.';
+    render();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+buildPalette();
+buildBoard();
+reset();
+</script>
+</body>
+</html>

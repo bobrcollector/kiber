@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача для принцесс</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .story {
+        font-size: 15px;
+        color: #444;
+        background: white;
+        border-radius: 10px;
+        padding: 15px 20px;
+        max-width: 800px;
+        line-height: 1.5;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+
+    .story p { margin: 6px 0; }
+
+    .advice-box {
+        font-size: 14px;
+        color: #555;
+        background: #eaf2f8;
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 800px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .advice-box b { color: #2980b9; }
+
+    .advice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    .advice .mark {
+        width: 70px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 2px 0;
+        font-size: 13px;
+        background: #ecf0f1;
+        color: #888;
+    }
+
+    .advice .mark.true { background: #d5f5e3; color: #27ae60; }
+    .advice .mark.false { background: #fdecea; color: #c0392b; }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 800px;
+        box-sizing: border-box;
+    }
+
+    .route {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .room {
+        background: #fdf6e3;
+        border: 2px solid #e0c48a;
+        border-radius: 10px;
+        padding: 10px;
+        width: 92px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        color: #7d5a1a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .room .icon { font-size: 30px; }
+    .room.garden { background: #eafaf1; border-color: #82e0aa; color: #1e8449; }
+
+    .doors {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .door {
+        padding: 7px 10px;
+        font-size: 13px;
+        border-radius: 8px;
+        border: 2px solid #bdc3c7;
+        background: white;
+        color: #2c3e50;
+        cursor: pointer;
+        font-weight: bold;
+        min-width: 95px;
+        transition: all 0.15s;
+    }
+
+    .door:hover:not(:disabled) { border-color: #2980b9; background: #eaf2f8; }
+    .door.selected { background: #2980b9; border-color: #2980b9; color: white; }
+    .door:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 22px;
+    }
+
+    button.action {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 18px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>👸 Задача для принцесс</h1>
+
+<div class="story">
+    <p>— Задаю тебе последнюю задачу, — сказала принцесса Иванушке, — найди единственно верный путь из этой комнаты в наш зимний сад и сорви для меня самую красивую розу. Из этой комнаты ты пройдёшь через левую, или правую, или среднюю дверь во вторую комнату; такие же три вида дверей будут перед тобой при переходе из второй комнаты в третью и из третьей — в сад.</p>
+    <p>Иванушка знал, что обычно из трёх советов принцессы <b>ровно два</b> указывают ложное направление. Кроме того, служанка принцессы успела шепнуть ему, что надо пройти через дверь <b>каждого вида по одному разу</b>.</p>
+    <p><b>Каким же маршрутом следует пройти Иванушке?</b></p>
+</div>
+
+<div class="advice-box">
+    <b>Советы принцессы:</b>
+    <div class="advice"><span class="mark" id="mark-0">?</span> 1) Из этого зала пройди через <b>правую</b> дверь.</div>
+    <div class="advice"><span class="mark" id="mark-1">?</span> 2) Из второй комнаты — <b>не через правую</b> дверь.</div>
+    <div class="advice"><span class="mark" id="mark-2">?</span> 3) Из третьей — <b>не через левую</b> дверь.</div>
+</div>
+
+<div class="panel">
+    <div class="route" id="route"></div>
+
+    <div class="controls">
+        <button class="action btn-check" id="btn-check">Проверить маршрут</button>
+        <button class="action btn-answer" id="btn-answer">Ответ</button>
+        <button class="action btn-reset" id="btn-reset">Сбросить</button>
+    </div>
+
+    <div class="status" id="status">Выбери дверь на каждом переходе. Каждый вид двери — только один раз!</div>
+</div>
+
+<script>
+const DOORS = [
+    { id: 'L', name: 'Левая' },
+    { id: 'M', name: 'Средняя' },
+    { id: 'R', name: 'Правая' }
+];
+const ROOMS = [
+    { icon: '🏰', name: 'Зал' },
+    { icon: '🚪', name: '2-я комната' },
+    { icon: '🚪', name: '3-я комната' },
+    { icon: '🌹', name: 'Зимний сад', garden: true }
+];
+// Каждый совет проверяет выбранную дверь на своём переходе
+const ADVICE = [
+    d => d === 'R',
+    d => d !== 'R',
+    d => d !== 'L'
+];
+const ANSWER = ['L', 'R', 'M'];
+
+const routeEl = document.getElementById('route');
+const statusEl = document.getElementById('status');
+let route = [null, null, null];
+const doorBtns = [];
+
+function build() {
+    ROOMS.forEach((room, i) => {
+        const roomEl = document.createElement('div');
+        roomEl.className = 'room' + (room.garden ? ' garden' : '');
+        roomEl.innerHTML = `<span class="icon">${room.icon}</span>${room.name}`;
+        routeEl.appendChild(roomEl);
+
+        if (i < 3) {
+            const doorsEl = document.createElement('div');
+            doorsEl.className = 'doors';
+            doorBtns[i] = {};
+            DOORS.forEach(door => {
+                const btn = document.createElement('button');
+                btn.className = 'door';
+                btn.textContent = door.name;
+                btn.addEventListener('click', () => choose(i, door.id));
+                doorsEl.appendChild(btn);
+                doorBtns[i][door.id] = btn;
+            });
+            routeEl.appendChild(doorsEl);
+        }
+    });
+}
+
+function choose(stage, door) {
+    route[stage] = route[stage] === door ? null : door;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Выбери дверь на каждом переходе. Каждый вид двери — только один раз!';
+    render();
+}
+
+function render() {
+    for (let s = 0; s < 3; s++) {
+        DOORS.forEach(door => {
+            const btn = doorBtns[s][door.id];
+            btn.classList.toggle('selected', route[s] === door.id);
+            btn.disabled = route[s] !== door.id && route.includes(door.id);
+        });
+        const mark = document.getElementById('mark-' + s);
+        if (route[s] === null) {
+            mark.className = 'mark';
+            mark.textContent = '?';
+        } else {
+            const ok = ADVICE[s](route[s]);
+            mark.className = 'mark ' + (ok ? 'true' : 'false');
+            mark.textContent = ok ? 'правда' : 'ложь';
+        }
+    }
+}
+
+function check() {
+    if (route.includes(null)) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Выбери двери на всех трёх переходах.';
+        return;
+    }
+    const falseCount = route.filter((d, s) => !ADVICE[s](d)).length;
+    if (falseCount === 2) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🌹 Верно! Ровно два совета ложные — Иванушка дошёл до зимнего сада!';
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = `При таком маршруте ложных советов: ${falseCount}, а должно быть ровно 2. Попробуй другой путь.`;
+    }
+}
+
+function showAnswer() {
+    route = ANSWER.slice();
+    render();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: Левая → Правая → Средняя. Первый и второй советы ложные, третий — правдивый.';
+}
+
+function reset() {
+    route = [null, null, null];
+    statusEl.className = 'status';
+    statusEl.textContent = 'Выбери дверь на каждом переходе. Каждый вид двери — только один раз!';
+    render();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+build();
+render();
+</script>
+</body>
+</html>

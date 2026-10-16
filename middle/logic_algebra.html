@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Алгебра логики</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .tables {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+
+    .truth {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        padding: 12px 16px;
+    }
+
+    .truth h3 {
+        margin: 0 0 8px 0;
+        font-size: 15px;
+        color: #2980b9;
+        text-align: center;
+    }
+
+    .truth table { border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 15px; }
+    .truth td { padding: 3px 8px; }
+    .truth td.res { font-weight: bold; color: #2c3e50; }
+    .truth tr.hot { background: #fff3cd; }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 750px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .expr {
+        font-family: 'Courier New', monospace;
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        word-break: break-word;
+    }
+
+    .expr mark {
+        background: #f1c40f;
+        border-radius: 5px;
+        padding: 0 4px;
+    }
+
+    .history {
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        color: #777;
+        margin-top: 12px;
+        line-height: 1.8;
+        text-align: center;
+    }
+
+    .question {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+
+    .bits {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-bit {
+        width: 64px;
+        height: 64px;
+        font-size: 28px;
+        font-family: 'Courier New', monospace;
+        background-color: #2980b9;
+    }
+
+    .btn-bit:hover { background-color: #216a94; }
+
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>💡 Задача: Алгебра логики</h1>
+<p class="subtitle">Пользуясь правилами ниже, найди, чему равно выражение
+    <b>((0 или 1) и 1) и ((1 и 1) и !0)</b>.</p>
+
+<div class="tables">
+    <div class="truth">
+        <h3>и</h3>
+        <table id="t-and">
+            <tr data-key="0 и 0"><td>0 и 0 =</td><td class="res">0</td></tr>
+            <tr data-key="0 и 1"><td>0 и 1 =</td><td class="res">0</td></tr>
+            <tr data-key="1 и 0"><td>1 и 0 =</td><td class="res">0</td></tr>
+            <tr data-key="1 и 1"><td>1 и 1 =</td><td class="res">1</td></tr>
+        </table>
+    </div>
+    <div class="truth">
+        <h3>или</h3>
+        <table>
+            <tr data-key="0 или 0"><td>0 или 0 =</td><td class="res">0</td></tr>
+            <tr data-key="0 или 1"><td>0 или 1 =</td><td class="res">1</td></tr>
+            <tr data-key="1 или 0"><td>1 или 0 =</td><td class="res">1</td></tr>
+            <tr data-key="1 или 1"><td>1 или 1 =</td><td class="res">1</td></tr>
+        </table>
+    </div>
+    <div class="truth">
+        <h3>! (не)</h3>
+        <table>
+            <tr data-key="!0"><td>!0 =</td><td class="res">1</td></tr>
+            <tr data-key="!1"><td>!1 =</td><td class="res">0</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Считаем по шагам</h2>
+    <div class="expr" id="expr"></div>
+    <div class="question" id="question"></div>
+    <div class="bits" id="bits">
+        <button class="btn-bit" data-bit="0">0</button>
+        <button class="btn-bit" data-bit="1">1</button>
+    </div>
+    <div class="history" id="history"></div>
+
+    <div class="controls">
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="status" id="status">Сначала вычисляем то, что в самых внутренних скобках.</div>
+</div>
+
+<script>
+// Каждый шаг: выражение с выделенной частью, выделенная операция и её значение
+const STAGES = [
+    { before: '((', part: '0 или 1', after: ') и 1) и ((1 и 1) и !0)', key: '0 или 1', value: 1 },
+    { before: '(', part: '1 и 1', after: ') и ((1 и 1) и !0)', key: '1 и 1', value: 1 },
+    { before: '1 и ((', part: '1 и 1', after: ') и !0)', key: '1 и 1', value: 1 },
+    { before: '1 и (1 и ', part: '!0', after: ')', key: '!0', value: 1 },
+    { before: '1 и (', part: '1 и 1', after: ')', key: '1 и 1', value: 1 },
+    { before: '', part: '1 и 1', after: '', key: '1 и 1', value: 1 }
+];
+const RESULT = 1;
+
+const exprEl = document.getElementById('expr');
+const questionEl = document.getElementById('question');
+const historyEl = document.getElementById('history');
+const statusEl = document.getElementById('status');
+const bitBtns = document.querySelectorAll('.btn-bit');
+let stage = 0;
+let history = [];
+
+function plain(s) {
+    return s.before + s.part + s.after;
+}
+
+function highlightRule(key) {
+    document.querySelectorAll('.truth tr').forEach(tr => tr.classList.toggle('hot', tr.dataset.key === key));
+}
+
+function render() {
+    historyEl.innerHTML = history.join('<br>');
+    if (stage >= STAGES.length) {
+        exprEl.innerHTML = String(RESULT);
+        questionEl.textContent = 'Выражение вычислено!';
+        bitBtns.forEach(b => { b.disabled = true; });
+        highlightRule(null);
+        return;
+    }
+    const s = STAGES[stage];
+    exprEl.innerHTML = `${s.before}<mark>${s.part}</mark>${s.after}`;
+    questionEl.innerHTML = `Шаг ${stage + 1}. Чему равно <b>${s.part}</b>?`;
+    bitBtns.forEach(b => { b.disabled = false; });
+    highlightRule(null);
+}
+
+function answer(bit) {
+    if (stage >= STAGES.length) return;
+    const s = STAGES[stage];
+    if (bit === s.value) {
+        history.push(`${plain(s)} &nbsp;→&nbsp; ${s.part} = ${s.value}`);
+        stage++;
+        if (stage >= STAGES.length) {
+            statusEl.className = 'status success';
+            statusEl.textContent = `🎉 Отлично! Всё выражение равно ${RESULT}.`;
+        } else {
+            statusEl.className = 'status';
+            statusEl.textContent = `Верно: ${s.part} = ${s.value}. Подставляем и считаем дальше.`;
+        }
+        render();
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Не так. Посмотри на подсвеченное правило в таблице сверху.';
+        highlightRule(s.key);
+    }
+}
+
+function showAnswer() {
+    while (stage < STAGES.length) {
+        const s = STAGES[stage];
+        history.push(`${plain(s)} &nbsp;→&nbsp; ${s.part} = ${s.value}`);
+        stage++;
+    }
+    render();
+    statusEl.className = 'status';
+    statusEl.textContent = `Ответ: ${RESULT}.`;
+}
+
+function reset() {
+    stage = 0;
+    history = [];
+    statusEl.className = 'status';
+    statusEl.textContent = 'Сначала вычисляем то, что в самых внутренних скобках.';
+    render();
+}
+
+bitBtns.forEach(b => b.addEventListener('click', () => answer(Number(b.dataset.bit))));
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

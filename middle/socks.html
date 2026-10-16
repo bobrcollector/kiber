@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Носочки</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 700px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .answer-row input {
+        width: 80px;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+
+    .drawer {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        background: #f3e5d0;
+        border: 3px solid #b8865b;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+
+    .stock {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: white;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    .modes {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .modes label { cursor: pointer; }
+
+    .hand {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        min-height: 80px;
+        align-items: center;
+        border: 2px dashed #bdc3c7;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .hand .placeholder { color: #aaa; font-size: 14px; }
+
+    .sock-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+        color: #777;
+        animation: pop 0.3s ease;
+    }
+
+    .sock-card.pair svg { filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.9)); }
+
+    @keyframes pop {
+        from { transform: scale(0.3) translateY(-20px); opacity: 0; }
+        to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-draw { background-color: #2980b9; }
+    .btn-draw:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🧦 Задача: Носочки</h1>
+<p class="subtitle">У Паши в комоде лежит 10 синих носков, 6 зелёных и 5 красных. Какое минимальное количество носков ему надо вытащить из комода не глядя, чтобы наверняка получить пару носков одного цвета?</p>
+
+<div class="panel">
+    <h2>1. Твой ответ</h2>
+    <div class="answer-row">
+        Нужно вытащить
+        <input type="number" id="answer-input" min="1" inputmode="numeric">
+        носков
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+    </div>
+    <div class="status" id="answer-status">Подумай: что будет в самом невезучем случае?</div>
+</div>
+
+<div class="panel">
+    <h2>2. Проверь на опыте</h2>
+    <div class="drawer" id="drawer"></div>
+
+    <div class="modes">
+        <label><input type="radio" name="mode" value="unlucky" checked> 😈 Самый невезучий случай</label>
+        <label><input type="radio" name="mode" value="random"> 🎲 Случайно</label>
+    </div>
+
+    <div class="hand" id="hand"></div>
+
+    <div class="controls">
+        <button class="btn-draw" id="btn-draw">Вытащить носок</button>
+        <button class="btn-reset" id="btn-reset">Вернуть все носки</button>
+    </div>
+
+    <div class="status" id="draw-status">Вытаскивай носки по одному и смотри, когда появится пара.</div>
+</div>
+
+<script>
+const COLORS = [
+    { id: 'blue', name: 'синий', fill: '#3498db', count: 10 },
+    { id: 'green', name: 'зелёный', fill: '#2ecc71', count: 6 },
+    { id: 'red', name: 'красный', fill: '#e74c3c', count: 5 }
+];
+const ANSWER = 4;
+
+const drawerEl = document.getElementById('drawer');
+const handEl = document.getElementById('hand');
+const drawStatus = document.getElementById('draw-status');
+const btnDraw = document.getElementById('btn-draw');
+const answerInput = document.getElementById('answer-input');
+const answerStatus = document.getElementById('answer-status');
+
+let stock = {};
+let hand = [];
+
+function sockSvg(fill) {
+    return `<svg width="40" height="56" viewBox="0 0 40 56">
+        <path d="M10 2 H28 V30 L36 40 Q40 50 30 53 L8 53 Q2 52 3 45 Q4 40 10 36 Z"
+              fill="${fill}" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="10" y="2" width="18" height="7" fill="white" opacity="0.5"/>
+    </svg>`;
+}
+
+function renderDrawer() {
+    drawerEl.innerHTML = '<div class="stock">🗄️ В комоде:</div>' + COLORS.map(c =>
+        `<div class="stock">${sockSvg(c.fill).replace('width="40" height="56"', 'width="18" height="26"')} ${stock[c.id]}</div>`
+    ).join('');
+}
+
+function renderHand(pairColor) {
+    if (hand.length === 0) {
+        handEl.innerHTML = '<span class="placeholder">Здесь появятся вытащенные носки</span>';
+        return;
+    }
+    handEl.innerHTML = hand.map((id, i) => {
+        const color = COLORS.find(c => c.id === id);
+        const isPair = pairColor === id;
+        return `<div class="sock-card${isPair ? ' pair' : ''}">${sockSvg(color.fill)}№${i + 1}</div>`;
+    }).join('');
+}
+
+function pickColor() {
+    const available = COLORS.filter(c => stock[c.id] > 0);
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    if (mode === 'unlucky') {
+        // Злой комод отдаёт цвет, которого ещё нет в руке
+        const fresh = available.filter(c => !hand.includes(c.id));
+        if (fresh.length) return fresh[0].id;
+        return available[0].id;
+    }
+    // Случайно: вероятность пропорциональна количеству носков
+    const total = available.reduce((s, c) => s + stock[c.id], 0);
+    let x = Math.random() * total;
+    for (const c of available) {
+        x -= stock[c.id];
+        if (x < 0) return c.id;
+    }
+    return available[available.length - 1].id;
+}
+
+function draw() {
+    const id = pickColor();
+    stock[id]--;
+    hand.push(id);
+    renderDrawer();
+
+    const pair = hand.filter(x => x === id).length >= 2;
+    renderHand(pair ? id : null);
+    if (pair) {
+        const name = COLORS.find(c => c.id === id).name;
+        drawStatus.className = 'status success';
+        drawStatus.textContent = `🎉 Пара найдена! Понадобилось носков: ${hand.length} (пара — ${name} цвет).`;
+        btnDraw.disabled = true;
+    } else {
+        drawStatus.className = 'status';
+        drawStatus.textContent = `Вытащено носков: ${hand.length}. Все разного цвета — пары пока нет.`;
+    }
+}
+
+function reset() {
+    COLORS.forEach(c => { stock[c.id] = c.count; });
+    hand = [];
+    btnDraw.disabled = false;
+    drawStatus.className = 'status';
+    drawStatus.textContent = 'Вытаскивай носки по одному и смотри, когда появится пара.';
+    renderDrawer();
+    renderHand(null);
+}
+
+function checkAnswer() {
+    const v = Number(answerInput.value);
+    if (!answerInput.value.trim()) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число.';
+    } else if (v === ANSWER) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! 4 носка — и пара точно найдётся.';
+    } else if (v < ANSWER) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Маловато: все эти носки могут оказаться разного цвета. Проверь в «невезучем случае»!';
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Пара найдётся, но можно вытащить и меньше. Ищем минимальное количество!';
+    }
+}
+
+function showAnswer() {
+    answerInput.value = ANSWER;
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Ответ: 4 носка. Цветов всего три, поэтому в худшем случае первые три носка будут разными, а четвёртый обязательно совпадёт по цвету с одним из них.';
+}
+
+btnDraw.addEventListener('click', draw);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', reset));
+
+reset();
+</script>
+</body>
+</html>

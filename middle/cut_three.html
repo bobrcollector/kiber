@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Одну на три</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .rules {
+        font-size: 14px;
+        color: #555;
+        background: #eaf2f8;
+        border-radius: 10px;
+        padding: 12px 18px;
+        max-width: 750px;
+        margin-bottom: 25px;
+    }
+
+    .rules b { color: #2980b9; }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 560px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .palette {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+    }
+
+    .swatch {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .swatch.selected { border-color: #2c3e50; transform: scale(1.1); }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(7, 56px);
+        grid-template-rows: repeat(6, 56px);
+        user-select: none;
+        touch-action: none;
+    }
+
+    .cell {
+        box-sizing: border-box;
+        border: 1px solid #bbb;
+        cursor: pointer;
+        background: white;
+        transition: background 0.15s;
+    }
+
+    .cell.empty {
+        border: none;
+        background: transparent;
+        cursor: default;
+    }
+
+    .counter {
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .counter span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .counter i {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 18px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 480px) {
+        .board {
+            grid-template-columns: repeat(7, 42px);
+            grid-template-rows: repeat(6, 42px);
+        }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>✂️ Задача: Одну на три</h1>
+<p class="subtitle">Разрежь фигуру, изображённую на рисунке, по сторонам клеток на три равные (по форме и размеру) части.</p>
+<div class="rules">
+    Выбери цвет и закрашивай клетки — каждый цвет будет одной частью.
+    Все <b>3 части</b> должны быть <b>одинаковыми</b> по форме и размеру (их можно поворачивать и переворачивать).
+    Повторный щелчок по клетке стирает цвет.
+</div>
+
+<div class="panel">
+    <div class="palette" id="palette"></div>
+    <div class="board" id="board"></div>
+    <div class="counter" id="counter"></div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сбросить</button>
+    </div>
+
+    <div class="status" id="status">Раскрась фигуру в 3 цвета.</div>
+</div>
+
+<script>
+// 1 — клетка фигуры, 0 — пустое место
+const SHAPE = [
+    [1, 1, 0, 0, 0, 0, 0],
+    [1, 1, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 0, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 0, 0]
+];
+const ROWS = SHAPE.length, COLS = SHAPE[0].length;
+const TOTAL = SHAPE.flat().filter(Boolean).length;
+const COLORS = ['#f9d56e', '#8fd3f4', '#f7a8b8'];
+const ANSWER = [
+    [0, 0, null, null, null, null, null],
+    [0, 1, null, null, null, null, 1],
+    [0, 1, 1, 1, 1, 1, 1],
+    [0, 2, 2, 2, 2, 2, 2],
+    [0, 2, null, null, null, null, 2],
+    [0, 0, null, null, null, null, null]
+];
+
+const boardEl = document.getElementById('board');
+const paletteEl = document.getElementById('palette');
+const statusEl = document.getElementById('status');
+const counterEl = document.getElementById('counter');
+
+let grid = [];
+let current = 0;
+let painting = false;
+let paintValue = null;
+const cellEls = [];
+
+function buildPalette() {
+    COLORS.forEach((color, i) => {
+        const sw = document.createElement('div');
+        sw.className = 'swatch';
+        sw.style.background = color;
+        sw.addEventListener('click', () => { current = i; renderPalette(); });
+        paletteEl.appendChild(sw);
+    });
+    renderPalette();
+}
+
+function renderPalette() {
+    [...paletteEl.children].forEach((sw, i) => sw.classList.toggle('selected', i === current));
+}
+
+function buildBoard() {
+    for (let r = 0; r < ROWS; r++) {
+        cellEls[r] = [];
+        for (let c = 0; c < COLS; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            if (!SHAPE[r][c]) {
+                cell.classList.add('empty');
+            } else {
+                cell.addEventListener('pointerdown', e => {
+                    e.preventDefault();
+                    painting = true;
+                    paintValue = grid[r][c] === current ? null : current;
+                    paint(r, c);
+                });
+                cell.addEventListener('pointerenter', () => { if (painting) paint(r, c); });
+            }
+            boardEl.appendChild(cell);
+            cellEls[r][c] = cell;
+        }
+    }
+    document.addEventListener('pointerup', () => { painting = false; });
+}
+
+function paint(r, c) {
+    grid[r][c] = paintValue;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Раскрась фигуру в 3 цвета.';
+    render();
+}
+
+function render() {
+    const inside = (r, c) => r >= 0 && c >= 0 && r < ROWS && c < COLS && SHAPE[r][c];
+    const THICK = '3px solid #2c3e50', THIN = '1px solid #bbb';
+    const edge = (r, c, nr, nc) => {
+        if (!inside(nr, nc)) return THICK;
+        const a = grid[r][c], b = grid[nr][nc];
+        return (a !== b && (a !== null || b !== null)) ? THICK : THIN;
+    };
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (!SHAPE[r][c]) continue;
+            const v = grid[r][c];
+            const el = cellEls[r][c];
+            el.style.background = v === null ? 'white' : COLORS[v];
+            el.style.borderTop = edge(r, c, r - 1, c);
+            el.style.borderBottom = edge(r, c, r + 1, c);
+            el.style.borderLeft = edge(r, c, r, c - 1);
+            el.style.borderRight = edge(r, c, r, c + 1);
+        }
+    }
+
+    const counts = COLORS.map((_, i) => grid.flat().filter(v => v === i).length);
+    counterEl.innerHTML = COLORS.map((color, i) =>
+        `<span><i style="background:${color}"></i>${counts[i]} кл.</span>`).join('') +
+        `<span>Всего клеток: ${TOTAL}</span>`;
+}
+
+// Приводим фигуру к стандартному виду с учётом поворотов и отражений
+function normalize(cells) {
+    let best = null;
+    for (let t = 0; t < 8; t++) {
+        const pts = cells.map(([r, c]) => {
+            for (let k = 0; k < t % 4; k++) [r, c] = [c, -r];
+            if (t >= 4) c = -c;
+            return [r, c];
+        });
+        const mr = Math.min(...pts.map(p => p[0]));
+        const mc = Math.min(...pts.map(p => p[1]));
+        const key = pts.map(([r, c]) => (r - mr) + ',' + (c - mc)).sort().join(';');
+        if (best === null || key < best) best = key;
+    }
+    return best;
+}
+
+function isConnected(cells) {
+    const set = new Set(cells.map(p => p.join(',')));
+    const seen = new Set([cells[0].join(',')]);
+    const stack = [cells[0]];
+    while (stack.length) {
+        const [r, c] = stack.pop();
+        for (const [dr, dc] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+            const k = (r + dr) + ',' + (c + dc);
+            if (set.has(k) && !seen.has(k)) { seen.add(k); stack.push([r + dr, c + dc]); }
+        }
+    }
+    return seen.size === cells.length;
+}
+
+function check() {
+    const parts = COLORS.map(() => []);
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (!SHAPE[r][c]) continue;
+            if (grid[r][c] === null) return fail('Закрась все клетки фигуры.');
+            parts[grid[r][c]].push([r, c]);
+        }
+    }
+    if (parts.some(p => p.length === 0)) return fail('Нужно использовать все 3 цвета — 3 части.');
+    if (parts.some(p => p.length !== TOTAL / 3))
+        return fail(`Части должны быть одного размера: в фигуре ${TOTAL} клетки, значит по ${TOTAL / 3} клеток в каждой части.`);
+    if (parts.some(p => !isConnected(p))) return fail('Каждая часть должна быть цельной, а не из кусочков.');
+    const shapes = parts.map(normalize);
+    if (shapes.some(s => s !== shapes[0])) return fail('Размер верный, но части разной формы. Попробуй ещё!');
+
+    statusEl.className = 'status success';
+    statusEl.textContent = '🎉 Отлично! Фигура разрезана на три одинаковые части!';
+}
+
+function fail(msg) {
+    statusEl.className = 'status error';
+    statusEl.textContent = msg;
+}
+
+function showAnswer() {
+    grid = ANSWER.map(row => row.slice());
+    render();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Каждая часть — «скобка» из 8 клеток: полоска из 6 клеток с загнутыми концами.';
+}
+
+function reset() {
+    grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+    statusEl.className = 'status';
+    statusEl.textContent = 'Раскрась фигуру в 3 цвета.';
+    render();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+buildPalette();
+buildBoard();
+reset();
+</script>
+</body>
+</html>

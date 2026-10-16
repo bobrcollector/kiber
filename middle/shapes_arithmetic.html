@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Новая арифметика</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    table.puzzle {
+        border-collapse: collapse;
+    }
+
+    table.puzzle td {
+        border: 2px solid #2c3e50;
+        width: 72px;
+        height: 72px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0;
+    }
+
+    table.puzzle td.sum {
+        font-size: 18px;
+        font-style: italic;
+        color: #2c3e50;
+        line-height: 1.2;
+    }
+
+    .calc {
+        display: block;
+        font-size: 12px;
+        font-style: normal;
+        color: #aaa;
+    }
+
+    .calc.ok { color: #27ae60; font-weight: bold; }
+    .calc.bad { color: #e74c3c; font-weight: bold; }
+
+    td.question { font-size: 26px; font-weight: bold; color: #e67e22; }
+
+    .values {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 260px;
+    }
+
+    .value-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .value-row input, .final input {
+        width: 70px;
+        padding: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .value-row input:focus, .final input:focus { border-color: #2980b9; }
+
+    .note {
+        font-size: 13px;
+        color: #777;
+        line-height: 1.4;
+    }
+
+    .final {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .bottom {
+        width: 100%;
+        max-width: 900px;
+        margin-top: 25px;
+    }
+
+    @media (max-width: 420px) {
+        table.puzzle td { width: 58px; height: 58px; }
+        table.puzzle svg { width: 40px; height: 40px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🔺 Задача: Новая арифметика</h1>
+<p class="subtitle">Софа придумала свою арифметику! Она складывает геометрические фигуры. Например, если сложить треугольник, квадрат и круг, то получится 14. А если сложить круг и два шестиугольника, то получится 19. А сколько получится, если сложить круг, треугольник и шестиугольник?</p>
+
+<div class="container">
+    <div class="panel">
+        <h2>Таблица Софы</h2>
+        <table class="puzzle" id="puzzle"></table>
+    </div>
+
+    <div class="panel">
+        <h2>Сколько стоит каждая фигура?</h2>
+        <div class="values" id="values"></div>
+        <p class="note">Подбирай числа: в таблице под каждой суммой появится, сколько получается с твоими числами.
+            Зелёный — совпало, красный — нет.<br>
+            💡 Сравни вторую строку и второй столбец: в них по два квадрата.</p>
+    </div>
+</div>
+
+<div class="panel bottom">
+    <h2>Ответ: круг + треугольник + шестиугольник = ?</h2>
+    <div class="final">
+        <span>= </span>
+        <input type="number" id="final-input" inputmode="numeric">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сбросить</button>
+    </div>
+    <div class="status" id="status">Найди значения фигур и посчитай третий столбец.</div>
+</div>
+
+<script>
+const SHAPES = {
+    tri: { name: 'Треугольник', value: 3,
+        svg: '<polygon points="25,4 47,46 3,46" fill="#111"/>' },
+    sq: { name: 'Квадрат', value: 4,
+        svg: '<rect x="5" y="5" width="40" height="40" fill="white" stroke="#111" stroke-width="4"/>' },
+    circ: { name: 'Круг', value: 7,
+        svg: '<circle cx="25" cy="25" r="21" fill="#111"/>' },
+    hex: { name: 'Шестиугольник', value: 6,
+        svg: '<polygon points="14,6 36,6 47,25 36,44 14,44 3,25" fill="white" stroke="#111" stroke-width="3.5" stroke-linejoin="round"/>' }
+};
+
+const TABLE = [
+    ['tri', 'sq', 'circ'],
+    ['sq', 'sq', 'tri'],
+    ['circ', 'hex', 'hex']
+];
+const ROW_SUMS = [14, 11, 19];
+const COL_SUMS = [14, 14, null];
+const ANSWER = SHAPES.circ.value + SHAPES.tri.value + SHAPES.hex.value;
+
+const puzzleEl = document.getElementById('puzzle');
+const valuesEl = document.getElementById('values');
+const statusEl = document.getElementById('status');
+const finalInput = document.getElementById('final-input');
+const inputs = {};
+const rowCalcEls = [];
+const colCalcEls = [];
+
+function shapeSvg(key, size = 50) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 50 50">${SHAPES[key].svg}</svg>`;
+}
+
+function buildTable() {
+    TABLE.forEach((row, r) => {
+        const tr = document.createElement('tr');
+        row.forEach(key => {
+            const td = document.createElement('td');
+            td.innerHTML = shapeSvg(key);
+            tr.appendChild(td);
+        });
+        const sumTd = document.createElement('td');
+        sumTd.className = 'sum';
+        sumTd.innerHTML = `= ${ROW_SUMS[r]}<span class="calc"></span>`;
+        rowCalcEls.push(sumTd.querySelector('.calc'));
+        tr.appendChild(sumTd);
+        puzzleEl.appendChild(tr);
+    });
+
+    const tr = document.createElement('tr');
+    COL_SUMS.forEach(sum => {
+        const td = document.createElement('td');
+        if (sum === null) {
+            td.className = 'sum question';
+            td.innerHTML = '= ?<span class="calc"></span>';
+        } else {
+            td.className = 'sum';
+            td.innerHTML = `= ${sum}<span class="calc"></span>`;
+        }
+        colCalcEls.push(td.querySelector('.calc'));
+        tr.appendChild(td);
+    });
+    tr.appendChild(document.createElement('td'));
+    puzzleEl.appendChild(tr);
+}
+
+function buildValues() {
+    Object.keys(SHAPES).forEach(key => {
+        const row = document.createElement('div');
+        row.className = 'value-row';
+        row.innerHTML = `${shapeSvg(key, 36)} =`;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.inputMode = 'numeric';
+        input.title = SHAPES[key].name;
+        input.addEventListener('input', updateCalcs);
+        row.appendChild(input);
+        valuesEl.appendChild(row);
+        inputs[key] = input;
+    });
+}
+
+function val(key) {
+    const v = inputs[key].value.trim();
+    return v === '' ? null : Number(v);
+}
+
+function sumOf(keys) {
+    const vals = keys.map(val);
+    return vals.includes(null) ? null : vals.reduce((a, b) => a + b, 0);
+}
+
+function showCalc(el, sum, target) {
+    if (sum === null) {
+        el.textContent = '';
+        el.className = 'calc';
+        return;
+    }
+    el.textContent = 'у тебя ' + sum;
+    el.className = 'calc' + (target === null ? '' : (sum === target ? ' ok' : ' bad'));
+}
+
+function updateCalcs() {
+    TABLE.forEach((row, r) => showCalc(rowCalcEls[r], sumOf(row), ROW_SUMS[r]));
+    COL_SUMS.forEach((target, c) => showCalc(colCalcEls[c], sumOf(TABLE.map(row => row[c])), target));
+}
+
+function check() {
+    const v = finalInput.value.trim();
+    if (v === '') {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Впиши число.';
+    } else if (Number(v) === ANSWER) {
+        statusEl.className = 'status success';
+        statusEl.textContent = `🎉 Верно! Круг + треугольник + шестиугольник = ${ANSWER}.`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Не совсем. Найди сначала значение каждой фигуры — все суммы в таблице должны стать зелёными.';
+    }
+}
+
+function showAnswer() {
+    Object.keys(SHAPES).forEach(key => { inputs[key].value = SHAPES[key].value; });
+    finalInput.value = ANSWER;
+    updateCalcs();
+    statusEl.className = 'status';
+    statusEl.textContent = `Квадрат + квадрат + треугольник = 11, квадрат + квадрат + шестиугольник = 14, значит шестиугольник на 3 больше треугольника. ` +
+        `Подбором: ▲ = 3, ■ = 4, ● = 7, ⬡ = 6. Ответ: 7 + 3 + 6 = ${ANSWER}.`;
+}
+
+function reset() {
+    Object.values(inputs).forEach(inp => { inp.value = ''; });
+    finalInput.value = '';
+    updateCalcs();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Найди значения фигур и посчитай третий столбец.';
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+finalInput.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+buildTable();
+buildValues();
+updateCalcs();
+</script>
+</body>
+</html>
