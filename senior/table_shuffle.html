@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Перетасовка таблицы</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .info-panel {
+        background: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        max-width: 760px;
+        line-height: 1.5;
+        font-size: 15px;
+    }
+
+    .info-panel p { margin: 6px 0; }
+
+    .counter {
+        font-size: 20px;
+        font-weight: bold;
+        color: #8e44ad;
+        margin-bottom: 15px;
+        background: #fff;
+        padding: 8px 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .tables {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .table-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .table-card h2 {
+        font-size: 16px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 44px repeat(3, 60px);
+        grid-template-rows: 44px repeat(3, 60px);
+        gap: 4px;
+    }
+
+    .grid.target { grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); }
+
+    .cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: bold;
+        background: #f8f9fa;
+        border: 2px solid #bdc3c7;
+        border-radius: 6px;
+        color: #2c3e50;
+        transition: background 0.3s;
+    }
+
+    .cell.match { background: #eafaf1; border-color: #2ecc71; }
+
+    .handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: #f5eef8;
+        color: #8e44ad;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+        border: 2px solid transparent;
+        transition: background 0.2s;
+    }
+
+    .handle:hover { background: #e8daef; }
+    .handle.selected { background: #8e44ad; color: white; border-color: #6c3483; }
+
+    .status {
+        font-size: 15px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid #ddd;
+        text-align: center;
+        max-width: 700px;
+        margin-bottom: 15px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .log {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 15px;
+        text-align: center;
+        max-width: 700px;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-undo { background-color: #8e44ad; }
+    .btn-undo:hover { background-color: #6c3483; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .explanation {
+        display: none;
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 18px;
+        border-radius: 10px;
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 720px;
+    }
+
+    .explanation.open { display: block; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🔀 Задача: Перетасовка таблицы</h1>
+
+<div class="info-panel">
+    <p>В таблице разрешается переставлять местами любые две строки друг с другом и любые два столбца.
+    Можно ли с помощью нескольких таких операций получить из левой таблицы правую?
+    Если да, то приведите набор операций, содержащий <b>минимальное</b> число операций перестановки. Если нет — объясните почему.</p>
+    <p style="color:#777; font-size:14px;">👉 Нажми на номер строки (слева) или столбца (сверху), а потом на другой — они поменяются местами.</p>
+</div>
+
+<div class="counter" id="counter">Операций: 0</div>
+
+<div class="tables">
+    <div class="table-card">
+        <h2>Твоя таблица</h2>
+        <div class="grid" id="grid"></div>
+    </div>
+    <div class="table-card">
+        <h2>Нужно получить</h2>
+        <div class="grid target" id="target"></div>
+    </div>
+</div>
+
+<div class="log" id="log"></div>
+<div class="status" id="status">Выбери две строки или два столбца, чтобы поменять их местами.</div>
+
+<div class="buttons">
+    <button class="btn-undo" id="btn-undo">↩ Отменить</button>
+    <button class="btn-reset" id="btn-reset">🔄 Сначала</button>
+    <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+</div>
+
+<div class="explanation" id="explanation">
+    <b>Почему это возможно?</b> При перестановках строк числа одной строки всегда остаются вместе в одной строке,
+    а числа одного столбца — в одном столбце. В правой таблице строки — это {7, 8, 9}, {4, 5, 6}, {1, 2, 3},
+    а столбцы — {9, 6, 3}, {7, 4, 1}, {8, 5, 2}. Это те же наборы, что и в левой таблице, только в другом порядке. Значит, получить можно.<br><br>
+    <b>Решение за 3 операции:</b><br>
+    Шаг 1: поменять столбцы 1 и 3.<br>
+    Шаг 2: поменять строки 1 и 3.<br>
+    Шаг 3: поменять столбцы 2 и 3.<br><br>
+    <b>Почему меньше нельзя?</b> Перестановки строк не меняют порядок столбцов, и наоборот, поэтому строки и столбцы можно считать отдельно.
+    Строки нужно расставить в порядке 3, 2, 1 — хватит <b>одной</b> перестановки (строки 1 и 3), и без неё не обойтись.
+    Столбцы нужно расставить в порядке 3, 1, 2 — тут <b>ни один</b> столбец не стоит на своём месте. Одна перестановка двигает
+    только два столбца, а третий остаётся там, где был, то есть не на своём месте. Значит, для столбцов нужно минимум <b>две</b> перестановки.
+    Итого минимум 1 + 2 = 3 операции.
+</div>
+
+<script>
+const START = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+const TARGET = [[9, 7, 8], [6, 4, 5], [3, 1, 2]];
+const MIN_OPS = 3;
+const SOLUTION = [['col', 0, 2], ['row', 0, 2], ['col', 1, 2]];
+
+let table = [];
+let history = [];      // ['row'|'col', a, b]
+let selected = null;   // { kind, index }
+let playing = false;
+
+const gridEl = document.getElementById('grid');
+const statusEl = document.getElementById('status');
+
+function setStatus(text, cls = '') {
+    statusEl.className = 'status ' + cls;
+    statusEl.textContent = text;
+}
+
+function isSolved() {
+    return table.every((row, r) => row.every((v, c) => v === TARGET[r][c]));
+}
+
+function render() {
+    let html = '<div></div>';
+    for (let c = 0; c < 3; c++) {
+        const sel = selected && selected.kind === 'col' && selected.index === c ? 'selected' : '';
+        html += `<div class="handle ${sel}" data-kind="col" data-index="${c}">ст. ${c + 1}</div>`;
+    }
+    for (let r = 0; r < 3; r++) {
+        const sel = selected && selected.kind === 'row' && selected.index === r ? 'selected' : '';
+        html += `<div class="handle ${sel}" data-kind="row" data-index="${r}">стр. ${r + 1}</div>`;
+        for (let c = 0; c < 3; c++) {
+            const match = table[r][c] === TARGET[r][c] ? 'match' : '';
+            html += `<div class="cell ${match}">${table[r][c]}</div>`;
+        }
+    }
+    gridEl.innerHTML = html;
+
+    document.getElementById('counter').textContent = `Операций: ${history.length}`;
+    const names = { row: 'строки', col: 'столбцы' };
+    document.getElementById('log').textContent = history.length
+        ? history.map(([k, a, b], i) => `${i + 1}) ${names[k]} ${a + 1} и ${b + 1}`).join('   ')
+        : '';
+    document.getElementById('btn-undo').disabled = history.length === 0 || playing;
+}
+
+function swap(kind, a, b) {
+    if (kind === 'row') {
+        [table[a], table[b]] = [table[b], table[a]];
+    } else {
+        table.forEach(row => { [row[a], row[b]] = [row[b], row[a]]; });
+    }
+}
+
+function doSwap(kind, a, b) {
+    swap(kind, a, b);
+    history.push([kind, a, b]);
+    selected = null;
+    render();
+    if (isSolved()) {
+        if (history.length <= MIN_OPS) {
+            setStatus(`🎉 Получилось за ${history.length} операции — это минимум!`, 'success');
+        } else {
+            setStatus(`Таблица совпала, но операций потребовалось: ${history.length}. А можно за ${MIN_OPS}! Попробуй сначала.`, 'error');
+        }
+    } else {
+        setStatus('Зелёным подсвечены клетки, которые уже стоят на своих местах.');
+    }
+}
+
+gridEl.addEventListener('click', e => {
+    if (playing) return;
+    const h = e.target.closest('.handle');
+    if (!h) return;
+    const kind = h.dataset.kind;
+    const index = Number(h.dataset.index);
+
+    if (!selected || selected.kind !== kind) {
+        selected = { kind, index };
+        setStatus(`Выбран${kind === 'row' ? 'а строка' : ' столбец'} ${index + 1}. Теперь выбери ${kind === 'row' ? 'другую строку' : 'другой столбец'}.`);
+        render();
+    } else if (selected.index === index) {
+        selected = null;
+        setStatus('Выбор отменён.');
+        render();
+    } else {
+        doSwap(kind, selected.index, index);
+    }
+});
+
+function undo() {
+    if (playing || history.length === 0) return;
+    const [kind, a, b] = history.pop();
+    swap(kind, a, b);
+    selected = null;
+    render();
+    setStatus('Операция отменена.');
+}
+
+function reset() {
+    table = START.map(row => [...row]);
+    history = [];
+    selected = null;
+    render();
+    setStatus('Выбери две строки или два столбца, чтобы поменять их местами.');
+}
+
+function playSolution() {
+    if (playing) return;
+    reset();
+    playing = true;
+    render();
+    setStatus('Смотри решение…');
+    SOLUTION.forEach(([kind, a, b], k) => {
+        setTimeout(() => {
+            selected = { kind, index: a };
+            render();
+        }, 1400 * k + 400);
+        setTimeout(() => {
+            doSwap(kind, a, b);
+            if (k === SOLUTION.length - 1) {
+                playing = false;
+                render();
+                document.getElementById('explanation').classList.add('open');
+            }
+        }, 1400 * k + 1100);
+    });
+}
+
+const targetEl = document.getElementById('target');
+targetEl.innerHTML = TARGET.flat().map(v => `<div class="cell">${v}</div>`).join('');
+
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-reset').addEventListener('click', () => { if (!playing) reset(); });
+document.getElementById('btn-solution').addEventListener('click', playSolution);
+
+reset();
+</script>
+</body>
+</html>

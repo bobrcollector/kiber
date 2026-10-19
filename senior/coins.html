@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Монетки</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .info-panel {
+        background: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        max-width: 760px;
+        line-height: 1.5;
+    }
+
+    .info-panel p { margin: 6px 0; font-size: 15px; }
+
+    .board-panel {
+        background: white;
+        padding: 25px 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: auto;
+    }
+
+    .board {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .slot {
+        width: 70px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        cursor: pointer;
+        border-radius: 10px;
+        padding-bottom: 6px;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+
+    .slot:hover { background: #f5eef8; }
+    .slot.selected { background: #e8daef; }
+    .slot.target { background: #eafaf1; }
+
+    .stack {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+    }
+
+    .coin {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #fff3b0, #f4c430 55%, #c99a06);
+        border: 3px solid #b7950b;
+        box-shadow: 0 3px 5px rgba(0,0,0,0.25);
+        box-sizing: border-box;
+        transition: transform 0.2s;
+    }
+
+    .coin + .coin { margin-bottom: -40px; }
+
+    .slot.selected .coin {
+        transform: translateY(-10px);
+        border-color: #8e44ad;
+    }
+
+    .empty-mark {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        border: 3px dashed #d5d8dc;
+        box-sizing: border-box;
+    }
+
+    .slot-num {
+        margin-top: 8px;
+        font-weight: bold;
+        font-size: 18px;
+        color: #2c3e50;
+    }
+
+    .counter {
+        font-size: 20px;
+        font-weight: bold;
+        color: #8e44ad;
+        margin-bottom: 12px;
+        background: #fff;
+        padding: 8px 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .status {
+        font-size: 15px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid #ddd;
+        text-align: center;
+        max-width: 700px;
+        margin-bottom: 15px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .moves-log {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        margin-bottom: 15px;
+        min-height: 24px;
+        color: #2c3e50;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-undo { background-color: #8e44ad; }
+    .btn-undo:hover { background-color: #6c3483; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🪙 Задача: Монетки</h1>
+
+<div class="info-panel">
+    <p>На столе лежат восемь монет одним рядком.</p>
+    <p>За один ход можно взять одну монету, перенести её <b>через две соседние монеты</b> (монеты, а не стопки!) и положить на третью.</p>
+    <p>За <b>четыре хода</b> нужно получить четыре стопки по две монеты в каждой. Как?</p>
+    <p style="color:#777; font-size:14px;">👉 Нажми на монету, которую хочешь перенести, а потом — на монету, на которую её положить.
+    Стопка из двух монет считается за <b>две</b> монеты, пустые места не считаются.</p>
+</div>
+
+<div class="counter" id="counter">Ход: 0 / 4</div>
+
+<div class="board-panel">
+    <div class="board" id="board"></div>
+</div>
+
+<div class="moves-log" id="moves-log"></div>
+
+<div class="status" id="status">Выбери монету, которую хочешь перенести.</div>
+
+<div class="buttons">
+    <button class="btn-undo" id="btn-undo">↩ Отменить ход</button>
+    <button class="btn-reset" id="btn-reset">🔄 Сначала</button>
+    <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+</div>
+
+<script>
+const N = 8;
+const MAX_MOVES = 4;
+const SOLUTION = [[4, 7], [6, 2], [1, 3], [5, 8]];
+
+let coins = [];      // coins[i] — сколько монет на месте i (1..8)
+let history = [];    // сделанные ходы [from, to]
+let selected = null;
+let playing = false;
+
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+
+function setStatus(text, cls = '') {
+    statusEl.className = 'status ' + cls;
+    statusEl.textContent = text;
+}
+
+// Проверяем ход по правилам; возвращаем текст ошибки или null
+function moveError(from, to) {
+    if (coins[from] !== 1) return 'Переносить можно только одиночную монету.';
+    if (from === to) return 'Нужно перенести монету на другое место.';
+    if (coins[to] === 0) return 'Класть монету можно только на другую монету, а не на пустое место.';
+    if (coins[to] !== 1) return 'Эта стопка уже готова — третья монета в ней лишняя.';
+    const lo = Math.min(from, to), hi = Math.max(from, to);
+    let between = 0;
+    for (let i = lo + 1; i < hi; i++) between += coins[i];
+    if (between !== 2) {
+        return `Между монетами №${from} и №${to} лежит монет: ${between}. А перепрыгнуть нужно ровно через две.`;
+    }
+    return null;
+}
+
+function hasLegalMove() {
+    for (let f = 1; f <= N; f++)
+        for (let t = 1; t <= N; t++)
+            if (moveError(f, t) === null) return true;
+    return false;
+}
+
+function render() {
+    let html = '';
+    for (let i = 1; i <= N; i++) {
+        let cls = 'slot';
+        if (selected === i) cls += ' selected';
+        else if (selected !== null && moveError(selected, i) === null) cls += ' target';
+        const stack = coins[i] === 0
+            ? '<div class="empty-mark"></div>'
+            : '<div class="stack">' + '<div class="coin"></div>'.repeat(coins[i]) + '</div>';
+        html += `<div class="${cls}" data-pos="${i}">${stack}<div class="slot-num">${i}</div></div>`;
+    }
+    boardEl.innerHTML = html;
+    document.getElementById('counter').textContent = `Ход: ${history.length} / ${MAX_MOVES}`;
+    document.getElementById('moves-log').textContent = history.map(([f, t]) => `№${f} → №${t}`).join('   ');
+    document.getElementById('btn-undo').disabled = history.length === 0 || playing;
+}
+
+function afterMove() {
+    if (history.length === MAX_MOVES) {
+        setStatus('🎉 Получилось! Четыре стопки по две монеты за четыре хода.', 'success');
+    } else if (!hasLegalMove()) {
+        setStatus('Тупик — больше нет ни одного допустимого хода. Отмени ход или начни сначала.', 'error');
+    } else {
+        setStatus('Выбери следующую монету.');
+    }
+}
+
+function doMove(from, to) {
+    coins[from] -= 1;
+    coins[to] += 1;
+    history.push([from, to]);
+    selected = null;
+    render();
+    afterMove();
+}
+
+boardEl.addEventListener('click', e => {
+    if (playing) return;
+    const slot = e.target.closest('.slot');
+    if (!slot) return;
+    const pos = Number(slot.dataset.pos);
+    if (history.length >= MAX_MOVES) return;
+
+    if (selected === null) {
+        if (coins[pos] !== 1) {
+            setStatus(coins[pos] === 0 ? 'Здесь нет монеты.' : 'Стопку разбирать нельзя — выбери одиночную монету.', 'error');
+            return;
+        }
+        selected = pos;
+        setStatus(`Монета №${pos} в руке. Куда её положить? Подходящие места подсвечены зелёным.`);
+        render();
+        return;
+    }
+
+    if (pos === selected) {
+        selected = null;
+        setStatus('Выбери монету, которую хочешь перенести.');
+        render();
+        return;
+    }
+
+    const err = moveError(selected, pos);
+    if (err) {
+        setStatus(err, 'error');
+        return;
+    }
+    doMove(selected, pos);
+});
+
+function undo() {
+    if (history.length === 0 || playing) return;
+    const [from, to] = history.pop();
+    coins[from] += 1;
+    coins[to] -= 1;
+    selected = null;
+    render();
+    setStatus('Ход отменён.');
+}
+
+function reset() {
+    coins = [0];
+    for (let i = 1; i <= N; i++) coins.push(1);
+    history = [];
+    selected = null;
+    render();
+    setStatus('Выбери монету, которую хочешь перенести.');
+}
+
+function playSolution() {
+    if (playing) return;
+    reset();
+    playing = true;
+    setStatus('Смотри решение…');
+    SOLUTION.forEach(([from, to], k) => {
+        setTimeout(() => {
+            selected = from;
+            render();
+        }, 900 * (2 * k) + 300);
+        setTimeout(() => {
+            doMove(from, to);
+            if (k === SOLUTION.length - 1) {
+                playing = false;
+                render();
+                setStatus('Решение: №4 на №7, №6 на №2, №1 на №3 и №5 на №8. 🎉', 'success');
+            }
+        }, 900 * (2 * k + 1) + 300);
+    });
+}
+
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-reset').addEventListener('click', () => { if (!playing) reset(); });
+document.getElementById('btn-solution').addEventListener('click', playSolution);
+
+reset();
+</script>
+</body>
+</html>

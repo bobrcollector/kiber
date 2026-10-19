@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Маленький класс</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    table.examples {
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+    }
+
+    table.examples th, table.examples td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 16px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.examples th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input[type=number]:focus { border-color: #8e44ad; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    /* Лента времени */
+    .timeline {
+        display: flex;
+        width: 100%;
+        min-height: 54px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 10px 0 4px;
+        border: 2px solid #ddd;
+    }
+
+    .seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        min-width: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 1px solid rgba(255,255,255,0.6);
+    }
+
+
+    .legend-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .legend-row span::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -1px;
+        background: var(--c);
+    }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .test-case {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: inline-block;
+        white-space: pre;
+        margin-bottom: 10px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .code-box {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-top: 12px;
+    }
+
+    .code-box pre { margin: 0; }
+
+    .code-keyword { color: #ff9ff3; }
+    .code-function { color: #feca57; }
+    .code-number { color: #ff9f43; }
+    .code-comment { color: #7f8c8d; font-style: italic; }
+
+    .queue {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0;
+    }
+
+    .student {
+        width: 48px;
+        border-radius: 8px;
+        text-align: center;
+        padding: 4px 0;
+        font-size: 12px;
+        color: #555;
+        border: 2px solid transparent;
+    }
+
+    .student b {
+        display: block;
+        font-size: 18px;
+        color: #2c3e50;
+    }
+
+    .student.odd { background: #e8f8f5; }
+    .student.even { background: #fef5e7; }
+
+    .student.me {
+        background: #8e44ad;
+        border-color: #6c3483;
+        color: #f5eef8;
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(142, 68, 173, 0.4);
+    }
+
+    .student.me b { color: white; }
+
+    .seg-legend {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🏫 Задача: Маленький класс</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p class="limit">Ограничение по времени: 1 секунда</p>
+        <p>В классе <b>N</b> учеников. Учитель опрашивает сначала всех учащихся с нечётными номерами (1, 3, 5, ...),
+        затем всех с чётными номерами (2, 4, 6, ...).
+        Андрей, имеющий номер <b>K</b> по журналу, хочет узнать, какой по порядку вопрос достанется ему.
+        Напишите программу, вычисляющую номер вопроса по данным N и K.</p>
+
+        <h3>Формат входных данных</h3>
+        <p>Вводятся два целых числа N и K, каждое в отдельной строке (1 ≤ N ≤ 1000, 1 ≤ K ≤ N).</p>
+
+        <h3>Формат выходных данных</h3>
+        <p>Выведите одно целое число — номер вопроса, который достанется Андрею.</p>
+
+        <h3>Примеры</h3>
+        <table class="examples">
+            <tr><th>стандартный ввод</th><th>стандартный вывод</th></tr>
+            <tr><td>10<br>7</td><td>4</td></tr>
+            <tr><td>10<br>6</td><td>8</td></tr>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: в каком порядке спрашивает учитель</h2>
+        <div class="inputs">
+            <label>N = <input type="number" id="in-n" value="10" min="1" max="1000"></label>
+            <label>K = <input type="number" id="in-k" value="7" min="1"></label>
+            <button class="btn-check" id="btn-run">▶ Запустить</button>
+        </div>
+        <div class="seg-legend">
+            <span>Сверху — номер вопроса, снизу — номер ученика по журналу.</span>
+            <span style="color:#16a085">■ нечётные</span>
+            <span style="color:#e67e22">■ чётные</span>
+            <span style="color:#8e44ad">■ Андрей</span>
+        </div>
+        <div class="queue" id="queue"></div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Проверь себя</h2>
+        <p>Что выведет правильная программа на такой ввод?</p>
+        <div class="test-case" id="test-case"></div>
+        <div class="inputs">
+            <label>Ответ: <input type="number" id="test-answer"></label>
+            <button class="btn-check" id="btn-test-check">Проверить</button>
+            <button class="btn-next" id="btn-test-new">🎲 Новый тест</button>
+        </div>
+        <div class="status" id="test-status">Посчитай в уме или на листочке.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <h3>Идея</h3>
+            <p>Если K — <b>нечётное</b>, то Андрей окажется в первой половине опрошенных, поэтому ответом будет порядковый номер
+            числа K среди всех нечётных чисел. Его можно найти по формуле <span class="math">(K + 1) // 2</span>
+            (где <span class="math">//</span> — операция целочисленного деления).</p>
+            <p>Если K — <b>чётное</b>, то нужно определить, какое это по порядку чётное число (<span class="math">K // 2</span>),
+            а также добавить количество нечётных чисел от 1 до N (<span class="math">(N + 1) // 2</span>) — их всех спросят раньше.
+            Получится формула <span class="math">K // 2 + (N + 1) // 2</span>.</p>
+            <div class="code-box"><pre><code>n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+k = <span class="code-function">int</span>(<span class="code-function">input</span>())
+
+<span class="code-keyword">if</span> k % <span class="code-number">2</span> != <span class="code-number">0</span>:
+    <span class="code-comment"># нечётный номер — спросят в первой половине</span>
+    <span class="code-function">print</span>((k + <span class="code-number">1</span>) // <span class="code-number">2</span>)
+<span class="code-keyword">else</span>:
+    <span class="code-comment"># чётный — сначала спросят всех нечётных</span>
+    <span class="code-function">print</span>(k // <span class="code-number">2</span> + (n + <span class="code-number">1</span>) // <span class="code-number">2</span>)</code></pre></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function solve(n, k) {
+    return k % 2 !== 0 ? Math.floor((k + 1) / 2) : Math.floor(k / 2) + Math.floor((n + 1) / 2);
+}
+
+const MAX_VISUAL = 60;
+
+function run() {
+    const n = Number(document.getElementById('in-n').value);
+    const k = Number(document.getElementById('in-k').value);
+    const queue = document.getElementById('queue');
+    const exp = document.getElementById('explanation');
+    queue.innerHTML = '';
+    if (!Number.isInteger(n) || !Number.isInteger(k) || n < 1 || n > 1000 || k < 1 || k > n) {
+        exp.innerHTML = 'Проверь ограничения: 1 ≤ N ≤ 1000, 1 ≤ K ≤ N.';
+        return;
+    }
+
+    const answer = solve(n, k);
+    if (n <= MAX_VISUAL) {
+        const order = [];
+        for (let i = 1; i <= n; i += 2) order.push(i);
+        for (let i = 2; i <= n; i += 2) order.push(i);
+        queue.innerHTML = order.map((st, idx) =>
+            `<div class="student ${st % 2 ? 'odd' : 'even'} ${st === k ? 'me' : ''}">` +
+            `вопрос<b>${idx + 1}</b>№${st}</div>`
+        ).join('');
+    } else {
+        queue.innerHTML = `<div style="color:#888; font-size:14px;">Учеников слишком много, чтобы нарисовать всех (больше ${MAX_VISUAL}) — смотри расчёт ниже.</div>`;
+    }
+
+    const odds = Math.floor((n + 1) / 2);
+    let html = `В классе <b>${n}</b> учеников: нечётных номеров <span class="math">(${n} + 1) // 2 = ${odds}</span>, чётных — ${n - odds}.<br>`;
+    if (k % 2 !== 0) {
+        html += `Номер ${k} — нечётный. Среди нечётных чисел 1, 3, 5, … он стоит на месте <span class="math">(${k} + 1) // 2 = ${answer}</span>.<br>`;
+    } else {
+        html += `Номер ${k} — чётный. Сначала спросят всех ${odds} нечётных, а среди чётных 2, 4, 6, … Андрей стоит на месте <span class="math">${k} // 2 = ${k / 2}</span>.<br>` +
+                `Итого: <span class="math">${k / 2} + ${odds} = ${answer}</span>.<br>`;
+    }
+    html += `Андрею достанется вопрос номер <b>${answer}</b>.`;
+    exp.innerHTML = html;
+}
+
+// Проверь себя
+let testData = null;
+
+function randInt(lo, hi) {
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function newTest() {
+    const n = randInt(5, 35);
+    const k = randInt(1, n);
+    testData = { n, k };
+    document.getElementById('test-case').textContent = `${n}\n${k}`;
+    document.getElementById('test-answer').value = '';
+    const st = document.getElementById('test-status');
+    st.className = 'status';
+    st.textContent = 'Посчитай в уме или на листочке.';
+}
+
+function checkTest() {
+    const st = document.getElementById('test-status');
+    const v = document.getElementById('test-answer').value.trim();
+    const expected = solve(testData.n, testData.k);
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (Number(v) === expected) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Попробуй ещё один тест.';
+    } else {
+        st.className = 'status error';
+        st.textContent = testData.k % 2 === 0
+            ? 'Неверно. Номер чётный — не забудь, что сначала спросят всех нечётных. Сколько их при этом N?'
+            : 'Неверно. Номер нечётный — каким по счёту он стоит среди 1, 3, 5, …?';
+    }
+}
+
+document.getElementById('btn-run').addEventListener('click', run);
+document.getElementById('btn-test-new').addEventListener('click', newTest);
+document.getElementById('btn-test-check').addEventListener('click', checkTest);
+document.getElementById('test-answer').addEventListener('keydown', e => { if (e.key === 'Enter') checkTest(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+run();
+newTest();
+</script>
+</body>
+</html>

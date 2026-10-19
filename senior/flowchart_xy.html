@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Алгоритм в виде блок-схемы</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 800px;
+    }
+
+    .container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .diagram-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .diagram-title {
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #8e44ad;
+    }
+
+    svg.flow {
+        width: 460px;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .block {
+        fill: #ecf0f1;
+        stroke: #7f8c8d;
+        stroke-width: 2;
+        transition: all 0.3s ease;
+    }
+
+    .block.active {
+        fill: #f1c40f;
+        stroke: #e67e22;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5));
+    }
+
+    .block-text {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        fill: #2c3e50;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        user-select: none;
+        pointer-events: none;
+    }
+
+    .label {
+        font-size: 12px;
+        font-style: italic;
+        fill: #7f8c8d;
+    }
+
+    .arrow {
+        stroke: #7f8c8d;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .arrow.head { marker-end: url(#arrowhead); }
+
+    .arrow.active {
+        stroke: #e67e22;
+        stroke-width: 3;
+    }
+
+    .arrow.head.active { marker-end: url(#arrowhead-active); }
+
+    .controls-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 400px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .answer-box, .params-box {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .params-box {
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .answer-box input, .params-box input {
+        width: 80px;
+        padding: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .params-box input { width: 60px; font-size: 15px; padding: 5px; }
+
+    .answer-box input:focus, .params-box input:focus { border-color: #8e44ad; }
+
+    .var-display {
+        display: flex;
+        justify-content: space-around;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        color: #8e44ad;
+    }
+
+    .var-display.highlight { background: #fff3cd; }
+
+    button {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; padding: 9px 16px; font-size: 15px; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-next:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .trace-table-container {
+        width: 100%;
+        max-height: 260px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+    }
+
+    .step-desc { color: #555; font-style: italic; }
+    tr.cond { background-color: #fff3cd; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🧮 Задача: Алгоритм в виде блок-схемы</h1>
+<p class="subtitle">На рисунке представлен фрагмент программы. Чему равна переменная M после выполнения этого фрагмента? Сначала посчитай сам, а потом проверь по шагам!</p>
+
+<div class="container">
+    <div class="diagram-panel">
+        <div class="diagram-title">Блок-схема</div>
+        <svg class="flow" viewBox="0 0 460 450">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#7f8c8d" />
+                </marker>
+                <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#e67e22" />
+                </marker>
+            </defs>
+
+            <!-- Начало -->
+            <rect id="block-start" class="block" x="170" y="10" width="120" height="36" rx="18" ry="18" />
+            <text class="block-text" x="230" y="28">НАЧАЛО</text>
+            <path id="a-start" class="arrow head" d="M230,46 V70" />
+
+            <!-- X := -7; Y := 12 -->
+            <rect id="block-init" class="block" x="135" y="70" width="190" height="36" />
+            <text class="block-text" id="init-text" x="230" y="88">X := -7; Y := 12</text>
+            <path id="a-init" class="arrow head" d="M230,106 V140" />
+
+            <!-- Условие X > 0 -->
+            <polygon id="block-cond1" class="block" points="230,140 300,170 230,200 160,170" />
+            <text class="block-text" x="230" y="170">X &gt; 0</text>
+
+            <!-- Да: вниз к M := X * Y -->
+            <path id="a-yes1" class="arrow head" d="M230,200 V250" />
+            <text class="label" x="240" y="228">Да</text>
+
+            <!-- Нет: вправо к условию Y > 0 -->
+            <path id="a-no1" class="arrow head" d="M300,170 H380 V238" />
+            <text class="label" x="330" y="160">Нет</text>
+
+            <!-- M := X * Y -->
+            <rect id="block-mul" class="block" x="170" y="250" width="120" height="36" />
+            <text class="block-text" x="230" y="268">M := X * Y</text>
+
+            <!-- Условие Y > 0 -->
+            <polygon id="block-cond2" class="block" points="380,238 440,268 380,298 320,268" />
+            <text class="block-text" x="380" y="268">Y &gt; 0</text>
+
+            <!-- Да: влево в M := X * Y -->
+            <path id="a-yes2" class="arrow head" d="M320,268 H290" />
+            <text class="label" x="298" y="258">Да</text>
+
+            <!-- Нет: вниз к M := X + Y -->
+            <path id="a-no2" class="arrow head" d="M380,298 V330" />
+            <text class="label" x="390" y="318">Нет</text>
+
+            <!-- M := X + Y -->
+            <rect id="block-add" class="block" x="320" y="330" width="120" height="36" />
+            <text class="block-text" x="380" y="348">M := X + Y</text>
+
+            <!-- Слияние ветвей -->
+            <path id="a-mul-merge" class="arrow" d="M230,286 V348" />
+            <path id="a-add-merge" class="arrow" d="M320,348 H230" />
+            <path id="a-merge" class="arrow head" d="M230,348 V395" />
+
+            <!-- Конец -->
+            <rect id="block-end" class="block" x="170" y="395" width="120" height="36" rx="18" ry="18" />
+            <text class="block-text" x="230" y="413">КОНЕЦ</text>
+        </svg>
+    </div>
+
+    <div class="controls-panel">
+        <div class="answer-box">
+            Мой ответ: M =
+            <input type="number" id="answer-input" inputmode="numeric">
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="answer-status">Выполни алгоритм в уме или на листочке.</div>
+
+        <div class="var-display" id="var-display">
+            <span>X = <span id="val-x">—</span></span>
+            <span>Y = <span id="val-y">—</span></span>
+            <span>M = <span id="val-m">—</span></span>
+        </div>
+
+        <button id="btn-next" class="btn-next">Следующий шаг ▶</button>
+        <button id="btn-reset" class="btn-reset">Сбросить</button>
+
+        <div class="trace-table-container">
+            <table>
+                <thead>
+                    <tr><th>Шаг</th><th>Действие</th><th>X</th><th>Y</th><th>M</th></tr>
+                </thead>
+                <tbody id="trace-body"></tbody>
+            </table>
+        </div>
+
+        <div class="params-box">
+            🔬 Поэкспериментируй: X =
+            <input type="number" id="param-x" value="-7">
+            Y =
+            <input type="number" id="param-y" value="12">
+            <button class="btn-check" id="btn-apply">Применить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Отрицательное число в выражении берём в скобки
+function fmt(v) {
+    return v < 0 ? `(${v})` : `${v}`;
+}
+
+// Строим список шагов, выполняя алгоритм
+function buildSteps(x, y) {
+    const steps = [{ block: 'start', arrows: [], desc: 'Начало', x: null, y: null, m: null }];
+    steps.push({ block: 'init', arrows: ['a-start'], desc: `X := ${x}; Y := ${y}`, x, y, m: null });
+
+    const xPos = x > 0;
+    steps.push({ block: 'cond1', arrows: ['a-init'], desc: `${x} > 0? — ${xPos ? 'да' : 'нет'}`, x, y, m: null, cond: true });
+
+    let m, merge;
+    if (xPos) {
+        m = x * y;
+        steps.push({ block: 'mul', arrows: ['a-yes1'], desc: `M := ${x} * ${fmt(y)} = ${m}`, x, y, m });
+        merge = 'a-mul-merge';
+    } else {
+        const yPos = y > 0;
+        steps.push({ block: 'cond2', arrows: ['a-no1'], desc: `${y} > 0? — ${yPos ? 'да' : 'нет'}`, x, y, m: null, cond: true });
+        if (yPos) {
+            m = x * y;
+            steps.push({ block: 'mul', arrows: ['a-yes2'], desc: `M := ${x} * ${fmt(y)} = ${m}`, x, y, m });
+            merge = 'a-mul-merge';
+        } else {
+            m = x + y;
+            steps.push({ block: 'add', arrows: ['a-no2'], desc: `M := ${x} + ${fmt(y)} = ${m}`, x, y, m });
+            merge = 'a-add-merge';
+        }
+    }
+    steps.push({ block: 'end', arrows: [merge, 'a-merge'], desc: `Конец: M = ${m}`, x, y, m });
+    return { steps, result: m };
+}
+
+let X0 = -7, Y0 = 12;
+let STEPS = [], RESULT = 0;
+
+const valXEl = document.getElementById('val-x');
+const valYEl = document.getElementById('val-y');
+const valMEl = document.getElementById('val-m');
+const varDisplay = document.getElementById('var-display');
+const btnNext = document.getElementById('btn-next');
+const traceBody = document.getElementById('trace-body');
+const answerInput = document.getElementById('answer-input');
+const answerStatus = document.getElementById('answer-status');
+let current = 0;
+
+function show(v) {
+    return v === null ? '—' : v;
+}
+
+function clearHighlight() {
+    document.querySelectorAll('.block, .arrow').forEach(el => el.classList.remove('active'));
+}
+
+function showStep(step) {
+    clearHighlight();
+    document.getElementById('block-' + step.block).classList.add('active');
+    step.arrows.forEach(id => document.getElementById(id).classList.add('active'));
+    valXEl.textContent = show(step.x);
+    valYEl.textContent = show(step.y);
+    valMEl.textContent = show(step.m);
+}
+
+function nextStep() {
+    if (current >= STEPS.length) return;
+    const step = STEPS[current];
+    showStep(step);
+
+    const tr = document.createElement('tr');
+    if (step.cond) tr.className = 'cond';
+    tr.innerHTML = `<td>${current + 1}</td><td class="step-desc">${step.desc}</td>` +
+                   `<td>${show(step.x)}</td><td>${show(step.y)}</td><td>${show(step.m)}</td>`;
+    traceBody.appendChild(tr);
+    tr.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    current++;
+    if (current >= STEPS.length) {
+        btnNext.disabled = true;
+        btnNext.textContent = 'Готово!';
+        varDisplay.classList.add('highlight');
+    }
+}
+
+function reset() {
+    ({ steps: STEPS, result: RESULT } = buildSteps(X0, Y0));
+    document.getElementById('init-text').textContent = `X := ${X0}; Y := ${Y0}`;
+    current = 0;
+    traceBody.innerHTML = '';
+    btnNext.disabled = false;
+    btnNext.textContent = 'Следующий шаг ▶';
+    varDisplay.classList.remove('highlight');
+    clearHighlight();
+    valXEl.textContent = '—';
+    valYEl.textContent = '—';
+    valMEl.textContent = '—';
+}
+
+function applyParams() {
+    const x = parseInt(document.getElementById('param-x').value, 10);
+    const y = parseInt(document.getElementById('param-y').value, 10);
+    if (isNaN(x) || isNaN(y)) return;
+    X0 = x;
+    Y0 = y;
+    answerStatus.className = 'status';
+    answerStatus.textContent = `Теперь X = ${X0}, Y = ${Y0}. Чему будет равно M?`;
+    reset();
+}
+
+function checkAnswer() {
+    const v = answerInput.value.trim();
+    if (v === '') {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число.';
+    } else if (Number(v) === RESULT) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = `🎉 Верно! После выполнения фрагмента M = ${RESULT}.`;
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Неверно. Внимательно проверь условия и пройди алгоритм по шагам.';
+    }
+}
+
+btnNext.addEventListener('click', nextStep);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-apply').addEventListener('click', applyParams);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+
+reset();
+</script>
+</body>
+</html>

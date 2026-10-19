@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Школьный буфет</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .conditions { flex: 1 1 360px; }
+    .board { flex: 1 1 520px; }
+
+    .conditions ol {
+        padding-left: 22px;
+        margin: 0 0 12px;
+        line-height: 1.5;
+    }
+
+    .conditions li { margin-bottom: 6px; }
+
+    .legend {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table.grid {
+        border-collapse: collapse;
+        margin: 0 auto 15px;
+        font-size: 16px;
+    }
+
+    table.grid th, table.grid td {
+        border: 2px solid #bdc3c7;
+        width: 52px;
+        height: 42px;
+        text-align: center;
+    }
+
+    table.grid th { background: #f8f9fa; color: #2c3e50; }
+    table.grid th.name { width: 90px; text-align: left; padding-left: 8px; }
+
+    table.grid td.cell {
+        cursor: pointer;
+        font-size: 22px;
+        font-weight: bold;
+        user-select: none;
+        transition: background 0.15s;
+    }
+
+    table.grid td.cell:hover { background: #f5eef8; }
+    table.grid td.plus { color: #27ae60; }
+    table.grid td.minus { color: #c0392b; }
+
+    table.grid tr.row-ok th.name { background: #eafaf1; color: #27ae60; }
+    table.grid tr.row-bad th.name { background: #fdecea; color: #c0392b; }
+
+    .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .hints { margin-top: 12px; }
+
+    .hint {
+        background: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🥪 Задача: Школьный буфет</h1>
+
+<div class="container">
+    <div class="panel conditions">
+        <h2>Условие</h2>
+        <p>Шестеро друзей на перемене заскочили в буфет, в котором:</p>
+        <ol>
+            <li>Маша купила то же, что Витя, и вдобавок ещё бутерброд с сыром;</li>
+            <li>Аня купила то же, что Света, но не стала покупать шоколадное печенье;</li>
+            <li>Игорь ел то же, что Наташа, но без луковых чипсов;</li>
+            <li>Витя завтракал тем же, что и Наташа, но бутерброду с котлетой предпочёл картофельные чипсы;</li>
+            <li>Света ела то же, что Наташа, но вместо молочного коктейля пила лимонад.</li>
+        </ol>
+        <p><b>Что кушал каждый из друзей?</b></p>
+        <div class="legend">
+            <b>БС</b> — бутерброд с сыром, <b>БК</b> — бутерброд с котлетой,
+            <b>ЛЧ</b> — луковые чипсы, <b>КЧ</b> — картофельные чипсы,
+            <b>ШП</b> — шоколадное печенье, <b>МК</b> — молочный коктейль, <b>Л</b> — лимонад.
+        </div>
+    </div>
+
+    <div class="panel board">
+        <h2>Заполни таблицу</h2>
+        <p style="font-size:14px; color:#555; margin-top:0;">Нажимай на клетку: пусто → <b style="color:#27ae60">+</b> (ел) → <b style="color:#c0392b">–</b> (не ел) → пусто.</p>
+        <div class="table-wrap">
+            <table class="grid" id="grid"></table>
+        </div>
+        <div class="buttons">
+            <button class="btn-check" id="btn-check">Проверить</button>
+            <button class="btn-hint" id="btn-hint">💡 Подсказка</button>
+            <button class="btn-hint" id="btn-answer">Показать ответ</button>
+            <button class="btn-reset" id="btn-reset">Очистить</button>
+        </div>
+        <div class="status" id="status">Начни с того, кто упоминается в условиях чаще всех.</div>
+        <div class="hints" id="hints"></div>
+    </div>
+</div>
+
+<script>
+const ITEMS = ['БС', 'БК', 'ЛЧ', 'КЧ', 'ШП', 'МК', 'Л'];
+const PEOPLE = ['Маша', 'Витя', 'Аня', 'Света', 'Игорь', 'Наташа'];
+
+// Наташа — основа, все остальные выводятся из неё
+const NATASHA = ['БК', 'ЛЧ', 'ШП', 'МК'];
+function buildAnswer() {
+    const without = (set, item) => set.filter(x => x !== item);
+    const natasha = NATASHA;
+    const igor = without(natasha, 'ЛЧ');
+    const vitya = [...without(natasha, 'БК'), 'КЧ'];
+    const masha = [...vitya, 'БС'];
+    const sveta = [...without(natasha, 'МК'), 'Л'];
+    const anya = without(sveta, 'ШП');
+    return { 'Маша': masha, 'Витя': vitya, 'Аня': anya, 'Света': sveta, 'Игорь': igor, 'Наташа': natasha };
+}
+const ANSWER = buildAnswer();
+
+const HINTS = [
+    'Все друзья описаны через Наташу — напрямую или через другого друга. Значит, сначала нужно понять, что ела <b>Наташа</b>.',
+    'Игорь ел то же, что Наташа, <b>но без луковых чипсов</b> — значит, у Наташи ЛЧ были. ' +
+    'Витя <b>вместо бутерброда с котлетой</b> взял КЧ — значит, у Наташи был БК (а КЧ не было). ' +
+    'Света <b>вместо молочного коктейля</b> пила лимонад — значит, у Наташи был МК (а Л не было). ' +
+    'Аня, в отличие от Светы, не купила шоколадное печенье — значит, у Светы, а значит и у Наташи, ШП было.',
+    'Наташа: БК, ЛЧ, ШП, МК. Теперь заполняй по цепочке: Игорь и Витя (из Наташи) → Маша (из Вити) → Света (из Наташи) → Аня (из Светы).'
+];
+
+const gridEl = document.getElementById('grid');
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+let state = {};
+let hintsShown = 0;
+
+function render() {
+    let html = '<tr><th class="name"></th>' + ITEMS.map(it => `<th>${it}</th>`).join('') + '</tr>';
+    PEOPLE.forEach(p => {
+        html += `<tr data-person="${p}"><th class="name">${p}</th>`;
+        ITEMS.forEach(it => {
+            const v = state[p][it];
+            const cls = v === '+' ? 'plus' : v === '-' ? 'minus' : '';
+            html += `<td class="cell ${cls}" data-person="${p}" data-item="${it}">${v === '-' ? '–' : v}</td>`;
+        });
+        html += '</tr>';
+    });
+    gridEl.innerHTML = html;
+}
+
+function clearMarks() {
+    gridEl.querySelectorAll('tr').forEach(tr => tr.classList.remove('row-ok', 'row-bad'));
+}
+
+function reset() {
+    state = {};
+    PEOPLE.forEach(p => {
+        state[p] = {};
+        ITEMS.forEach(it => state[p][it] = '');
+    });
+    hintsShown = 0;
+    hintsEl.innerHTML = '';
+    statusEl.className = 'status';
+    statusEl.textContent = 'Начни с того, кто упоминается в условиях чаще всех.';
+    render();
+}
+
+gridEl.addEventListener('click', e => {
+    const td = e.target.closest('td.cell');
+    if (!td) return;
+    const { person, item } = td.dataset;
+    const order = ['', '+', '-'];
+    state[person][item] = order[(order.indexOf(state[person][item]) + 1) % order.length];
+    render();
+});
+
+function check() {
+    clearMarks();
+    let empty = 0, wrongRows = 0;
+    PEOPLE.forEach(p => {
+        let ok = true;
+        ITEMS.forEach(it => {
+            const v = state[p][it];
+            if (v === '') empty++;
+            const expected = ANSWER[p].includes(it) ? '+' : '-';
+            if (v !== expected) ok = false;
+        });
+        const tr = gridEl.querySelector(`tr[data-person="${p}"]`);
+        const filled = ITEMS.every(it => state[p][it] !== '');
+        if (filled) tr.classList.add(ok ? 'row-ok' : 'row-bad');
+        if (!ok) wrongRows++;
+    });
+
+    if (wrongRows === 0) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! Таблица заполнена правильно — все пять условий выполняются.';
+    } else if (empty > 0) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Заполнены не все клетки (пустых: ${empty}). Строки, заполненные целиком, подсвечены: зелёные — верно, красные — есть ошибка.`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Есть ошибки в строках: ${wrongRows}. Они подсвечены красным.`;
+    }
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.innerHTML = `💡 <b>Подсказка ${hintsShown + 1}.</b> ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+}
+
+function showAnswer() {
+    PEOPLE.forEach(p => ITEMS.forEach(it => state[p][it] = ANSWER[p].includes(it) ? '+' : '-'));
+    render();
+    check();
+    statusEl.textContent = 'Это правильный ответ. Проверь, что каждое из пяти условий выполняется!';
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

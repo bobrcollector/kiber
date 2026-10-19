@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Дубайский отдых</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .statement { width: 100%; }
+    .venn-panel { flex: 1 1 400px; display: flex; flex-direction: column; align-items: center; }
+    .side-panel { flex: 1 1 400px; display: flex; flex-direction: column; gap: 12px; }
+
+    svg.venn {
+        width: 400px;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .circle {
+        fill-opacity: 0.18;
+        stroke-width: 2.5;
+    }
+
+    .c-walk { fill: #27ae60; stroke: #27ae60; }
+    .c-movie { fill: #2980b9; stroke: #2980b9; }
+    .c-chat { fill: #e67e22; stroke: #e67e22; }
+
+    .set-label {
+        font-size: 16px;
+        font-weight: bold;
+        text-anchor: middle;
+    }
+
+    .region {
+        font-size: 22px;
+        font-weight: bold;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        fill: #2c3e50;
+        cursor: pointer;
+    }
+
+    .region.empty { fill: #b0b0b0; }
+    .region.focused { fill: #8e44ad; }
+
+    .regions-form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 6px 10px;
+        align-items: center;
+        font-size: 14px;
+    }
+
+    .regions-form input {
+        width: 60px;
+        padding: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 6px;
+        outline: none;
+    }
+
+    .regions-form input:focus { border-color: #8e44ad; }
+
+    .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 2px;
+    }
+
+    .checks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .checks li {
+        padding: 4px 8px;
+        border-radius: 6px;
+        margin-bottom: 3px;
+        background: #f8f9fa;
+    }
+
+    .checks li.ok { background: #eafaf1; color: #27ae60; }
+    .checks li.bad { background: #fdecea; color: #c0392b; }
+
+    .answer-box {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .answer-box input {
+        width: 80px;
+        padding: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution {
+        display: none;
+        background: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .solution.open { display: block; }
+    .solution ol { margin: 6px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🌴 Задача: Дубайский отдых</h1>
+
+<div class="container">
+    <div class="panel statement">
+        <h2>Условие</h2>
+        Группа учеников кибер-школы отправилась в тур в Дубай. В один из вечеров они разделились.
+        <b>Пятнадцать</b> человек пошли гулять по городу. Смотреть кино пошли <b>семнадцать</b> человек.
+        Гуляли по городу, смотрели кино и вечером общались в чате группы — <b>пятеро</b>.
+        Гуляли по городу, общались в чате группы, но не смотрели кино — <b>шестеро</b>.
+        Сколько учеников было в группе, если известно, что в чате вечером собралось <b>одиннадцать</b> человек,
+        а среди тех, кто и гулял по городу, и смотрел кино, <b>нет тех, кто не вышел в чат</b>?
+    </div>
+
+    <div class="panel venn-panel">
+        <h2>Круги Эйлера</h2>
+        <svg class="venn" viewBox="0 0 400 370">
+            <circle class="circle c-walk" cx="150" cy="155" r="95" />
+            <circle class="circle c-movie" cx="250" cy="155" r="95" />
+            <circle class="circle c-chat" cx="200" cy="240" r="95" />
+
+            <text class="set-label" x="80" y="45" fill="#27ae60">🚶 Гуляли</text>
+            <text class="set-label" x="320" y="45" fill="#2980b9">🎬 Кино</text>
+            <text class="set-label" x="200" y="360" fill="#e67e22">💬 Чат</text>
+
+            <text class="region" data-region="w" x="105" y="125"></text>
+            <text class="region" data-region="m" x="295" y="125"></text>
+            <text class="region" data-region="c" x="200" y="295"></text>
+            <text class="region" data-region="wm" x="200" y="108"></text>
+            <text class="region" data-region="wc" x="146" y="220"></text>
+            <text class="region" data-region="mc" x="254" y="220"></text>
+            <text class="region" data-region="wmc" x="200" y="183"></text>
+        </svg>
+        <p style="font-size:13px; color:#777; text-align:center; margin:4px 0 0;">Нажми на область круга, чтобы вписать в неё число.</p>
+    </div>
+
+    <div class="panel side-panel">
+        <h2>Сколько человек в каждой области?</h2>
+        <div class="regions-form" id="regions-form"></div>
+
+        <h2 style="margin-top:6px;">Условия</h2>
+        <ul class="checks" id="checks"></ul>
+
+        <div class="answer-box">
+            Всего в группе:
+            <input type="number" id="answer-input" inputmode="numeric">
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="answer-status">Заполни области так, чтобы все условия выполнились, и сложи их.</div>
+
+        <div class="buttons">
+            <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+            <button class="btn-reset" id="btn-reset">Очистить</button>
+        </div>
+
+        <div class="solution" id="solution">
+            <ol>
+                <li>Гуляли + кино + чат — <b>5</b> человек (центр).</li>
+                <li>Гуляли + чат, но без кино — <b>6</b> человек.</li>
+                <li>Среди тех, кто и гулял, и смотрел кино, нет тех, кто не вышел в чат: гуляли + кино без чата — <b>0</b>.</li>
+                <li>В чате 11 человек, а 5 + 6 = 11 уже есть. Значит, все остальные области чата пустые — <b>0</b>.
+                    Получается, все, кто был в чате, гуляли по городу.</li>
+                <li>Только гуляли: 15 − 5 − 6 − 0 = <b>4</b>. Только кино: 17 − 5 − 0 − 0 = <b>12</b>.</li>
+                <li>Всего: 4 + 12 + 5 + 6 = <b>27</b>.</li>
+            </ol>
+            Короче: гуляли и смотрели кино ровно 5 человек (все они были в чате), поэтому
+            <b>15 + 17 − 5 = 27</b> — тех, кто был в обеих компаниях, мы посчитали дважды и вычитаем один раз.
+        </div>
+    </div>
+</div>
+
+<script>
+// Области кругов Эйлера: w — гуляли, m — кино, c — чат
+const REGIONS = [
+    { id: 'w',   name: 'Только гуляли',               dots: ['#27ae60'] },
+    { id: 'm',   name: 'Только кино',                 dots: ['#2980b9'] },
+    { id: 'c',   name: 'Только чат',                  dots: ['#e67e22'] },
+    { id: 'wm',  name: 'Гуляли + кино, без чата',     dots: ['#27ae60', '#2980b9'] },
+    { id: 'wc',  name: 'Гуляли + чат, без кино',      dots: ['#27ae60', '#e67e22'] },
+    { id: 'mc',  name: 'Кино + чат, не гуляли',       dots: ['#2980b9', '#e67e22'] },
+    { id: 'wmc', name: 'Гуляли + кино + чат',         dots: ['#27ae60', '#2980b9', '#e67e22'] }
+];
+
+const SOLUTION = { w: 4, m: 12, c: 0, wm: 0, wc: 6, mc: 0, wmc: 5 };
+
+const CHECKS = [
+    { text: 'Гуляли по городу — 15', fn: v => v.w + v.wm + v.wc + v.wmc === 15 },
+    { text: 'Смотрели кино — 17', fn: v => v.m + v.wm + v.mc + v.wmc === 17 },
+    { text: 'Гуляли + кино + чат — 5', fn: v => v.wmc === 5 },
+    { text: 'Гуляли + чат, без кино — 6', fn: v => v.wc === 6 },
+    { text: 'В чате — 11', fn: v => v.c + v.wc + v.mc + v.wmc === 11 },
+    { text: 'Гуляли + кино, но не в чате — никого', fn: v => v.wm === 0 }
+];
+
+const TOTAL = Object.values(SOLUTION).reduce((a, b) => a + b, 0);
+
+const form = document.getElementById('regions-form');
+const checksEl = document.getElementById('checks');
+const answerInput = document.getElementById('answer-input');
+const answerStatus = document.getElementById('answer-status');
+
+form.innerHTML = REGIONS.map(r =>
+    `<label for="r-${r.id}">${r.dots.map(c => `<span class="dot" style="background:${c}"></span>`).join('')} ${r.name}</label>` +
+    `<input type="number" min="0" id="r-${r.id}" data-region="${r.id}">`
+).join('');
+
+function values() {
+    const v = {};
+    let filled = true;
+    REGIONS.forEach(r => {
+        const s = document.getElementById('r-' + r.id).value.trim();
+        if (s === '') filled = false;
+        v[r.id] = s === '' ? 0 : Number(s);
+    });
+    return { v, filled };
+}
+
+function update() {
+    const { v, filled } = values();
+    document.querySelectorAll('text.region').forEach(t => {
+        const s = document.getElementById('r-' + t.dataset.region).value.trim();
+        t.textContent = s === '' ? '?' : s;
+        t.classList.toggle('empty', s === '');
+    });
+    checksEl.innerHTML = CHECKS.map(c => {
+        const cls = !filled ? '' : c.fn(v) ? 'ok' : 'bad';
+        const mark = !filled ? '◻️' : c.fn(v) ? '✅' : '❌';
+        return `<li class="${cls}">${mark} ${c.text}</li>`;
+    }).join('');
+}
+
+form.addEventListener('input', update);
+
+form.addEventListener('focusin', e => {
+    const id = e.target.dataset.region;
+    document.querySelectorAll('text.region').forEach(t => t.classList.toggle('focused', t.dataset.region === id));
+});
+
+form.addEventListener('focusout', () => {
+    document.querySelectorAll('text.region').forEach(t => t.classList.remove('focused'));
+});
+
+document.querySelectorAll('text.region').forEach(t => {
+    t.addEventListener('click', () => document.getElementById('r-' + t.dataset.region).focus());
+});
+
+function checkAnswer() {
+    const s = answerInput.value.trim();
+    if (s === '') {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число.';
+    } else if (Number(s) === TOTAL) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = `🎉 Верно! В группе было ${TOTAL} человек.`;
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Неверно. Заполни все области кругов так, чтобы все условия стали зелёными, и сложи числа.';
+    }
+}
+
+function reset() {
+    REGIONS.forEach(r => document.getElementById('r-' + r.id).value = '');
+    answerInput.value = '';
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Заполни области так, чтобы все условия выполнились, и сложи их.';
+    document.getElementById('solution').classList.remove('open');
+    document.getElementById('btn-solution').textContent = '💡 Показать решение';
+    update();
+}
+
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+    if (open) {
+        REGIONS.forEach(r => document.getElementById('r-' + r.id).value = SOLUTION[r.id]);
+        update();
+    }
+});
+
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+
+reset();
+</script>
+</body>
+</html>

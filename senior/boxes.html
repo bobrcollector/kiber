@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Ящики</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .statement { width: 100%; font-size: 15px; }
+    .statement p { margin: 6px 0; }
+
+    .warehouse { flex: 1 1 460px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .log-panel { flex: 1 1 300px; display: flex; flex-direction: column; gap: 12px; }
+
+    .counter {
+        font-size: 20px;
+        font-weight: bold;
+        color: #8e44ad;
+        background: #f5eef8;
+        padding: 8px 20px;
+        border-radius: 20px;
+    }
+
+    .counter.over { color: #c0392b; background: #fdecea; }
+
+    .stacks {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 10px;
+        border-bottom: 4px solid #7f8c8d;
+    }
+
+    .stack-col {
+        width: 72px;
+        min-height: 220px;
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        cursor: pointer;
+        border-radius: 10px 10px 0 0;
+        transition: background 0.2s;
+    }
+
+    .stack-col:hover { background: #f5eef8; }
+    .stack-col.selected { background: #e8daef; }
+    .stack-col.target:hover { background: #d5f5e3; }
+
+    .boxes {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 3px;
+    }
+
+    .box {
+        width: 60px;
+        height: 48px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        box-shadow: inset -6px -6px 0 rgba(0,0,0,0.15);
+        transition: transform 0.2s;
+    }
+
+    .box.t-А { background: #e74c3c; }
+    .box.t-Б { background: #3498db; }
+    .box.t-В { background: #27ae60; }
+    .box.t-Г { background: #f39c12; }
+
+    .stack-col.selected .box:last-child {
+        transform: translateY(-14px);
+        outline: 3px solid #8e44ad;
+    }
+
+    .stack-num {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: #2c3e50;
+    }
+
+    .stack-num span { width: 72px; text-align: center; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+    button {
+        padding: 10px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-undo { background-color: #8e44ad; }
+    .btn-undo:hover { background-color: #6c3483; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .minutes {
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        max-height: 330px;
+        overflow-y: auto;
+    }
+
+    .minute {
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin-bottom: 4px;
+        background: #f8f9fa;
+        border-left: 4px solid #bdc3c7;
+    }
+
+    .minute.current { border-left-color: #8e44ad; background: #f5eef8; }
+    .minute b { font-family: 'Segoe UI', sans-serif; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>📦 Задача: Ящики</h1>
+
+<div class="container">
+    <div class="panel statement">
+        <h2>Условие</h2>
+        <p>На складе имеется 8 ящиков видов А, Б, В, Г, по два ящика каждого вида. Ящики распределены на 4 стопки, пронумерованных числами от 1 до 4.
+        Нужно переставить ящики так, чтобы <b>в каждой стопке были ящики одного вида</b> (порядок неважен): например, все ящики вида А могут оказаться в стопке 2, все ящики вида Б — в стопке 4 и т.д.</p>
+        <p>При помощи погрузчика можно взять <b>верхний</b> ящик из одной стопки и поставить его поверх другой стопки. Одно перемещение выполняется за одну минуту.
+        Но у вас есть <b>два погрузчика</b>, и если они не мешают друг другу, то могут выполнять два перемещения одновременно.
+        У одновременно выполняемых перемещений все номера стопок (как начальных, так и конечных) должны быть различны.
+        Например, можно одновременно выполнить перемещения 1→3 и 4→2, но нельзя одновременно выполнить 1→3 и 3→2.</p>
+        <p><b>Переставьте ящики нужным образом за 6 минут.</b></p>
+    </div>
+
+    <div class="panel warehouse">
+        <div class="counter" id="counter">Минута: 0 / 6</div>
+        <div>
+            <div class="stacks" id="stacks"></div>
+            <div class="stack-num"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+        </div>
+        <div class="status" id="status">Нажми на стопку, чтобы взять верхний ящик, а потом — на стопку, куда его поставить.</div>
+        <div class="buttons">
+            <button class="btn-next" id="btn-minute">⏭ Следующая минута</button>
+            <button class="btn-undo" id="btn-undo">↩ Отменить</button>
+            <button class="btn-reset" id="btn-reset">🔄 Сначала</button>
+            <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        </div>
+    </div>
+
+    <div class="panel log-panel">
+        <h2>План перемещений</h2>
+        <p style="font-size:13px; color:#666; margin:0;">Второе перемещение попадает в ту же минуту, если все четыре номера стопок разные.
+        Иначе начинается новая минута. Кнопка «Следующая минута» закрывает текущую минуту вручную.</p>
+        <div class="minutes" id="minutes"></div>
+    </div>
+</div>
+
+<script>
+const START = [['В', 'А'], ['В', 'Б'], ['Г', 'А'], ['Г', 'Б']];   // снизу вверх
+const LIMIT = 6;
+const SOLUTION = [
+    [[1, 4], [2, 3]],
+    [[1, 2], [3, 4]],
+    [[3, 1], [4, 2]],
+    [[4, 1], [3, 2]],
+    [[2, 1], [4, 3]],
+    [[1, 4], [2, 3]]
+];
+
+let stacks = [];
+let minutes = [];    // [{ moves: [[from, to], ...], closed: bool }]
+let selected = null;
+let playing = false;
+
+const stacksEl = document.getElementById('stacks');
+const statusEl = document.getElementById('status');
+
+function setStatus(text, cls = '') {
+    statusEl.className = 'status ' + cls;
+    statusEl.textContent = text;
+}
+
+function isSolved() {
+    return stacks.every(s => s.length === 2 && s[0] === s[1]);
+}
+
+function render() {
+    stacksEl.innerHTML = stacks.map((s, i) => {
+        let cls = 'stack-col';
+        if (selected === i + 1) cls += ' selected';
+        else if (selected !== null) cls += ' target';
+        const boxes = s.map(t => `<div class="box t-${t}">${t}</div>`).join('');
+        return `<div class="${cls}" data-stack="${i + 1}"><div class="boxes">${boxes}</div></div>`;
+    }).join('');
+
+    const counter = document.getElementById('counter');
+    counter.textContent = `Минута: ${minutes.length} / ${LIMIT}`;
+    counter.classList.toggle('over', minutes.length > LIMIT);
+
+    const minEl = document.getElementById('minutes');
+    minEl.innerHTML = minutes.map((m, k) => {
+        const isCurrent = k === minutes.length - 1 && !m.closed && m.moves.length < 2;
+        const moves = m.moves.map(([f, t]) => `${f} → ${t}`).join(', ');
+        return `<div class="minute ${isCurrent ? 'current' : ''}"><b>${k + 1} минута:</b> ${moves}</div>`;
+    }).join('') || '<div style="color:#999; font-size:14px;">Пока пусто</div>';
+    minEl.scrollTop = minEl.scrollHeight;
+
+    const totalMoves = minutes.reduce((a, m) => a + m.moves.length, 0);
+    document.getElementById('btn-undo').disabled = totalMoves === 0 || playing;
+    const last = minutes[minutes.length - 1];
+    document.getElementById('btn-minute').disabled = !last || last.closed || last.moves.length >= 2 || playing;
+}
+
+// Можно ли добавить ход в текущую минуту
+function fitsCurrentMinute(from, to) {
+    const last = minutes[minutes.length - 1];
+    if (!last || last.closed || last.moves.length >= 2) return false;
+    const used = new Set(last.moves.flat());
+    return !used.has(from) && !used.has(to);
+}
+
+function applyMove(from, to) {
+    stacks[to - 1].push(stacks[from - 1].pop());
+}
+
+function addMove(from, to) {
+    if (fitsCurrentMinute(from, to)) {
+        minutes[minutes.length - 1].moves.push([from, to]);
+    } else {
+        minutes.push({ moves: [[from, to]], closed: false });
+    }
+    applyMove(from, to);
+}
+
+function afterMove() {
+    if (isSolved()) {
+        if (minutes.length <= LIMIT) {
+            setStatus(`🎉 Готово! Все ящики разложены по видам за ${minutes.length} мин.`, 'success');
+        } else {
+            setStatus(`Ящики разложены, но за ${minutes.length} мин. А можно уложиться в ${LIMIT}! Чаще используй оба погрузчика.`, 'error');
+        }
+    } else if (minutes.length > LIMIT) {
+        setStatus(`Уже ${minutes.length} минут — больше лимита. Отмени несколько ходов или начни сначала.`, 'error');
+    } else {
+        setStatus('Выбери следующую стопку.');
+    }
+}
+
+stacksEl.addEventListener('click', e => {
+    if (playing) return;
+    const col = e.target.closest('.stack-col');
+    if (!col) return;
+    const n = Number(col.dataset.stack);
+
+    if (selected === null) {
+        if (stacks[n - 1].length === 0) {
+            setStatus('Стопка пуста — брать нечего.', 'error');
+            return;
+        }
+        selected = n;
+        setStatus(`Взяли ящик ${stacks[n - 1].at(-1)} со стопки ${n}. Куда поставить?`);
+    } else if (selected === n) {
+        selected = null;
+        setStatus('Нажми на стопку, чтобы взять верхний ящик.');
+    } else {
+        addMove(selected, n);
+        selected = null;
+        render();
+        afterMove();
+        return;
+    }
+    render();
+});
+
+function closeMinute() {
+    const last = minutes[minutes.length - 1];
+    if (!last || last.closed) return;
+    last.closed = true;
+    render();
+    setStatus('Минута закончилась. Следующее перемещение начнёт новую минуту.');
+}
+
+function undo() {
+    if (playing || minutes.length === 0) return;
+    const last = minutes[minutes.length - 1];
+    const [from, to] = last.moves.pop();
+    stacks[from - 1].push(stacks[to - 1].pop());
+    if (last.moves.length === 0) minutes.pop();
+    selected = null;
+    render();
+    setStatus('Отменено.');
+}
+
+function reset() {
+    stacks = START.map(s => [...s]);
+    minutes = [];
+    selected = null;
+    render();
+    setStatus('Нажми на стопку, чтобы взять верхний ящик, а потом — на стопку, куда его поставить.');
+}
+
+function playSolution() {
+    if (playing) return;
+    reset();
+    playing = true;
+    render();
+    setStatus('Смотри решение: каждую минуту работают оба погрузчика.');
+    SOLUTION.forEach((pair, k) => {
+        setTimeout(() => {
+            if (minutes.length) minutes[minutes.length - 1].closed = true;
+            minutes.push({ moves: [], closed: false });
+            pair.forEach(([f, t]) => {
+                minutes[minutes.length - 1].moves.push([f, t]);
+                applyMove(f, t);
+            });
+            if (k === SOLUTION.length - 1) {
+                playing = false;
+                minutes[minutes.length - 1].closed = true;
+            }
+            render();
+            if (!playing) afterMove();
+        }, 1300 * (k + 1));
+    });
+}
+
+document.getElementById('btn-minute').addEventListener('click', closeMinute);
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-reset').addEventListener('click', () => { if (!playing) reset(); });
+document.getElementById('btn-solution').addEventListener('click', playSolution);
+
+reset();
+</script>
+</body>
+</html>

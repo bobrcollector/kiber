@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Районы, кварталы</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 1000px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .statement { width: 100%; font-size: 15px; }
+    .statement p { margin: 6px 0; }
+
+    .city-panel { flex: 1 1 430px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .formula-panel { flex: 1 1 400px; display: flex; flex-direction: column; gap: 12px; }
+
+    .sliders {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .sliders label { display: flex; align-items: center; gap: 8px; }
+    .sliders input { accent-color: #8e44ad; width: 120px; }
+    .sliders .val { color: #8e44ad; font-size: 18px; min-width: 18px; }
+
+    svg.city {
+        width: 400px;
+        max-width: 100%;
+        height: auto;
+        background: #eafaf1;
+        border-radius: 10px;
+    }
+
+    .road {
+        stroke: #2c3e50;
+        stroke-width: 6;
+        stroke-linecap: round;
+        transition: stroke 0.3s;
+    }
+
+    svg.show-h .road.h { stroke: #e67e22; }
+    svg.show-v .road.v { stroke: #2980b9; }
+
+    .block-fill { fill: #d5f5e3; }
+    .km-label { font-size: 12px; fill: #7f8c8d; text-anchor: middle; }
+
+    .total {
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        text-align: center;
+    }
+
+    .total b { color: #8e44ad; font-size: 20px; }
+
+    .formula-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .formula-input:focus { border-color: #8e44ad; }
+
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-h { background-color: #e67e22; }
+    .btn-h:hover { background-color: #ca6f1e; }
+
+    .btn-v { background-color: #2980b9; }
+    .btn-v:hover { background-color: #216a94; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    table.tests {
+        border-collapse: collapse;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    table.tests th, table.tests td {
+        border: 1px solid #ddd;
+        padding: 5px 8px;
+        text-align: center;
+    }
+
+    table.tests th { background: #f8f9fa; }
+    table.tests td.ok { color: #27ae60; font-weight: bold; }
+    table.tests td.bad { color: #c0392b; font-weight: bold; }
+
+    .solution {
+        display: none;
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .solution.open { display: block; }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🏙️ Задача: Районы, кварталы</h1>
+
+<div class="container">
+    <div class="panel statement">
+        <h2>Условие</h2>
+        <p>План города представляет собой прямоугольник размером <b>n × m</b> километров, разбитый на кварталы — квадраты со стороной 1 километр.
+        Между кварталами, а также по границе города проложены дороги.</p>
+        <p>Определите суммарную длину всех дорог в городе в километрах. Единицу измерения указывать не нужно.</p>
+        <p>Ответом к этой задаче является некоторое выражение, которое может содержать целые числа, переменные <b>n</b> и <b>m</b>,
+        операции сложения (+), вычитания (−), умножения (*) и круглые скобки. Запись вида <b>2n</b> для обозначения произведения
+        числа 2 и переменной n неверная, нужно писать <b>2 * n</b>.</p>
+        <p>Пример правильного (по форме записи) выражения: <span class="math">n + (m - 1) * 2</span></p>
+    </div>
+
+    <div class="panel city-panel">
+        <h2>🔬 План города</h2>
+        <div class="sliders">
+            <label>n = <input type="range" id="in-n" min="1" max="8" value="2"><span class="val" id="val-n">2</span></label>
+            <label>m = <input type="range" id="in-m" min="1" max="8" value="3"><span class="val" id="val-m">3</span></label>
+        </div>
+        <svg class="city" id="city" viewBox="0 0 400 300"></svg>
+        <div class="buttons">
+            <button class="btn-h" id="btn-h">Горизонтальные дороги</button>
+            <button class="btn-v" id="btn-v">Вертикальные дороги</button>
+        </div>
+        <div class="total">Суммарная длина дорог: <b id="total">—</b> км</div>
+    </div>
+
+    <div class="panel formula-panel">
+        <h2>✍️ Твоя формула</h2>
+        <input class="formula-input" id="formula" placeholder="например: n + (m - 1) * 2" autocomplete="off" spellcheck="false">
+        <div class="buttons">
+            <button class="btn-check" id="btn-check">Проверить</button>
+            <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        </div>
+        <div class="status" id="status">Подсказка: подвигай ползунки и посмотри, как устроены дороги.</div>
+        <table class="tests" id="tests"></table>
+        <div class="solution" id="solution">
+            Посмотрим отдельно на горизонтальные и вертикальные дороги.<br>
+            Горизонтальных дорог <b>n + 1</b> (n рядов кварталов дают n + 1 линию), каждая длиной <b>m</b> км.<br>
+            Вертикальных дорог <b>m + 1</b>, каждая длиной <b>n</b> км.<br>
+            <b>Ответ:</b> <span class="math">(n + 1) * m + (m + 1) * n</span><br>
+            Правильным является любое выражение, эквивалентное данному, например <span class="math">2 * n * m + n + m</span>.
+        </div>
+    </div>
+</div>
+
+<script>
+// ---------- Чертёж города ----------
+const svg = document.getElementById('city');
+const inN = document.getElementById('in-n');
+const inM = document.getElementById('in-m');
+
+function roadsLength(n, m) {
+    return (n + 1) * m + (m + 1) * n;
+}
+
+function drawCity() {
+    const n = Number(inN.value), m = Number(inM.value);
+    document.getElementById('val-n').textContent = n;
+    document.getElementById('val-m').textContent = m;
+
+    const W = 400, H = 300, PAD = 30;
+    const s = Math.min((W - 2 * PAD) / m, (H - 2 * PAD) / n);
+    const x0 = (W - m * s) / 2, y0 = (H - n * s) / 2;
+
+    let html = `<rect class="block-fill" x="${x0}" y="${y0}" width="${m * s}" height="${n * s}" />`;
+    for (let r = 0; r <= n; r++) {
+        const y = y0 + r * s;
+        html += `<line class="road h" x1="${x0}" y1="${y}" x2="${x0 + m * s}" y2="${y}" />`;
+    }
+    for (let c = 0; c <= m; c++) {
+        const x = x0 + c * s;
+        html += `<line class="road v" x1="${x}" y1="${y0}" x2="${x}" y2="${y0 + n * s}" />`;
+    }
+    html += `<text class="km-label" x="${x0 + s / 2}" y="${y0 - 10}">1 км</text>`;
+    html += `<text class="km-label" x="${x0 + m * s / 2}" y="${y0 + n * s + 22}">m = ${m} км</text>`;
+    html += `<text class="km-label" x="${x0 - 16}" y="${y0 + n * s / 2}" transform="rotate(-90 ${x0 - 16} ${y0 + n * s / 2})">n = ${n} км</text>`;
+    svg.innerHTML = html;
+    document.getElementById('total').textContent = roadsLength(n, m);
+}
+
+inN.addEventListener('input', drawCity);
+inM.addEventListener('input', drawCity);
+document.getElementById('btn-h').addEventListener('click', () => svg.classList.toggle('show-h'));
+document.getElementById('btn-v').addEventListener('click', () => svg.classList.toggle('show-v'));
+
+// ---------- Разбор формулы ----------
+function tokenize(src) {
+    const s = src.replace(/[−–]/g, '-').replace(/[∗×·]/g, '*').toLowerCase();
+    const tokens = [];
+    let i = 0;
+    while (i < s.length) {
+        const ch = s[i];
+        if (/\s/.test(ch)) { i++; continue; }
+        if (/\d/.test(ch)) {
+            let j = i;
+            while (j < s.length && /\d/.test(s[j])) j++;
+            tokens.push({ type: 'num', value: Number(s.slice(i, j)) });
+            i = j;
+        } else if (ch === 'n' || ch === 'm') {
+            tokens.push({ type: 'var', value: ch });
+            i++;
+        } else if ('+-*()'.includes(ch)) {
+            tokens.push({ type: ch });
+            i++;
+        } else {
+            throw new Error(`Недопустимый символ «${src[i]}». Можно использовать только числа, n, m, +, -, * и скобки.`);
+        }
+    }
+    return tokens;
+}
+
+// Возвращает функцию (n, m) => значение
+function parse(src) {
+    const tokens = tokenize(src);
+    if (tokens.length === 0) throw new Error('Впиши формулу.');
+    let pos = 0;
+    const peek = () => tokens[pos];
+    const startsOperand = t => t && (t.type === 'num' || t.type === 'var' || t.type === '(');
+
+    function expr() {
+        let left = term();
+        while (peek() && (peek().type === '+' || peek().type === '-')) {
+            const op = tokens[pos++].type;
+            const a = left, b = term();
+            left = op === '+' ? (env => a(env) + b(env)) : (env => a(env) - b(env));
+        }
+        return left;
+    }
+
+    function term() {
+        let left = factor();
+        while (true) {
+            if (peek() && peek().type === '*') {
+                pos++;
+                const a = left, b = factor();
+                left = env => a(env) * b(env);
+            } else if (startsOperand(peek())) {
+                throw new Error('Пропущен знак умножения. Запись вида 2n неверная — нужно писать 2 * n.');
+            } else {
+                return left;
+            }
+        }
+    }
+
+    function factor() {
+        const t = tokens[pos++];
+        if (!t) throw new Error('Формула обрывается — чего-то не хватает в конце.');
+        if (t.type === 'num') return () => t.value;
+        if (t.type === 'var') return env => env[t.value];
+        if (t.type === '-') { const f = factor(); return env => -f(env); }
+        if (t.type === '(') {
+            const e = expr();
+            if (!peek() || peek().type !== ')') throw new Error('Не хватает закрывающей скобки «)».');
+            pos++;
+            return e;
+        }
+        throw new Error(`Неожиданный символ «${t.type}».`);
+    }
+
+    const f = expr();
+    if (pos < tokens.length) throw new Error(`Лишний символ «${tokens[pos].type === 'num' || tokens[pos].type === 'var' ? tokens[pos].value : tokens[pos].type}».`);
+    return f;
+}
+
+const TEST_PAIRS = [[1, 1], [2, 3], [3, 2], [4, 7], [10, 1], [6, 9]];
+
+const statusEl = document.getElementById('status');
+const testsEl = document.getElementById('tests');
+
+function check() {
+    testsEl.innerHTML = '';
+    let f;
+    try {
+        f = parse(document.getElementById('formula').value);
+    } catch (err) {
+        statusEl.className = 'status error';
+        statusEl.textContent = err.message;
+        return;
+    }
+
+    let allOk = true;
+    let rows = '<tr><th>n</th><th>m</th><th>Твоя формула</th><th>Длина дорог</th></tr>';
+    TEST_PAIRS.forEach(([n, m]) => {
+        const mine = f({ n, m });
+        const real = roadsLength(n, m);
+        const ok = mine === real;
+        if (!ok) allOk = false;
+        rows += `<tr><td>${n}</td><td>${m}</td><td class="${ok ? 'ok' : 'bad'}">${mine}</td><td>${real}</td></tr>`;
+    });
+    testsEl.innerHTML = rows;
+
+    if (allOk) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! Формула даёт правильную длину дорог для любых n и m из проверки.';
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Пока неверно — посмотри, на каких n и m формула ошибается. Поставь эти значения на ползунках и посчитай дороги.';
+    }
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('formula').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+drawCity();
+</script>
+</body>
+</html>

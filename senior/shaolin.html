@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Шаолиньский Даня</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    table.examples {
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+    }
+
+    table.examples th, table.examples td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 16px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.examples th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input[type=number]:focus { border-color: #8e44ad; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    /* Лента времени */
+    .timeline {
+        display: flex;
+        width: 100%;
+        min-height: 54px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 10px 0 4px;
+        border: 2px solid #ddd;
+    }
+
+    .seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        min-width: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 1px solid rgba(255,255,255,0.6);
+    }
+
+
+    .legend-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .legend-row span::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -1px;
+        background: var(--c);
+    }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .test-case {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: inline-block;
+        white-space: pre;
+        margin-bottom: 10px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .code-box {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-top: 12px;
+    }
+
+    .code-box pre { margin: 0; }
+
+    .code-keyword { color: #ff9ff3; }
+    .code-function { color: #feca57; }
+    .code-number { color: #ff9f43; }
+    .code-comment { color: #7f8c8d; font-style: italic; }
+
+    .seg.work { background: #27ae60; }
+    .seg.rest { background: #e67e22; }
+
+    .test-answers input[type=number] { width: 80px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🥋 Задача: Шаолиньский Даня</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p class="limit">Ограничение по времени: 1 секунда</p>
+        <p>Даня готовится к спортивным соревнованиям. Он тренируется по системе шаолиньских монахов.
+        Тренировка должна состоять из <b>N</b> подходов, каждый из которых длится <b>M</b> минут и <b>S</b> секунд,
+        между каждой парой подряд идущих подходов должен быть перерыв длительностью <b>P</b> секунд.
+        Помогите Дане определить, сколько всего времени займёт тренировка.</p>
+
+        <h3>Формат входных данных</h3>
+        <p>Первая строка содержит целое число N (1 ≤ N ≤ 100) — количество подходов.<br>
+        Вторая строка содержит целое число M (0 ≤ M ≤ 59) — количество минут в одном подходе.<br>
+        Третья строка содержит целое число S (0 ≤ S ≤ 59) — количество секунд в одном подходе.<br>
+        Четвёртая строка содержит целое число P (0 ≤ P ≤ 120) — длительность паузы между подходами, выраженная в секундах.<br>
+        Гарантируется, что один подход занимает ненулевое время.</p>
+
+        <h3>Формат выходных данных</h3>
+        <p>Выведите два целых числа — продолжительность тренировки в минутах и секундах.
+        Первое число должно быть равно количеству полных минут в тренировке.
+        Второе число — количеству секунд в тренировке, находящемуся в диапазоне от 0 до 59 включительно.</p>
+
+        <h3>Пример</h3>
+        <table class="examples">
+            <tr><th>стандартный ввод</th><th>стандартный вывод</th></tr>
+            <tr><td>4<br>3<br>24<br>70</td><td>17<br>6</td></tr>
+        </table>
+        <p style="font-size:14px; color:#555;">Дане нужно выполнить 4 подхода, каждый длительностью 3 минуты 24 секунды.
+        Между подходами у него будет 3 перерыва по 70 секунд. Следовательно, вся тренировка займёт 17 минут и 6 секунд.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: посмотри на тренировку</h2>
+        <div class="inputs">
+            <label>N = <input type="number" id="in-n" value="4" min="1" max="100"></label>
+            <label>M = <input type="number" id="in-m" value="3" min="0" max="59"></label>
+            <label>S = <input type="number" id="in-s" value="24" min="0" max="59"></label>
+            <label>P = <input type="number" id="in-p" value="70" min="0" max="120"></label>
+            <button class="btn-check" id="btn-run">▶ Запустить</button>
+        </div>
+        <div class="timeline" id="timeline"></div>
+        <div class="legend-row">
+            <span style="--c:#27ae60">подход</span>
+            <span style="--c:#e67e22">перерыв</span>
+        </div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Проверь себя</h2>
+        <p>Что выведет правильная программа на такой ввод?</p>
+        <div class="test-case" id="test-case"></div>
+        <div class="inputs test-answers">
+            <label>Минуты: <input type="number" id="test-min"></label>
+            <label>Секунды: <input type="number" id="test-sec"></label>
+            <button class="btn-check" id="btn-test-check">Проверить</button>
+            <button class="btn-next" id="btn-test-new">🎲 Новый тест</button>
+        </div>
+        <div class="status" id="test-status">Посчитай в уме или на листочке.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <h3>Идея</h3>
+            <p>Чтобы определить общую длительность всех подходов в секундах, нужно выразить в секундах длительность одного подхода
+            (умножить количество минут M на 60 и прибавить количество секунд S) и умножить на количество подходов N.</p>
+            <p>Между подходами будет <b>N − 1</b> перерыв (перерывы только <i>между</i> подходами!), каждый длится P секунд,
+            поэтому общая длительность перерывов равна <span class="math">(N − 1) · P</span>.</p>
+            <p>Общая длительность тренировки в секундах: <span class="math">N · (M · 60 + S) + (N − 1) · P</span>.
+            Чтобы выразить её в минутах и секундах, делим на 60: число минут — целая часть от деления (<span class="math">//</span>),
+            число секунд — остаток (<span class="math">%</span>).</p>
+            <div class="code-box"><pre><code><span class="code-comment"># Считываем данные</span>
+n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+m = <span class="code-function">int</span>(<span class="code-function">input</span>())
+s = <span class="code-function">int</span>(<span class="code-function">input</span>())
+p = <span class="code-function">int</span>(<span class="code-function">input</span>())
+
+<span class="code-comment"># Всё переводим в секунды</span>
+full_time = n * (m * <span class="code-number">60</span> + s) + (n - <span class="code-number">1</span>) * p
+
+<span class="code-function">print</span>(full_time // <span class="code-number">60</span>)  <span class="code-comment"># полные минуты</span>
+<span class="code-function">print</span>(full_time % <span class="code-number">60</span>)   <span class="code-comment"># оставшиеся секунды</span></code></pre></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function solve(n, m, s, p) {
+    const total = n * (m * 60 + s) + (n - 1) * p;
+    return { total, min: Math.floor(total / 60), sec: total % 60 };
+}
+
+function mmss(sec) {
+    return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+}
+
+function readInt(id, lo, hi) {
+    const s = document.getElementById(id).value.trim();
+    if (!/^\d+$/.test(s)) return null;
+    const v = Number(s);
+    return v >= lo && v <= hi ? v : null;
+}
+
+function addSeg(timeline, cls, duration, text, title) {
+    const div = document.createElement('div');
+    div.className = 'seg ' + cls;
+    div.style.flexGrow = duration;
+    div.title = title;
+    div.textContent = text;
+    timeline.appendChild(div);
+}
+
+function run() {
+    const n = readInt('in-n', 1, 100), m = readInt('in-m', 0, 59);
+    const s = readInt('in-s', 0, 59), p = readInt('in-p', 0, 120);
+    const timeline = document.getElementById('timeline');
+    const exp = document.getElementById('explanation');
+    timeline.innerHTML = '';
+    if (n === null || m === null || s === null || p === null) {
+        exp.innerHTML = 'Проверь ограничения: 1 ≤ N ≤ 100, 0 ≤ M ≤ 59, 0 ≤ S ≤ 59, 0 ≤ P ≤ 120.';
+        return;
+    }
+    if (m === 0 && s === 0) {
+        exp.innerHTML = 'Подход не может длиться 0 секунд — так сказано в условии.';
+        return;
+    }
+
+    const one = m * 60 + s;
+    const { total, min, sec } = solve(n, m, s, p);
+
+    for (let i = 1; i <= n; i++) {
+        addSeg(timeline, 'work', one, n <= 12 ? mmss(one) : '', `Подход ${i}: ${one} с`);
+        if (i < n && p > 0) addSeg(timeline, 'rest', p, n <= 12 ? `${p}с` : '', `Перерыв: ${p} с`);
+    }
+
+    exp.innerHTML =
+        `Один подход: <span class="math">${m} · 60 + ${s} = ${one}</span> с.<br>` +
+        `Все подходы: <span class="math">${n} · ${one} = ${n * one}</span> с.<br>` +
+        `Перерывов между подходами: <b>${n - 1}</b>, вместе <span class="math">${n - 1} · ${p} = ${(n - 1) * p}</span> с.<br>` +
+        `Всего: <span class="math">${n * one} + ${(n - 1) * p} = ${total}</span> с.<br>` +
+        `Минуты: <span class="math">${total} // 60 = ${min}</span>, секунды: <span class="math">${total} % 60 = ${sec}</span>.<br>` +
+        `Программа выведет: <b>${min}</b> и <b>${sec}</b>.`;
+}
+
+// Проверь себя
+let testData = null;
+
+function randInt(lo, hi) {
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function newTest() {
+    const n = randInt(1, 8);
+    const m = randInt(0, 10);
+    const s = m === 0 ? randInt(1, 59) : randInt(0, 59);
+    const p = randInt(0, 120);
+    testData = { n, m, s, p };
+    document.getElementById('test-case').textContent = `${n}\n${m}\n${s}\n${p}`;
+    document.getElementById('test-min').value = '';
+    document.getElementById('test-sec').value = '';
+    const st = document.getElementById('test-status');
+    st.className = 'status';
+    st.textContent = 'Посчитай в уме или на листочке.';
+}
+
+function checkTest() {
+    const st = document.getElementById('test-status');
+    const vm = document.getElementById('test-min').value.trim();
+    const vs = document.getElementById('test-sec').value.trim();
+    const { n, m, s, p } = testData;
+    const { min, sec } = solve(n, m, s, p);
+    if (vm === '' || vs === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши оба числа — минуты и секунды.';
+    } else if (Number(vm) === min && Number(vs) === sec) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Попробуй ещё один тест.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подсказка: переведи всё в секунды, а перерывов на один меньше, чем подходов.';
+    }
+}
+
+document.getElementById('btn-run').addEventListener('click', run);
+document.getElementById('btn-test-new').addEventListener('click', newTest);
+document.getElementById('btn-test-check').addEventListener('click', checkTest);
+document.getElementById('test-sec').addEventListener('keydown', e => { if (e.key === 'Enter') checkTest(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+run();
+newTest();
+</script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Рекламная пауза</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    table.examples {
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+    }
+
+    table.examples th, table.examples td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 16px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.examples th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input[type=number]:focus { border-color: #8e44ad; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    /* Лента времени */
+    .timeline {
+        display: flex;
+        width: 100%;
+        min-height: 54px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 10px 0 4px;
+        border: 2px solid #ddd;
+    }
+
+    .seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        min-width: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 1px solid rgba(255,255,255,0.6);
+    }
+
+    .seg.film { background: #27ae60; }
+    .seg.ad { background: #e67e22; }
+    .seg.ad.skipped { background: repeating-linear-gradient(45deg, #fdebd0, #fdebd0 5px, #f5cba7 5px, #f5cba7 10px); color: #a04000; }
+
+    .legend-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .legend-row span::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -1px;
+        background: var(--c);
+    }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .test-case {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: inline-block;
+        white-space: pre;
+        margin-bottom: 10px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .code-box {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-top: 12px;
+    }
+
+    .code-box pre { margin: 0; }
+
+    .code-keyword { color: #ff9ff3; }
+    .code-function { color: #feca57; }
+    .code-number { color: #ff9f43; }
+    .code-comment { color: #7f8c8d; font-style: italic; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>📺 Задача: Рекламная пауза</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p class="limit">Ограничение по времени: 0.5 секунд</p>
+        <p>Кибер Мишка включил в онлайн-кинотеатре новый фильм «Матрица». После каждых <b>a</b> минут показа фильма вставляется реклама длиной <b>b</b> минут. Но если в момент планируемого начала рекламного блока фильм завершается, то рекламу не показывают. Фильм без рекламы длится <b>n</b> минут. Сколько времени займёт показ всего фильма вместе с рекламой?</p>
+
+        <h3>Формат входных данных</h3>
+        <p>Первая строка содержит одно целое число a (1 ≤ a ≤ 10<sup>9</sup>) — длительность блока фильма между рекламами.<br>
+        Вторая строка содержит одно целое число b (1 ≤ b ≤ 10<sup>9</sup>) — длительность одного рекламного блока.<br>
+        Третья строка содержит одно целое число n (1 ≤ n ≤ 10<sup>9</sup>) — длительность оригинала фильма без рекламы.</p>
+
+        <h3>Формат выходных данных</h3>
+        <p>Выведите одно целое число — длительность фильма с рекламой.</p>
+        <div class="note">Ответ может превышать возможное значение 32-битной целочисленной переменной, поэтому в C++ нужен тип <b>long long</b>, в Java и C# — <b>long</b>. В Python целые числа могут быть любой длины.</div>
+
+        <h3>Примеры</h3>
+        <table class="examples">
+            <tr><th>стандартный ввод</th><th>стандартный вывод</th></tr>
+            <tr><td>20<br>5<br>90</td><td>110</td></tr>
+            <tr><td>30<br>4<br>120</td><td>132</td></tr>
+        </table>
+        <p style="font-size:14px; color:#555;">В первом примере будут показаны 4 рекламных блока — через 20, 40, 60, 80 минут показа фильма.<br>
+        Во втором примере будут показаны 3 рекламных блока — через 30, 60, 90 минут показа фильма.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: посмотри, как идёт показ</h2>
+        <div class="inputs">
+            <label>a = <input type="number" id="in-a" value="20" min="1"></label>
+            <label>b = <input type="number" id="in-b" value="5" min="1"></label>
+            <label>n = <input type="number" id="in-n" value="90" min="1"></label>
+            <button class="btn-check" id="btn-run">▶ Запустить</button>
+        </div>
+        <div class="timeline" id="timeline"></div>
+        <div class="legend-row">
+            <span style="--c:#27ae60">фильм</span>
+            <span style="--c:#e67e22">реклама</span>
+            <span style="--c:#f5cba7">реклама не показана (фильм уже кончился)</span>
+        </div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Проверь себя</h2>
+        <p>Что выведет правильная программа на такой ввод?</p>
+        <div class="test-case" id="test-case"></div>
+        <div class="inputs">
+            <label>Ответ: <input type="number" id="test-answer"></label>
+            <button class="btn-check" id="btn-test-check">Проверить</button>
+            <button class="btn-next" id="btn-test-new">🎲 Новый тест</button>
+        </div>
+        <div class="status" id="test-status">Посчитай в уме или на листочке.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <h3>Идея</h3>
+            <p>К длине фильма нужно добавить количество рекламных пауз, умноженное на продолжительность одной паузы <b>b</b>.
+            Рекламные паузы вставляются через каждые <b>a</b> минут, поэтому для подсчёта их числа нужно поделить <b>n</b> нацело на <b>a</b>.</p>
+            <p>Но если <b>n</b> делится на <b>a</b> (остаток от деления <span class="math">n % a</span> равен 0), то время последней рекламной паузы совпадёт с окончанием фильма — реклама показываться не будет, и число пауз нужно уменьшить на 1.</p>
+            <div class="code-box"><pre><code><span class="code-comment"># Считываем данные</span>
+a = <span class="code-function">int</span>(<span class="code-function">input</span>())
+b = <span class="code-function">int</span>(<span class="code-function">input</span>())
+n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+
+<span class="code-comment"># Сколько раз фильм «доходит» до рекламы</span>
+n_pauses = n // a
+<span class="code-comment"># Реклама в самом конце фильма не показывается</span>
+<span class="code-keyword">if</span> n % a == <span class="code-number">0</span>:
+    n_pauses -= <span class="code-number">1</span>
+
+<span class="code-function">print</span>(n + n_pauses * b)</code></pre></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Решение задачи (BigInt — ответ может быть больше 2^53)
+function solve(a, b, n) {
+    let pauses = n / a;
+    if (n % a === 0n) pauses -= 1n;
+    return n + pauses * b;
+}
+
+const MAX_VISUAL_PAUSES = 40n;
+
+function readBig(id) {
+    const s = document.getElementById(id).value.trim();
+    if (!/^\d+$/.test(s)) return null;
+    const v = BigInt(s);
+    return v >= 1n && v <= 1000000000n ? v : null;
+}
+
+function addSeg(timeline, cls, duration, text) {
+    const div = document.createElement('div');
+    div.className = 'seg ' + cls;
+    div.style.flexGrow = duration;
+    div.title = text;
+    div.textContent = text;
+    timeline.appendChild(div);
+}
+
+function run() {
+    const a = readBig('in-a'), b = readBig('in-b'), n = readBig('in-n');
+    const timeline = document.getElementById('timeline');
+    const exp = document.getElementById('explanation');
+    timeline.innerHTML = '';
+    if (a === null || b === null || n === null) {
+        exp.innerHTML = 'Все числа должны быть целыми от 1 до 10<sup>9</sup>.';
+        return;
+    }
+
+    const q = n / a, r = n % a;
+    const pauses = r === 0n ? q - 1n : q;
+    const total = solve(a, b, n);
+
+    if (pauses <= MAX_VISUAL_PAUSES) {
+        // Рисуем: блоки фильма по a минут, между ними реклама
+        for (let i = 1n; i <= q; i++) {
+            addSeg(timeline, 'film', Number(a), `${a}`);
+            if (i <= pauses) addSeg(timeline, 'ad', Number(b), `📺${b}`);
+        }
+        if (r !== 0n) addSeg(timeline, 'film', Number(r), `${r}`);
+        else addSeg(timeline, 'ad skipped', Number(b), '✖');
+    } else {
+        timeline.innerHTML = '<div class="seg film" style="flex-grow:1">Слишком много пауз, чтобы нарисовать — смотри расчёт ниже</div>';
+    }
+
+    let html = `Фильм длится <b>${n}</b> мин, реклама — после каждых <b>${a}</b> мин фильма.<br>` +
+               `Делим нацело: <span class="math">${n} // ${a} = ${q}</span>, остаток <span class="math">${n} % ${a} = ${r}</span>.<br>`;
+    if (r === 0n) {
+        html += `Остаток равен 0 — последняя реклама пришлась бы ровно на конец фильма, поэтому её не показывают: ` +
+                `<span class="math">${q} − 1 = ${pauses}</span> пауз.<br>`;
+    } else {
+        html += `Остаток не равен 0 — все <b>${pauses}</b> пауз будут показаны.<br>`;
+    }
+    html += `Ответ: <span class="math">${n} + ${pauses} * ${b} = ${total}</span> минут.`;
+    exp.innerHTML = html;
+}
+
+// Проверь себя
+let testData = null;
+
+function randInt(lo, hi) {
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function newTest() {
+    const a = randInt(5, 40);
+    const b = randInt(1, 10);
+    const k = randInt(1, 6);
+    const n = Math.random() < 0.4 ? a * k : a * k + randInt(1, a - 1);
+    testData = { a: BigInt(a), b: BigInt(b), n: BigInt(n) };
+    document.getElementById('test-case').textContent = `${a}\n${b}\n${n}`;
+    document.getElementById('test-answer').value = '';
+    const st = document.getElementById('test-status');
+    st.className = 'status';
+    st.textContent = 'Посчитай в уме или на листочке.';
+}
+
+function checkTest() {
+    const st = document.getElementById('test-status');
+    const v = document.getElementById('test-answer').value.trim();
+    const { a, b, n } = testData;
+    const expected = solve(a, b, n);
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (/^\d+$/.test(v) && BigInt(v) === expected) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Попробуй ещё один тест.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подсказка: не забудь проверить, делится ли n на a без остатка.';
+    }
+}
+
+document.getElementById('btn-run').addEventListener('click', run);
+document.getElementById('btn-test-new').addEventListener('click', newTest);
+document.getElementById('btn-test-check').addEventListener('click', checkTest);
+document.getElementById('test-answer').addEventListener('keydown', e => { if (e.key === 'Enter') checkTest(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+run();
+newTest();
+</script>
+</body>
+</html>
