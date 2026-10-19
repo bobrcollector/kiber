@@ -116,6 +116,7 @@
         padding: 6px 12px;
         font-weight: bold;
         font-size: 15px;
+        box-shadow: inset 0 0 0 1px rgba(44,62,80,0.08);
     }
 
     .modes {
@@ -150,6 +151,7 @@
         font-size: 12px;
         color: #777;
         animation: pop 0.3s ease;
+        filter: drop-shadow(0 4px 8px rgba(44,62,80,0.16));
     }
 
     .sock-card.pair svg { filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.9)); }
@@ -211,7 +213,7 @@
 </nav>
 
 <h1>🧦 Задача: Носочки</h1>
-<p class="subtitle">У Паши в комоде лежит 10 синих носков, 6 зелёных и 5 красных. Какое минимальное количество носков ему надо вытащить из комода не глядя, чтобы наверняка получить пару носков одного цвета?</p>
+<p class="subtitle">У Паши в комоде лежит 10 синих носков, 6 зелёных и 5 красных. Какое минимальное количество носков ему нужно вытащить, чтобы гарантированно получить пару одного цвета?</p>
 
 <div class="panel">
     <h2>1. Твой ответ</h2>
@@ -263,10 +265,17 @@ let stock = {};
 let hand = [];
 
 function sockSvg(fill) {
-    return `<svg width="40" height="56" viewBox="0 0 40 56">
-        <path d="M10 2 H28 V30 L36 40 Q40 50 30 53 L8 53 Q2 52 3 45 Q4 40 10 36 Z"
-              fill="${fill}" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"/>
-        <rect x="10" y="2" width="18" height="7" fill="white" opacity="0.5"/>
+    return `
+    <svg width="40" height="56" viewBox="0 0 54 68" aria-hidden="true">
+        <path d="M16 8h22c5.7 0 10.3 4.6 10.3 10.3v12.4l-5.3 4.3v15.6c0 7.6-5.8 13.4-13.4 13.4H22c-7.6 0-13.4-5.8-13.4-13.4V35l-5.3-4.3V18.3C3.3 12.6 7.9 8 13.6 8h2.4z"
+              fill="${fill}" stroke="#2c3e50" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M17 10h20v9H17z" fill="rgba(255,255,255,0.35)"/>
+        <path d="M17 20h20" stroke="rgba(255,255,255,0.72)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M20 30h14" stroke="rgba(255,255,255,0.68)" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M22 40h10" stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M15 50c5 6 15 9 24 6" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M16 8v6M38 8v6" stroke="#2c3e50" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 55c6 4 11 6 15 6 5 0 9-1 15-6" fill="none" stroke="rgba(44,62,80,0.3)" stroke-width="2.5" stroke-linecap="round"/>
     </svg>`;
 }
 
@@ -292,12 +301,10 @@ function pickColor() {
     const available = COLORS.filter(c => stock[c.id] > 0);
     const mode = document.querySelector('input[name="mode"]:checked').value;
     if (mode === 'unlucky') {
-        // Злой комод отдаёт цвет, которого ещё нет в руке
         const fresh = available.filter(c => !hand.includes(c.id));
         if (fresh.length) return fresh[0].id;
         return available[0].id;
     }
-    // Случайно: вероятность пропорциональна количеству носков
     const total = available.reduce((s, c) => s + stock[c.id], 0);
     let x = Math.random() * total;
     for (const c of available) {
@@ -356,7 +363,7 @@ function checkAnswer() {
 function showAnswer() {
     answerInput.value = ANSWER;
     answerStatus.className = 'status';
-    answerStatus.textContent = 'Ответ: 4 носка. Цветов всего три, поэтому в худшем случае первые три носка будут разными, а четвёртый обязательно совпадёт по цвету с одним из них.';
+    answerStatus.textContent = 'Ответ: 4 носка. Цветов всего три, поэтому в худшем случае первые три носка будут разными, а четвёртый обязательно составит пару.';
 }
 
 btnDraw.addEventListener('click', draw);
