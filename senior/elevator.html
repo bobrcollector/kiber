@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Очень удобный лифт!</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .seq {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        color: #8e44ad;
+        letter-spacing: 2px;
+    }
+
+    .row {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .tape {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+
+    .tape div {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid #bdc3c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        color: #7f8c8d;
+        background: white;
+    }
+
+    .tape div.done { border-color: #8e44ad; color: #8e44ad; background: #f5eef8; }
+    .tape div.now { background: #8e44ad; border-color: #8e44ad; color: white; }
+
+    .shaft {
+        border: 3px solid #2c3e50;
+        border-radius: 6px;
+        min-width: 250px;
+        overflow: hidden;
+    }
+
+    .floor {
+        display: grid;
+        grid-template-columns: 110px 50px 1fr;
+        align-items: center;
+        height: 48px;
+        border-bottom: 1px solid #ddd;
+        padding: 0 10px;
+        font-size: 14px;
+        animation: appear 0.3s ease;
+    }
+
+    .floor:last-child { border-bottom: none; }
+    .floor .lvl { font-weight: bold; color: #2c3e50; }
+    .floor .cab { font-size: 26px; text-align: center; }
+    .floor .visits { color: #8e44ad; }
+    .floor.here { background: #fff3cd; }
+
+    @keyframes appear {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .positions {
+        border-collapse: collapse;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        margin-top: 15px;
+    }
+
+    .positions-wrap { overflow-x: auto; }
+
+    .positions th, .positions td {
+        border: 1px solid #ddd;
+        padding: 4px 7px;
+        text-align: center;
+        min-width: 22px;
+    }
+
+    .positions th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; text-align: left; }
+    .positions td.now { background: #fff3cd; font-weight: bold; }
+
+    .controls { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 250px; }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .questions { display: flex; flex-direction: column; gap: 10px; }
+
+    .q {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .q span.text { flex: 1 1 300px; }
+
+    .q input {
+        width: 70px;
+        padding: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .q input:focus { border-color: #8e44ad; }
+    .q input.ok { border-color: #2ecc71; background: #eafaf1; }
+    .q input.bad { border-color: #e74c3c; background: #fdecea; }
+
+    .q .unit { width: 60px; color: #555; font-size: 14px; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🛗 Задача: Очень удобный лифт!</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p>В доме у Саши установили новый лифт экспериментальной модели. В этом лифте все кнопки с номерами этажей заменены двумя кнопками «1» и «2».
+        При нажатии на первую из них лифт поднимается на один этаж вверх, а при нажатии на вторую — опускается на один этаж вниз.</p>
+        <p>Саше очень понравился новый лифт, и она каталась на нём, пока не побывала на каждом из этажей хотя бы по одному разу.
+        Известна последовательность кнопок, которые нажимала Саша: <span class="seq">122122122111</span>. Подземных этажей (паркингов) в доме нет.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Покатайся вместе с Сашей</h2>
+        <p style="font-size:14px; color:#555; margin-top:0;">Номер этажа, где Саша вошла, пока неизвестен, поэтому считаем его <b>уровнем 0</b> и следим, как меняется положение лифта.</p>
+        <div class="tape" id="tape"></div>
+        <div class="row">
+            <div class="shaft" id="shaft"></div>
+            <div class="controls">
+                <div class="buttons">
+                    <button class="btn-next" id="btn-step">Нажать кнопку ▶</button>
+                    <button class="btn-check" id="btn-all">Все кнопки ⏭</button>
+                </div>
+                <div class="buttons">
+                    <button class="btn-hint" id="btn-number" disabled>🔢 Пронумеровать этажи</button>
+                    <button class="btn-reset" id="btn-restart">Сначала</button>
+                </div>
+                <div class="status" id="sim-status"></div>
+            </div>
+        </div>
+        <div class="positions-wrap">
+            <table class="positions" id="positions"></table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответь на вопросы</h2>
+        <div class="questions" id="questions"></div>
+        <div class="buttons" style="margin-top:15px;">
+            <button class="btn-check" id="btn-check">Проверить</button>
+            <button class="btn-hint" id="btn-answer">Показать ответ</button>
+        </div>
+        <div class="status" id="status">Впиши ответы числами.</div>
+    </div>
+</div>
+
+<script>
+const SEQ = '122122122111';
+const QUESTIONS = [
+    { text: '1. На каком этаже Саша вошла в лифт?', answer: 4, unit: 'этаж' },
+    { text: '2. На каком этаже Саша побывала три раза?', answer: 2, unit: 'этаж' },
+    { text: '3. Сколько раз Саша побывала на третьем этаже?', answer: 4, unit: 'раза' },
+    { text: '4. На каком этаже Саша вышла из лифта?', answer: 4, unit: 'этаж' },
+    { text: '5. Каково количество этажей в доме у Саши?', answer: 5, unit: 'этажей' }
+];
+
+// Положение лифта после каждого нажатия (уровень входа — 0)
+const LEVELS = [0];
+for (const ch of SEQ) LEVELS.push(LEVELS[LEVELS.length - 1] + (ch === '1' ? 1 : -1));
+const MIN_LEVEL = Math.min(...LEVELS);
+
+const tapeEl = document.getElementById('tape');
+const shaftEl = document.getElementById('shaft');
+const positionsEl = document.getElementById('positions');
+const simStatus = document.getElementById('sim-status');
+const btnStep = document.getElementById('btn-step');
+const btnAll = document.getElementById('btn-all');
+const btnNumber = document.getElementById('btn-number');
+const questionsEl = document.getElementById('questions');
+const statusEl = document.getElementById('status');
+
+let pressed = 0;
+let numbered = false;
+
+function signed(v) {
+    return v > 0 ? `+${v}` : v < 0 ? `−${-v}` : '0';
+}
+
+function floorName(level) {
+    return numbered ? `${level - MIN_LEVEL + 1}-й этаж` : `уровень ${signed(level)}`;
+}
+
+function render() {
+    tapeEl.innerHTML = SEQ.split('').map((ch, i) =>
+        `<div class="${i < pressed - 1 ? 'done' : i === pressed - 1 ? 'now' : ''}">${ch}</div>`
+    ).join('');
+
+    const seen = LEVELS.slice(0, pressed + 1);
+    const here = seen[seen.length - 1];
+    let html = '';
+    for (let lvl = Math.max(...seen); lvl >= Math.min(...seen); lvl--) {
+        const visits = seen.filter(v => v === lvl).length;
+        html += `<div class="floor${lvl === here ? ' here' : ''}">
+            <span class="lvl">${floorName(lvl)}</span>
+            <span class="cab">${lvl === here ? '🛗' : ''}</span>
+            <span class="visits">побывала: ${visits}</span>
+        </div>`;
+    }
+    shaftEl.innerHTML = html;
+
+    positionsEl.innerHTML =
+        '<tr><th>Кнопка</th><td>—</td>' + SEQ.split('').map((ch, i) => `<td>${i < pressed ? ch : ''}</td>`).join('') + '</tr>' +
+        '<tr><th>Положение</th>' + LEVELS.map((v, i) => `<td class="${i === pressed ? 'now' : ''}">${i <= pressed ? signed(v) : ''}</td>`).join('') + '</tr>';
+
+    const done = pressed >= SEQ.length;
+    btnStep.disabled = done;
+    btnAll.disabled = done;
+    btnNumber.disabled = !done || numbered;
+
+    if (pressed === 0) {
+        simStatus.className = 'status';
+        simStatus.textContent = 'Саша вошла в лифт. Нажимай кнопки по очереди.';
+    } else if (!done) {
+        const ch = SEQ[pressed - 1];
+        simStatus.className = 'status';
+        simStatus.textContent = `Кнопка «${ch}»: лифт ${ch === '1' ? 'поднимается' : 'опускается'} на ${floorName(here)}.`;
+    } else if (!numbered) {
+        simStatus.className = 'status';
+        simStatus.textContent = 'Саша побывала на каждом этаже хотя бы раз, а подземных этажей нет. Значит, самый нижний уровень — это 1-й этаж! Нажми «Пронумеровать этажи».';
+    } else {
+        simStatus.className = 'status success';
+        simStatus.textContent = `Этажи пронумерованы: номер этажа = уровень + ${1 - MIN_LEVEL}. Теперь можно ответить на все вопросы.`;
+    }
+}
+
+function step() {
+    if (pressed < SEQ.length) pressed++;
+    render();
+}
+
+function pressAll() {
+    pressed = SEQ.length;
+    render();
+}
+
+function restart() {
+    pressed = 0;
+    numbered = false;
+    render();
+}
+
+function renderQuestions() {
+    questionsEl.innerHTML = QUESTIONS.map((q, i) => `
+        <div class="q">
+            <span class="text">${q.text}</span>
+            <input type="number" id="q${i}" min="0" inputmode="numeric">
+            <span class="unit">${q.unit}</span>
+        </div>`).join('');
+    QUESTIONS.forEach((q, i) => {
+        document.getElementById(`q${i}`).addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    });
+}
+
+function check() {
+    let right = 0, empty = 0;
+    QUESTIONS.forEach((q, i) => {
+        const input = document.getElementById(`q${i}`);
+        const v = input.value.trim();
+        input.classList.remove('ok', 'bad');
+        if (!v) { empty++; return; }
+        const ok = Number(v) === q.answer;
+        input.classList.add(ok ? 'ok' : 'bad');
+        if (ok) right++;
+    });
+    if (right === QUESTIONS.length) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Все ответы верные!';
+    } else if (empty) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Верно: ${right}. Не заполнено ответов: ${empty}.`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Верно: ${right} из ${QUESTIONS.length}. Покатайся на лифте в тренажёре и пронумеруй этажи.`;
+    }
+}
+
+function showAnswer() {
+    QUESTIONS.forEach((q, i) => {
+        const input = document.getElementById(`q${i}`);
+        input.value = q.answer;
+        input.classList.remove('bad');
+        input.classList.add('ok');
+    });
+    pressed = SEQ.length;
+    numbered = true;
+    render();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Лифт побывал на уровнях от −3 до +1 — это 5 этажей, и уровень −3 — 1-й этаж. Саша вошла на уровне 0 (4-й этаж); три раза была на уровне −2 (2-й этаж); на 3-м этаже (уровень −1) — 4 раза. Кнопок «1» и «2» нажато поровну (по 6), поэтому Саша вышла там же, где вошла, — на 4-м этаже.';
+}
+
+btnStep.addEventListener('click', step);
+btnAll.addEventListener('click', pressAll);
+btnNumber.addEventListener('click', () => { numbered = true; render(); });
+document.getElementById('btn-restart').addEventListener('click', restart);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+
+renderQuestions();
+restart();
+</script>
+</body>
+</html>

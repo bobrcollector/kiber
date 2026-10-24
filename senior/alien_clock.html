@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Инопланетные часы</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .examples-wrap { overflow-x: auto; }
+
+    table.examples {
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+    }
+
+    table.examples th, table.examples td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 16px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.examples th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input[type=number]:focus { border-color: #8e44ad; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    /* Табло */
+    .boards {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin: 10px 0 15px;
+    }
+
+    .board {
+        background: #1e272e;
+        border-radius: 12px;
+        padding: 10px 18px;
+        text-align: center;
+        min-width: 150px;
+        box-shadow: inset 0 0 0 3px #485460;
+    }
+
+    .board .cap { font-size: 12px; color: #a4b0be; }
+    .board .time {
+        font-family: 'Courier New', monospace;
+        font-size: 34px;
+        font-weight: bold;
+        color: #0be881;
+        text-shadow: 0 0 8px rgba(11, 232, 129, 0.5);
+        word-break: break-all;
+    }
+    .board .sum { font-size: 13px; color: #d2dae2; }
+    .board.target .time { color: #ffd32a; text-shadow: 0 0 8px rgba(255, 211, 42, 0.5); }
+
+    .arrow-mid { font-size: 15px; color: #555; text-align: center; }
+    .arrow-mid b { color: #8e44ad; font-size: 20px; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .test-case {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: inline-block;
+        white-space: pre;
+        margin-bottom: 10px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .code-box {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-top: 12px;
+    }
+
+    .code-box pre { margin: 0; }
+
+    .code-keyword { color: #ff9ff3; }
+    .code-function { color: #feca57; }
+    .code-number { color: #ff9f43; }
+    .code-comment { color: #7f8c8d; font-style: italic; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>👽 Задача: Инопланетные часы</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p class="limit">Ограничение по времени: 1 секунда</p>
+        <p>Сутки на планете другой звёздной системы длятся <b>h</b> часов, а час длится <b>m</b> минут. Цифровое табло робота на поверхности этой планеты показывает время <b>x</b> часов <b>y</b> минут.
+        Через сколько минут цифровое табло будет показывать время, для которого сумма чисел, обозначающих часы и минуты, будет равна текущей сумме чисел на часах?</p>
+
+        <h3>Формат входных данных</h3>
+        <p>Программа получает на вход четыре целых неотрицательных числа h, m, x и y, записанные в отдельных строках — длительность суток в часах, длительность часа в минутах, часы и минуты, которые отображаются на цифровом табло робота (0 ≤ x &lt; h, 0 ≤ y &lt; m).
+        Все числа не превосходят 10<sup>8</sup>. Гарантируется, что h &lt; m.</p>
+
+        <h3>Формат выходных данных</h3>
+        <p>Программа должна вывести одно целое число — через сколько минут цифровое табло будет показывать время, когда сумма значений часов и минут будет равна аналогичной сумме в данный момент.</p>
+        <div class="note">Ответ может превышать возможное значение 32-битной целочисленной переменной, поэтому в C++ нужен тип <b>long long</b>, в Java и C# — <b>long</b>. В Python целые числа могут быть любой длины.</div>
+
+        <h3>Примеры</h3>
+        <div class="examples-wrap">
+            <table class="examples">
+                <tr><th>стандартный ввод</th><th>стандартный вывод</th></tr>
+                <tr><td>24<br>60<br>15<br>30</td><td>59</td></tr>
+                <tr><td>24<br>60<br>23<br>5</td><td>83</td></tr>
+                <tr><td>24<br>60<br>15<br>0</td><td>555</td></tr>
+            </table>
+        </div>
+        <p style="font-size:14px; color:#555;">В первом примере сумма чисел, обозначающих часы и минуты, равняется 15 + 30 = 45. Следующее время, когда будет такая же сумма, — 16:29, через 59 минут.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: табло робота</h2>
+        <div class="inputs">
+            <label>h = <input type="number" id="in-h" value="24" min="1"></label>
+            <label>m = <input type="number" id="in-m" value="60" min="2"></label>
+            <label>x = <input type="number" id="in-x" value="15" min="0"></label>
+            <label>y = <input type="number" id="in-y" value="30" min="0"></label>
+            <button class="btn-check" id="btn-run">▶ Запустить</button>
+            <button class="btn-next" id="btn-tick">⏩ Перебор по минутам</button>
+        </div>
+        <div class="boards">
+            <div class="board">
+                <div class="cap">сейчас</div>
+                <div class="time" id="board-now">—</div>
+                <div class="sum" id="sum-now"></div>
+            </div>
+            <div class="arrow-mid">через<br><b id="answer-mid">?</b><br>минут →</div>
+            <div class="board target">
+                <div class="cap" id="cap-target">искомое время</div>
+                <div class="time" id="board-target">—</div>
+                <div class="sum" id="sum-target"></div>
+            </div>
+        </div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Проверь себя</h2>
+        <p>Что выведет правильная программа на такой ввод?</p>
+        <div class="test-case" id="test-case"></div>
+        <div class="inputs">
+            <label>Ответ: <input type="number" id="test-answer"></label>
+            <button class="btn-check" id="btn-test-check">Проверить</button>
+            <button class="btn-next" id="btn-test-new">🎲 Новый тест</button>
+        </div>
+        <div class="status" id="test-status">Посчитай в уме или на листочке.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <h3>Идея</h3>
+            <p>Искомое время может выпасть либо на текущие сутки, либо уже после полуночи.</p>
+            <p><b>Текущие сутки.</b> Внутри часа минуты только растут, и сумма растёт вместе с ними. Значит, ближайший шанс — следующий час: часы увеличатся на 1, а минуты уменьшатся на 1, то есть время <span class="math">(x+1):(y−1)</span>. До него ровно <span class="math">m − 1</span> минут. Так можно, только если <span class="math">x + 1 &lt; h</span> (следующий час ещё в этих сутках) и <span class="math">y &gt; 0</span> (минуты не станут отрицательными).
+            В более поздние часы минут понадобится ещё меньше — значит, если не подошёл следующий час, то в текущих сутках ответа нет.</p>
+            <p><b>Следующие сутки.</b> Количество минут = время до конца текущих суток + время от начала суток до искомого момента.
+            Сумму <span class="math">S = x + y</span> нужно разложить на часы и минуты так, чтобы время было как можно раньше: минуты делаем как можно больше, но не больше <span class="math">m − 1</span>, а остаток отдаём часам.
+            Получаем часы <span class="math">a = max(0, S − (m − 1))</span> и минуты <span class="math">b = S − a</span>.</p>
+            <div class="code-box"><pre><code>h = <span class="code-function">int</span>(<span class="code-function">input</span>())
+m = <span class="code-function">int</span>(<span class="code-function">input</span>())
+x = <span class="code-function">int</span>(<span class="code-function">input</span>())
+y = <span class="code-function">int</span>(<span class="code-function">input</span>())
+
+<span class="code-keyword">if</span> x + <span class="code-number">1</span> &lt; h <span class="code-keyword">and</span> y &gt; <span class="code-number">0</span>:
+    <span class="code-comment"># Следующий час, на минуту меньше</span>
+    <span class="code-function">print</span>(m - <span class="code-number">1</span>)
+<span class="code-keyword">else</span>:
+    s = x + y
+    <span class="code-comment"># Самое раннее время в следующих сутках с суммой s</span>
+    a = <span class="code-function">max</span>(<span class="code-number">0</span>, s - (m - <span class="code-number">1</span>))
+    b = s - a
+    to_midnight = h * m - (x * m + y)
+    <span class="code-function">print</span>(to_midnight + a * m + b)</code></pre></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const LIMIT = 100000000n;
+const MAX_TICKS = 3000n;
+
+// Решение задачи (BigInt — ответ может быть больше 2^53)
+function solve(h, m, x, y) {
+    if (x + 1n < h && y > 0n) {
+        return { minutes: m - 1n, a: x + 1n, b: y - 1n, nextDay: false };
+    }
+    const s = x + y;
+    let a = s - (m - 1n);
+    if (a < 0n) a = 0n;
+    const b = s - a;
+    return { minutes: h * m - (x * m + y) + a * m + b, a, b, nextDay: true };
+}
+
+function fmt(hh, mm, m) {
+    const width = String(m - 1n).length;
+    return `${hh}:${String(mm).padStart(width, '0')}`;
+}
+
+function readBig(id) {
+    const s = document.getElementById(id).value.trim();
+    if (!/^\d+$/.test(s)) return null;
+    const v = BigInt(s);
+    return v <= LIMIT ? v : null;
+}
+
+function readAll() {
+    const h = readBig('in-h'), m = readBig('in-m'), x = readBig('in-x'), y = readBig('in-y');
+    if ([h, m, x, y].includes(null)) return { error: 'Все числа должны быть целыми от 0 до 10<sup>8</sup>.' };
+    if (!(h < m)) return { error: 'По условию h &lt; m.' };
+    if (!(x < h)) return { error: 'Часы x должны быть меньше h.' };
+    if (!(y < m)) return { error: 'Минуты y должны быть меньше m.' };
+    return { h, m, x, y };
+}
+
+let tickTimer = null;
+
+function stopTicks() {
+    if (tickTimer) clearInterval(tickTimer);
+    tickTimer = null;
+    document.getElementById('btn-tick').disabled = false;
+}
+
+function run() {
+    stopTicks();
+    const data = readAll();
+    const exp = document.getElementById('explanation');
+    if (data.error) {
+        exp.innerHTML = data.error;
+        return null;
+    }
+    const { h, m, x, y } = data;
+    const res = solve(h, m, x, y);
+    const s = x + y;
+
+    document.getElementById('board-now').textContent = fmt(x, y, m);
+    document.getElementById('sum-now').textContent = `сумма ${x} + ${y} = ${s}`;
+    document.getElementById('board-target').textContent = fmt(res.a, res.b, m);
+    document.getElementById('sum-target').textContent = `сумма ${res.a} + ${res.b} = ${res.a + res.b}`;
+    document.getElementById('cap-target').textContent = res.nextDay ? 'искомое время (следующие сутки)' : 'искомое время (эти же сутки)';
+    document.getElementById('answer-mid').textContent = res.minutes;
+
+    let html = `Текущая сумма: <span class="math">S = ${x} + ${y} = ${s}</span>.<br>`;
+    if (!res.nextDay) {
+        html += `<span class="math">x + 1 = ${x + 1n} &lt; h = ${h}</span> и <span class="math">y = ${y} &gt; 0</span>, поэтому подходит следующий час: ` +
+                `<span class="math">${fmt(res.a, res.b, m)}</span>. До него <span class="math">m − 1 = ${res.minutes}</span> минут.`;
+    } else {
+        const why = y === 0n
+            ? `<span class="math">y = 0</span> — в следующем часу минуты стали бы отрицательными`
+            : `<span class="math">x = ${x}</span> — последний час суток, следующего часа в этих сутках нет`;
+        const toMidnight = h * m - (x * m + y);
+        html += `В текущих сутках такого времени нет: ${why}.<br>` +
+                `До полуночи: <span class="math">h·m − (x·m + y) = ${h * m} − ${x * m + y} = ${toMidnight}</span> минут.<br>` +
+                `Самое раннее время с суммой ${s}: часы <span class="math">a = max(0, ${s} − ${m - 1n}) = ${res.a}</span>, минуты <span class="math">b = ${s} − ${res.a} = ${res.b}</span>, ` +
+                `от полуночи <span class="math">a·m + b = ${res.a * m + res.b}</span> минут.<br>` +
+                `Ответ: <span class="math">${toMidnight} + ${res.a * m + res.b} = ${res.minutes}</span>.`;
+    }
+    exp.innerHTML = html;
+    return { ...data, res };
+}
+
+// Перебор: табло «тикает» по минуте, пока сумма не совпадёт
+function tick() {
+    const data = run();
+    if (!data) return;
+    const { m, h, x, y, res } = data;
+    const exp = document.getElementById('explanation');
+    if (res.minutes > MAX_TICKS) {
+        exp.innerHTML += `<br><br>Перебор займёт ${res.minutes} шагов — слишком долго для анимации. Именно поэтому нужна формула!`;
+        return;
+    }
+    const total = Number(res.minutes);
+    const perFrame = Math.max(1, Math.ceil(total / 150));
+    let passed = 0;
+    let hh = x, mm = y;
+    const target = document.getElementById('board-target');
+    const sumTarget = document.getElementById('sum-target');
+    const capTarget = document.getElementById('cap-target');
+    capTarget.textContent = 'перебираем…';
+    document.getElementById('btn-tick').disabled = true;
+    tickTimer = setInterval(() => {
+        for (let k = 0; k < perFrame && passed < total; k++) {
+            passed++;
+            mm++;
+            if (mm === m) { mm = 0n; hh++; }
+            if (hh === h) hh = 0n;
+        }
+        target.textContent = fmt(hh, mm, m);
+        sumTarget.textContent = `сумма ${hh + mm}, прошло ${passed} мин`;
+        if (passed >= total) {
+            capTarget.textContent = 'нашли перебором!';
+            stopTicks();
+        }
+    }, 20);
+}
+
+// Проверь себя
+let testData = null;
+
+function randInt(lo, hi) {
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function newTest() {
+    const h = randInt(3, 12);
+    const m = randInt(h + 1, 20);
+    const r = Math.random();
+    // Чаще даём интересные случаи: последний час суток или ноль минут
+    const x = r < 0.3 ? h - 1 : randInt(0, h - 1);
+    const y = r > 0.7 ? 0 : randInt(0, m - 1);
+    testData = { h: BigInt(h), m: BigInt(m), x: BigInt(x), y: BigInt(y) };
+    document.getElementById('test-case').textContent = `${h}\n${m}\n${x}\n${y}`;
+    document.getElementById('test-answer').value = '';
+    const st = document.getElementById('test-status');
+    st.className = 'status';
+    st.textContent = 'Посчитай в уме или на листочке.';
+}
+
+function checkTest() {
+    const st = document.getElementById('test-status');
+    const v = document.getElementById('test-answer').value.trim();
+    const { h, m, x, y } = testData;
+    const expected = solve(h, m, x, y).minutes;
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (/^\d+$/.test(v) && BigInt(v) === expected) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Попробуй ещё один тест.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подсказка: проверь, можно ли найти время в этих же сутках, или придётся ждать полуночи.';
+    }
+}
+
+document.getElementById('btn-run').addEventListener('click', run);
+document.getElementById('btn-tick').addEventListener('click', tick);
+document.getElementById('btn-test-new').addEventListener('click', newTest);
+document.getElementById('btn-test-check').addEventListener('click', checkTest);
+document.getElementById('test-answer').addEventListener('keydown', e => { if (e.key === 'Enter') checkTest(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+run();
+newTest();
+</script>
+</body>
+</html>

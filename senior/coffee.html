@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Чрезвычайно хороший кофе!</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    table.examples {
+        border-collapse: collapse;
+        margin-top: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+    }
+
+    table.examples th, table.examples td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 16px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    table.examples th { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number] {
+        width: 110px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    input[type=number]:focus { border-color: #8e44ad; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+
+    /* Календарь */
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 4px;
+        margin: 10px 0 4px;
+    }
+
+    .calendar .dow {
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: #777;
+    }
+
+    .calendar .dow.sun { color: #c0392b; }
+
+    .day {
+        border-radius: 6px;
+        padding: 4px 2px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.3;
+        border: 1px solid #ddd;
+        background: #f8f9fa;
+        color: #555;
+    }
+
+    .day .cup { font-size: 18px; display: block; }
+    .day.bonus { background: #eafaf1; border-color: #2ecc71; color: #1e8449; font-weight: bold; }
+    .day.sunday { background: #fdedec; border-color: #e74c3c; color: #a93226; font-weight: bold; }
+
+    .legend-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .legend-row span::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -1px;
+        background: var(--c);
+    }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .test-case {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: inline-block;
+        white-space: pre;
+        margin-bottom: 10px;
+    }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .code-box {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 15px 20px;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-x: auto;
+        margin-top: 12px;
+    }
+
+    .code-box pre { margin: 0; }
+
+    .code-keyword { color: #ff9ff3; }
+    .code-function { color: #feca57; }
+    .code-number { color: #ff9f43; }
+    .code-comment { color: #7f8c8d; font-style: italic; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>☕ Задача: Чрезвычайно хороший кофе!</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p class="limit">Ограничение по времени: 1 секунда</p>
+        <p>В кофейне «Дабл Р» постоянные посетители получают каждую <b>n</b>-ю чашку кофе бесплатно. Кроме того, по воскресеньям в этом заведении также можно взять одну чашку кофе бесплатно (она не учитывается при накоплении бонуса). Купер, начиная с некоторого понедельника, в каждый из <b>d</b> дней заходил в это кафе выпить одну чашку кофе. Сколько чашек он выпил бесплатно?</p>
+
+        <h3>Формат входных данных</h3>
+        <p>Первая строка входных данных содержит натуральное число n (2 ≤ n ≤ 100),<br>
+        вторая — натуральное число d (1 ≤ d ≤ 10<sup>9</sup>).</p>
+
+        <h3>Формат выходных данных</h3>
+        <p>Выведите одно неотрицательное целое число — ответ на вопрос задачи.</p>
+
+        <h3>Примеры</h3>
+        <table class="examples">
+            <tr><th>стандартный ввод</th><th>стандартный вывод</th></tr>
+            <tr><td>3<br>10</td><td>4</td></tr>
+        </table>
+        <p style="font-size:14px; color:#555;">В примере каждая третья чашка бесплатна, и Купер заходил в кафе 10 дней подряд.
+        Бесплатные чашки — в среду (3-я чашка в счёт бонуса), субботу (6-я), воскресенье (по акции) и следующую среду (9-я). Всего 4.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: календарь Купера</h2>
+        <div class="inputs">
+            <label>n = <input type="number" id="in-n" value="3" min="2" max="100"></label>
+            <label>d = <input type="number" id="in-d" value="10" min="1"></label>
+            <button class="btn-check" id="btn-run">▶ Запустить</button>
+        </div>
+        <div class="calendar" id="calendar"></div>
+        <div class="legend-row">
+            <span style="--c:#f8f9fa">обычная чашка (идёт в счёт бонуса)</span>
+            <span style="--c:#2ecc71">бесплатная по бонусу — каждая n-я</span>
+            <span style="--c:#e74c3c">бесплатная по воскресенью</span>
+        </div>
+        <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Проверь себя</h2>
+        <p>Что выведет правильная программа на такой ввод?</p>
+        <div class="test-case" id="test-case"></div>
+        <div class="inputs">
+            <label>Ответ: <input type="number" id="test-answer"></label>
+            <button class="btn-check" id="btn-test-check">Проверить</button>
+            <button class="btn-next" id="btn-test-new">🎲 Новый тест</button>
+        </div>
+        <div class="status" id="test-status">Посчитай в уме или на листочке.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <h3>Идея: моделируем дни</h3>
+            <p>Заведём два счётчика: <span class="math">ans</span> — ответ и <span class="math">current</span> — количество невоскресных дней (чашек, которые идут в счёт бонуса).
+            Пройдём циклом по дням. Мы начинаем с понедельника, поэтому воскресенье — это день, номер которого (с нуля) при делении на 7 даёт остаток 6.
+            В воскресенье чашка бесплатная — увеличиваем <span class="math">ans</span>. В другой день увеличиваем <span class="math">current</span>, и если оно делится на <b>n</b> нацело — эта чашка тоже бесплатная.</p>
+            <div class="code-box"><pre><code>n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+d = <span class="code-function">int</span>(<span class="code-function">input</span>())
+ans = <span class="code-number">0</span>
+current = <span class="code-number">0</span>
+<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(d):
+    <span class="code-keyword">if</span> i % <span class="code-number">7</span> == <span class="code-number">6</span>:
+        ans += <span class="code-number">1</span>
+    <span class="code-keyword">else</span>:
+        current += <span class="code-number">1</span>
+        <span class="code-keyword">if</span> current % n == <span class="code-number">0</span>:
+            ans += <span class="code-number">1</span>
+<span class="code-function">print</span>(ans)</code></pre></div>
+
+            <h3>Как сделать быстрее</h3>
+            <p>При d = 10<sup>9</sup> цикл сделает миллиард шагов и может не уложиться в 1 секунду. Посчитаем то же самое формулой:</p>
+            <p>воскресений среди d дней — <span class="math">d // 7</span>, невоскресных дней — <span class="math">d − d // 7</span>, а бонусных чашек среди них — каждая n-я, то есть <span class="math">(d − d // 7) // n</span>.</p>
+            <div class="code-box"><pre><code>n = <span class="code-function">int</span>(<span class="code-function">input</span>())
+d = <span class="code-function">int</span>(<span class="code-function">input</span>())
+sundays = d // <span class="code-number">7</span>
+<span class="code-function">print</span>(sundays + (d - sundays) // n)</code></pre></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const DOW = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const MAX_VISUAL_DAYS = 84;
+
+function solve(n, d) {
+    const sundays = Math.floor(d / 7);
+    return sundays + Math.floor((d - sundays) / n);
+}
+
+function readInt(id, lo, hi) {
+    const s = document.getElementById(id).value.trim();
+    if (!/^\d+$/.test(s)) return null;
+    const v = Number(s);
+    return v >= lo && v <= hi ? v : null;
+}
+
+function run() {
+    const n = readInt('in-n', 2, 100);
+    const d = readInt('in-d', 1, 1e9);
+    const cal = document.getElementById('calendar');
+    const exp = document.getElementById('explanation');
+    cal.innerHTML = '';
+    if (n === null || d === null) {
+        exp.innerHTML = 'n должно быть от 2 до 100, d — от 1 до 10<sup>9</sup>.';
+        return;
+    }
+
+    const sundays = Math.floor(d / 7);
+    const regular = d - sundays;
+    const bonus = Math.floor(regular / n);
+
+    if (d <= MAX_VISUAL_DAYS) {
+        cal.innerHTML = DOW.map((w, i) => `<div class="dow${i === 6 ? ' sun' : ''}">${w}</div>`).join('');
+        let current = 0;
+        let free = 0;
+        for (let i = 0; i < d; i++) {
+            let cls = 'day';
+            let label;
+            if (i % 7 === 6) {
+                cls += ' sunday';
+                free++;
+                label = `беспл. ${free}`;
+            } else {
+                current++;
+                if (current % n === 0) {
+                    cls += ' bonus';
+                    free++;
+                    label = `беспл. ${free}`;
+                } else {
+                    label = `чашка ${current}`;
+                }
+            }
+            cal.innerHTML += `<div class="${cls}" title="День ${i + 1}"><span class="cup">☕</span>${label}</div>`;
+        }
+    } else {
+        cal.innerHTML = `<div class="day" style="grid-column: 1 / -1">Дней слишком много, чтобы нарисовать календарь (показываем до ${MAX_VISUAL_DAYS}) — смотри расчёт ниже.</div>`;
+    }
+
+    exp.innerHTML =
+        `Полных недель: <span class="math">${d} // 7 = ${sundays}</span> — столько воскресений, и в каждое чашка бесплатная.<br>` +
+        `Невоскресных дней: <span class="math">${d} − ${sundays} = ${regular}</span> — эти чашки идут в счёт бонуса.<br>` +
+        `Бесплатна каждая ${n}-я из них: <span class="math">${regular} // ${n} = ${bonus}</span>.<br>` +
+        `Ответ: <span class="math">${sundays} + ${bonus} = ${sundays + bonus}</span>.`;
+}
+
+// Проверь себя
+let testData = null;
+
+function randInt(lo, hi) {
+    return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function newTest() {
+    testData = { n: randInt(2, 6), d: randInt(5, 30) };
+    document.getElementById('test-case').textContent = `${testData.n}\n${testData.d}`;
+    document.getElementById('test-answer').value = '';
+    const st = document.getElementById('test-status');
+    st.className = 'status';
+    st.textContent = 'Посчитай в уме или на листочке.';
+}
+
+function checkTest() {
+    const st = document.getElementById('test-status');
+    const v = document.getElementById('test-answer').value.trim();
+    const { n, d } = testData;
+    const expected = solve(n, d);
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (Number(v) === expected) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Попробуй ещё один тест.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подсказка: воскресные чашки не идут в счёт бонуса. Можно проверить себя в тренажёре.';
+    }
+}
+
+document.getElementById('btn-run').addEventListener('click', run);
+document.getElementById('btn-test-new').addEventListener('click', newTest);
+document.getElementById('btn-test-check').addEventListener('click', checkTest);
+document.getElementById('test-answer').addEventListener('keydown', e => { if (e.key === 'Enter') checkTest(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const sol = document.getElementById('solution');
+    const open = sol.classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+run();
+newTest();
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Классика со спичками</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .field {
+        width: 100%;
+        height: auto;
+        display: block;
+        user-select: none;
+    }
+
+    .slot { cursor: pointer; }
+    .slot .hit { stroke: transparent; stroke-width: 22; stroke-linecap: round; }
+    .slot .empty { stroke: #e5e8eb; stroke-width: 4; stroke-dasharray: 6 6; stroke-linecap: round; }
+    .field.holding .slot.free .empty { stroke: #2980b9; }
+    .field.holding .slot.free:hover .empty { stroke: #2ecc71; stroke-width: 6; }
+    .slot.picked .wood { stroke: #f1c40f; }
+    .slot.moved .wood { stroke: #a9dfbf; }
+    .slot.filled:hover .wood { stroke: #f7dc6f; }
+    .fixed { pointer-events: none; }
+
+    .equation {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 22px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #2c3e50;
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-hint { background-color: #2980b9; }
+    .btn-hint:hover { background-color: #216a94; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🔥 Задача: Классика</h1>
+<p class="subtitle">Переложи одну спичку так, чтобы получилось верное равенство.</p>
+
+<div class="panel">
+    <svg class="field" id="field" viewBox="0 0 640 160"></svg>
+    <div class="equation" id="equation"></div>
+
+    <div class="controls">
+        <button class="btn-hint" id="btn-hint">Подсказка</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="status" id="status">Нажми на спичку, чтобы взять её, а затем на пустое место, куда её положить.</div>
+</div>
+
+<script>
+// Семисегментная запись цифр: a — верх, b — правый верх, c — правый низ, d — низ, e — левый низ, f — левый верх, g — середина
+const DIGIT_SEGMENTS = {
+    0: 'abcdef', 1: 'bc', 2: 'abdeg', 3: 'abcdg', 4: 'bcfg',
+    5: 'acdfg', 6: 'acdefg', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg'
+};
+const Y0 = 20;
+const DIGIT_X = [20, 200, 380, 560];
+const OP_X = [140, 320];
+const EQ_X = 500;
+const START = { d0: 8, op0: '+', d1: 3, op1: '-', d2: 4, d3: 0 };
+const SOLUTION = { from: 'd0e', to: 'd3g' };
+
+const fieldEl = document.getElementById('field');
+const equationEl = document.getElementById('equation');
+const statusEl = document.getElementById('status');
+
+// Все места, куда можно положить спичку
+const SLOTS = {};
+DIGIT_X.forEach((x, i) => {
+    const y = Y0;
+    Object.assign(SLOTS, {
+        [`d${i}a`]: [x + 5, y, x + 55, y],
+        [`d${i}b`]: [x + 60, y + 5, x + 60, y + 55],
+        [`d${i}c`]: [x + 60, y + 65, x + 60, y + 115],
+        [`d${i}d`]: [x + 5, y + 120, x + 55, y + 120],
+        [`d${i}e`]: [x, y + 65, x, y + 115],
+        [`d${i}f`]: [x, y + 5, x, y + 55],
+        [`d${i}g`]: [x + 5, y + 60, x + 55, y + 60]
+    });
+});
+OP_X.forEach((x, i) => {
+    SLOTS[`o${i}h`] = [x - 28, 80, x + 28, 80];
+    SLOTS[`o${i}v`] = [x, 52, x, 108];
+});
+
+let initial, filled, holding, solved;
+
+function startSet() {
+    const s = new Set();
+    [START.d0, START.d1, START.d2, START.d3].forEach((d, i) => {
+        for (const seg of DIGIT_SEGMENTS[d]) s.add(`d${i}${seg}`);
+    });
+    [START.op0, START.op1].forEach((op, i) => {
+        s.add(`o${i}h`);
+        if (op === '+') s.add(`o${i}v`);
+    });
+    return s;
+}
+
+function matchSvg([x1, y1, x2, y2]) {
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#a0754a" stroke-width="9" stroke-linecap="round"/>
+        <line class="wood" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f0d29a" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="${x2}" cy="${y2}" r="6.5" fill="#8e2b1f"/>`;
+}
+
+function readDigit(i) {
+    const segs = 'abcdefg'.split('').filter(s => filled.has(`d${i}${s}`)).join('');
+    for (const [d, pattern] of Object.entries(DIGIT_SEGMENTS)) {
+        if (pattern === segs) return Number(d);
+    }
+    return null;
+}
+
+function readOp(i) {
+    const h = filled.has(`o${i}h`);
+    const v = filled.has(`o${i}v`);
+    if (h && v) return '+';
+    if (h) return '-';
+    return null;
+}
+
+function evaluate() {
+    const d = [0, 1, 2, 3].map(readDigit);
+    const ops = [0, 1].map(readOp);
+    const text = [d[0], ops[0], d[1], ops[1], d[2], '=', d[3]].map(x => x === null ? '?' : x).join(' ');
+    if (d.includes(null) || ops.includes(null)) return { text, valid: false };
+    let left = d[0];
+    left = ops[0] === '+' ? left + d[1] : left - d[1];
+    left = ops[1] === '+' ? left + d[2] : left - d[2];
+    return { text, valid: true, ok: left === d[3], left };
+}
+
+function render() {
+    const moved = [...filled].filter(id => !initial.has(id));
+    let html = '';
+    for (const [id, coords] of Object.entries(SLOTS)) {
+        const isFilled = filled.has(id) && holding !== id;
+        let cls = 'slot ' + (isFilled ? 'filled' : 'free');
+        if (moved.includes(id)) cls += ' moved';
+        const [x1, y1, x2, y2] = coords;
+        html += `<g class="${cls}" data-id="${id}">
+            <line class="hit" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>
+            ${isFilled ? matchSvg(coords) : `<line class="empty" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`}
+        </g>`;
+    }
+    if (holding) {
+        const [x1, y1, x2, y2] = SLOTS[holding];
+        html += `<g class="slot picked fixed" style="opacity:0.85" transform="translate(0,-6)">${matchSvg([x1, y1, x2, y2])}</g>`;
+    }
+    html += `<g class="fixed">${matchSvg([EQ_X - 28, 68, EQ_X + 28, 68])}${matchSvg([EQ_X - 28, 92, EQ_X + 28, 92])}</g>`;
+    fieldEl.innerHTML = html;
+    fieldEl.classList.toggle('holding', holding !== null);
+
+    const res = evaluate();
+    equationEl.textContent = res.text;
+
+    fieldEl.querySelectorAll('.slot[data-id]').forEach(g => g.addEventListener('click', () => onSlot(g.dataset.id)));
+}
+
+function onSlot(id) {
+    if (solved) return;
+    if (holding === null) {
+        if (!filled.has(id)) return;
+        const moved = [...filled].filter(x => !initial.has(x));
+        if (moved.length && !moved.includes(id)) {
+            statusEl.className = 'status error';
+            statusEl.textContent = 'Перекладывать можно только одну спичку. Возьми ту же спичку снова или нажми «Сначала».';
+            return;
+        }
+        holding = id;
+        statusEl.className = 'status';
+        statusEl.textContent = 'Спичка в руке. Нажми на пустое место, куда её положить, или на неё же, чтобы вернуть.';
+        render();
+        return;
+    }
+    if (id === holding) {
+        holding = null;
+        statusEl.className = 'status';
+        statusEl.textContent = 'Спичка осталась на месте. Выбери другую.';
+        render();
+        return;
+    }
+    if (filled.has(id)) return;
+    filled.delete(holding);
+    filled.add(id);
+    holding = null;
+    afterMove();
+}
+
+function afterMove() {
+    render();
+    const res = evaluate();
+    if (!res.valid) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Получилась не цифра или не знак. Возьми эту спичку снова и попробуй другое место.';
+    } else if (res.ok) {
+        solved = true;
+        statusEl.className = 'status success';
+        statusEl.textContent = `🎉 Верно! ${res.text} — равенство выполняется.`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Получилось ${res.text}, но слева ${res.left}. Равенство неверное — попробуй ещё.`;
+    }
+}
+
+function showHint() {
+    statusEl.className = 'status';
+    statusEl.textContent = 'Подсказка: сейчас слева 8 + 3 − 4 = 7, а справа 0. Попробуй уменьшить первое число и увеличить ответ.';
+}
+
+function showAnswer() {
+    filled = new Set(initial);
+    holding = SOLUTION.from;
+    render();
+    setTimeout(() => {
+        filled.delete(SOLUTION.from);
+        filled.add(SOLUTION.to);
+        holding = null;
+        afterMove();
+        statusEl.className = 'status';
+        statusEl.textContent = 'Ответ: 9 + 3 − 4 = 8. Берём левую нижнюю спичку у восьмёрки — получается 9, и кладём её в середину нуля — получается 8.';
+    }, 700);
+}
+
+function reset() {
+    initial = startSet();
+    filled = new Set(initial);
+    holding = null;
+    solved = false;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажми на спичку, чтобы взять её, а затем на пустое место, куда её положить.';
+    render();
+}
+
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

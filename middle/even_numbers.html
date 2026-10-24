@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Сборка чётных чисел</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 700px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .slots, .digits {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+
+    .slot {
+        width: 64px;
+        height: 76px;
+        border: 3px dashed #bdc3c7;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: bold;
+        color: #2c3e50;
+        cursor: pointer;
+        background: #fafbfc;
+    }
+
+    .slot.filled { border-style: solid; border-color: #2980b9; background: #eaf2f8; }
+    .slot.last { border-color: #e67e22; }
+    .slot.last.filled { background: #fdf2e9; }
+
+    .slot-labels {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        font-size: 12px;
+        color: #888;
+        margin: -10px 0 15px 0;
+    }
+
+    .slot-labels span { width: 70px; text-align: center; }
+
+    .btn-digit {
+        width: 64px;
+        height: 64px;
+        font-size: 30px;
+        background-color: #2980b9;
+    }
+
+    .btn-digit:hover { background-color: #216a94; }
+
+    .found {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        min-height: 44px;
+        border: 2px dashed #bdc3c7;
+        border-radius: 10px;
+        padding: 10px;
+        align-items: center;
+    }
+
+    .found .placeholder { color: #aaa; font-size: 14px; }
+
+    .chip {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        font-weight: bold;
+        background: #eafaf1;
+        border: 2px solid #2ecc71;
+        color: #27ae60;
+        border-radius: 8px;
+        padding: 4px 10px;
+        animation: pop 0.3s ease;
+    }
+
+    .chip.end4 { background: #eaf2f8; border-color: #2980b9; color: #216a94; }
+
+    @keyframes pop {
+        from { transform: scale(0.3); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .counter {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 15px;
+        color: #555;
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .answer-row input {
+        width: 80px;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-add { background-color: #2980b9; }
+    .btn-add:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🧱 Задача: Сборка чётных чисел</h1>
+<p class="subtitle">Сколько чётных трёхзначных чисел можно составить из цифр 3, 4, 5, 6? Цифры в записи числа не могут повторяться.</p>
+
+<div class="panel">
+    <h2>1. Собирай числа</h2>
+    <div class="slots" id="slots"></div>
+    <div class="slot-labels"><span>сотни</span><span>десятки</span><span>единицы</span></div>
+    <div class="digits" id="digits"></div>
+
+    <div class="controls">
+        <button class="btn-add" id="btn-add">Добавить число</button>
+        <button class="btn-reset" id="btn-clear">Очистить</button>
+    </div>
+    <div class="status" id="build-status">Нажимай на цифры, чтобы собрать трёхзначное число. Нажми на клетку, чтобы убрать цифру.</div>
+
+    <h2 style="margin-top: 20px;">Найденные числа</h2>
+    <div class="found" id="found"></div>
+    <div class="counter" id="counter"></div>
+</div>
+
+<div class="panel">
+    <h2>2. Твой ответ</h2>
+    <div class="answer-row">
+        Можно составить
+        <input type="number" id="answer-input" min="0" inputmode="numeric">
+        чисел
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+    </div>
+    <div class="status" id="answer-status">Подсказка: на какую цифру должно заканчиваться чётное число?</div>
+
+    <div class="controls">
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+</div>
+
+<script>
+const DIGITS = [3, 4, 5, 6];
+const ANSWER = 12;
+
+const slotsEl = document.getElementById('slots');
+const digitsEl = document.getElementById('digits');
+const foundEl = document.getElementById('found');
+const counterEl = document.getElementById('counter');
+const buildStatus = document.getElementById('build-status');
+const answerInput = document.getElementById('answer-input');
+const answerStatus = document.getElementById('answer-status');
+
+let slots = [null, null, null];
+let found = [];
+
+function allNumbers() {
+    const res = [];
+    for (const last of DIGITS.filter(d => d % 2 === 0)) {
+        for (const a of DIGITS) {
+            for (const b of DIGITS) {
+                if (a !== b && a !== last && b !== last) res.push(`${a}${b}${last}`);
+            }
+        }
+    }
+    return res;
+}
+
+function renderSlots() {
+    slotsEl.innerHTML = slots.map((d, i) =>
+        `<div class="slot${d !== null ? ' filled' : ''}${i === 2 ? ' last' : ''}" data-i="${i}">${d !== null ? d : ''}</div>`
+    ).join('');
+    slotsEl.querySelectorAll('.slot').forEach(el => el.addEventListener('click', () => {
+        slots[Number(el.dataset.i)] = null;
+        renderSlots();
+        renderDigits();
+    }));
+}
+
+function renderDigits() {
+    digitsEl.innerHTML = DIGITS.map(d =>
+        `<button class="btn-digit" data-d="${d}" ${slots.includes(d) ? 'disabled' : ''}>${d}</button>`
+    ).join('');
+    digitsEl.querySelectorAll('.btn-digit').forEach(btn => btn.addEventListener('click', () => {
+        const i = slots.indexOf(null);
+        if (i === -1) return;
+        slots[i] = Number(btn.dataset.d);
+        renderSlots();
+        renderDigits();
+    }));
+}
+
+function renderFound() {
+    if (found.length === 0) {
+        foundEl.innerHTML = '<span class="placeholder">Здесь появятся собранные чётные числа</span>';
+    } else {
+        const sorted = [...found].sort((a, b) => a[2] - b[2] || a - b);
+        foundEl.innerHTML = sorted.map(n => `<span class="chip${n[2] === '4' ? ' end4' : ''}">${n}</span>`).join('');
+    }
+    const end4 = found.filter(n => n[2] === '4').length;
+    const end6 = found.length - end4;
+    counterEl.textContent = `Найдено чисел: ${found.length} (на 4: ${end4}, на 6: ${end6})`;
+}
+
+function addNumber() {
+    if (slots.includes(null)) {
+        buildStatus.className = 'status error';
+        buildStatus.textContent = 'Заполни все три клетки — число должно быть трёхзначным.';
+        return;
+    }
+    const n = slots.join('');
+    if (slots[2] % 2 !== 0) {
+        buildStatus.className = 'status error';
+        buildStatus.textContent = `${n} — нечётное число: оно заканчивается на ${slots[2]}. Чётное число заканчивается на чётную цифру.`;
+    } else if (found.includes(n)) {
+        buildStatus.className = 'status error';
+        buildStatus.textContent = `Число ${n} уже есть в списке. Попробуй другое!`;
+    } else {
+        found.push(n);
+        buildStatus.className = 'status success';
+        buildStatus.textContent = found.length === ANSWER
+            ? `🎉 Число ${n} добавлено. Найдены все чётные числа!`
+            : `✅ Число ${n} подходит!`;
+        renderFound();
+    }
+    slots = [null, null, null];
+    renderSlots();
+    renderDigits();
+}
+
+function clearSlots() {
+    slots = [null, null, null];
+    buildStatus.className = 'status';
+    buildStatus.textContent = 'Нажимай на цифры, чтобы собрать трёхзначное число. Нажми на клетку, чтобы убрать цифру.';
+    renderSlots();
+    renderDigits();
+}
+
+function checkAnswer() {
+    const v = Number(answerInput.value);
+    if (!answerInput.value.trim()) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число.';
+    } else if (v === ANSWER) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! Можно составить 12 чётных чисел.';
+    } else if (v === 24) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = '24 — это все трёхзначные числа из этих цифр. А нам нужны только чётные!';
+    } else if (v === 6) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Это только числа на одну чётную цифру. А чётных цифр здесь две: 4 и 6.';
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Не так. Собери числа выше и посчитай, сколько их получится.';
+    }
+}
+
+function showAnswer() {
+    found = allNumbers();
+    renderFound();
+    answerInput.value = ANSWER;
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Ответ: 12 чисел. Чётное число заканчивается на 4 или 6. Если на конце 4, на первое место можно поставить одну из трёх оставшихся цифр, а на второе — одну из двух: 3 · 2 = 6 чисел. Ещё 6 чисел — с цифрой 6 на конце. Всего 6 + 6 = 12.';
+}
+
+function reset() {
+    found = [];
+    answerInput.value = '';
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Подсказка: на какую цифру должно заканчиваться чётное число?';
+    clearSlots();
+    renderFound();
+}
+
+document.getElementById('btn-add').addEventListener('click', addNumber);
+document.getElementById('btn-clear').addEventListener('click', clearSlots);
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+
+reset();
+</script>
+</body>
+</html>

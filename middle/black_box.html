@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Чёрный ящик</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 750px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .machine {
+        display: grid;
+        grid-template-columns: 1fr 90px 1fr;
+        align-items: stretch;
+        gap: 0 12px;
+    }
+
+    .col {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: space-around;
+    }
+
+    .box {
+        background: #2c3e50;
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 56px;
+        font-weight: bold;
+        font-family: Georgia, serif;
+    }
+
+    .io {
+        height: 44px;
+        display: flex;
+        align-items: center;
+        font-family: 'Courier New', monospace;
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .col.in .io { justify-content: flex-end; }
+    .col.in .io::after { content: '→'; margin-left: 10px; color: #95a5a6; }
+    .col.out .io::before { content: '→'; margin-right: 10px; color: #95a5a6; }
+
+    .io input {
+        width: 100%;
+        max-width: 170px;
+        padding: 6px 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        font-weight: bold;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .io input:focus { border-color: #2980b9; }
+    .io input.ok { border-color: #2ecc71; background: #eafaf1; }
+    .io input.bad { border-color: #e74c3c; background: #fdecea; }
+
+    .hints {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hint {
+        background: #fff8dc;
+        border-left: 4px solid #f1c40f;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 15px;
+        animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alphabet {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    .alphabet div {
+        width: 34px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 3px 0;
+        background: #f8f9fa;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .alphabet small { display: block; font-size: 11px; color: #888; font-weight: normal; }
+
+    .try-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .try-row input {
+        width: 170px;
+        padding: 10px;
+        font-size: 18px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .try-row input:focus { border-color: #2980b9; }
+
+    .try-out {
+        font-family: 'Courier New', monospace;
+        font-size: 22px;
+        font-weight: bold;
+        color: #2980b9;
+        min-width: 120px;
+    }
+
+    .hidden { display: none; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-hint { background-color: #2980b9; }
+    .btn-hint:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 520px) {
+        .machine { grid-template-columns: 1fr 50px 1.3fr; gap: 0 6px; }
+        .box { font-size: 36px; }
+        .io { font-size: 16px; }
+        .io input { font-size: 15px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>⬛ Задача: Чёрный ящик</h1>
+<p class="subtitle">Определи правило обработки информации чёрным ящиком и заполни пропуски.</p>
+
+<div class="panel">
+    <div class="machine">
+        <div class="col in" id="col-in"></div>
+        <div class="box">?</div>
+        <div class="col out" id="col-out"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-hint" id="btn-hint">Подсказка</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="status" id="status">Сравни слова на входе с тем, что получилось на выходе. Что стоит в начале, в середине и в конце?</div>
+    <div class="hints" id="hints"></div>
+    <div class="alphabet hidden" id="alphabet"></div>
+</div>
+
+<div class="panel hidden" id="try-panel">
+    <h2>Испытай чёрный ящик</h2>
+    <div class="try-row">
+        <input type="text" id="try-input" placeholder="любое слово" autocomplete="off">
+        →
+        <span class="try-out" id="try-out"></span>
+    </div>
+    <div class="status" id="try-status">Напиши любое русское слово и посмотри, что выдаст ящик.</div>
+</div>
+
+<script>
+const ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+const EXAMPLES = ['ров', 'ветер', 'сила'];
+const QUESTIONS = ['космос', 'планета'];
+const HINTS = [
+    'Посмотри на число в конце: в слове «ров» 3 буквы, в слове «ветер» — 5, в слове «сила» — 4.',
+    'Число в начале — это номер первой буквы слова в алфавите: р — 18-я буква, в — 3-я, с — 19-я.',
+    'Буквы в середине — это буквы исходного слова, каждая заменена на следующую букву алфавита: р → с, о → п, в → г. Не забудь про букву ё!'
+];
+
+const colIn = document.getElementById('col-in');
+const colOut = document.getElementById('col-out');
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+const alphabetEl = document.getElementById('alphabet');
+const tryPanel = document.getElementById('try-panel');
+const tryInput = document.getElementById('try-input');
+const tryOut = document.getElementById('try-out');
+const tryStatus = document.getElementById('try-status');
+
+let hintsShown = 0;
+
+function blackBox(word) {
+    const shifted = word.split('').map(ch => ALPHABET[(ALPHABET.indexOf(ch) + 1) % ALPHABET.length]).join('');
+    return `${ALPHABET.indexOf(word[0]) + 1}${shifted}${word.length}`;
+}
+
+function normalize(s) {
+    return s.trim().toLowerCase().replace(/\s+/g, '');
+}
+
+function renderMachine() {
+    colIn.innerHTML = [...EXAMPLES, ...QUESTIONS].map(w => `<div class="io">${w}</div>`).join('');
+    colOut.innerHTML = EXAMPLES.map(w => `<div class="io">${blackBox(w)}</div>`).join('') +
+        QUESTIONS.map((w, i) => `<div class="io"><input type="text" id="q${i}" autocomplete="off" placeholder="?"></div>`).join('');
+    QUESTIONS.forEach((w, i) => {
+        document.getElementById(`q${i}`).addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    });
+    alphabetEl.innerHTML = ALPHABET.split('').map((ch, i) => `<div>${ch}<small>${i + 1}</small></div>`).join('');
+}
+
+function check() {
+    let allOk = true;
+    let firstHint = '';
+    QUESTIONS.forEach((w, i) => {
+        const input = document.getElementById(`q${i}`);
+        const v = normalize(input.value);
+        const right = blackBox(w);
+        const ok = v === right;
+        input.classList.toggle('ok', ok);
+        input.classList.toggle('bad', !ok && v !== '');
+        if (ok) return;
+        allOk = false;
+        if (firstHint) return;
+        if (!v) firstHint = 'Заполни оба пропуска.';
+        else if (v.replace(/ё/g, 'е') === right.replace(/ё/g, 'е')) firstHint = `Почти! В алфавите после «е» идёт «ё». Проверь слово «${w}».`;
+        else if (!v.startsWith(String(ALPHABET.indexOf(w[0]) + 1))) firstHint = `Проверь число в начале для слова «${w}».`;
+        else if (!v.endsWith(String(w.length))) firstHint = `Проверь число в конце для слова «${w}».`;
+        else firstHint = `Проверь буквы в середине для слова «${w}».`;
+    });
+    if (allOk) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! Правило разгадано. Теперь можно испытать ящик на любом слове.';
+        tryPanel.classList.remove('hidden');
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = firstHint;
+    }
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.textContent = `💡 ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+    if (hintsShown === 2) alphabetEl.classList.remove('hidden');
+    document.getElementById('btn-hint').disabled = hintsShown >= HINTS.length;
+}
+
+function showAnswer() {
+    QUESTIONS.forEach((w, i) => {
+        const input = document.getElementById(`q${i}`);
+        input.value = blackBox(w);
+        input.classList.add('ok');
+        input.classList.remove('bad');
+    });
+    alphabetEl.classList.remove('hidden');
+    tryPanel.classList.remove('hidden');
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: 12лптнпт6 и 17рмбоёуб7. Правило: порядковый номер первой буквы слова в алфавите + буквы слова, сдвинутые на одну вперёд (на следующую букву алфавита) + количество букв в слове.';
+}
+
+function tryWord() {
+    const w = normalize(tryInput.value);
+    if (!w) {
+        tryOut.textContent = '';
+        tryStatus.className = 'status';
+        tryStatus.textContent = 'Напиши любое русское слово и посмотри, что выдаст ящик.';
+    } else if (![...w].every(ch => ALPHABET.includes(ch))) {
+        tryOut.textContent = '';
+        tryStatus.className = 'status error';
+        tryStatus.textContent = 'Ящик понимает только русские буквы.';
+    } else {
+        tryOut.textContent = blackBox(w);
+        tryStatus.className = 'status';
+        tryStatus.textContent = `${w[0]} — ${ALPHABET.indexOf(w[0]) + 1}-я буква алфавита, количество букв в слове: ${w.length}.`;
+    }
+}
+
+function reset() {
+    hintsShown = 0;
+    hintsEl.innerHTML = '';
+    document.getElementById('btn-hint').disabled = false;
+    alphabetEl.classList.add('hidden');
+    tryPanel.classList.add('hidden');
+    tryInput.value = '';
+    tryWord();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Сравни слова на входе с тем, что получилось на выходе. Что стоит в начале, в середине и в конце?';
+    renderMachine();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+tryInput.addEventListener('input', tryWord);
+
+reset();
+</script>
+</body>
+</html>

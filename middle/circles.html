@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Закономерные круги</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .circles {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .circle-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 8px;
+        border: 3px solid transparent;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        user-select: none;
+    }
+
+    .circle-card:hover { background: #eaf2f8; }
+    .circle-card.selected { border-color: #2980b9; background: #eaf2f8; }
+    .circle-card.odd { border-color: #e74c3c; background: #fdecea; }
+
+    .circle-card .label { font-weight: bold; font-size: 16px; color: #2c3e50; }
+
+    .circle-card svg text {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        font-size: 20px;
+        font-weight: bold;
+        fill: #2c3e50;
+    }
+
+    .chain {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        min-height: 36px;
+        text-align: center;
+        max-width: 170px;
+        line-height: 1.4;
+    }
+
+    .chain .ok { color: #27ae60; font-weight: bold; }
+    .chain .bad { color: #c0392b; font-weight: bold; }
+
+    .reasons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .reason {
+        text-align: left;
+        background: #f8f9fa;
+        color: #2c3e50;
+        border: 2px solid #ddd;
+        font-weight: normal;
+        line-height: 1.4;
+    }
+
+    .reason:hover { background: #eaf2f8; border-color: #2980b9; }
+    .reason.right { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .reason.wrong { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .hidden { display: none; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>⭕ Задача: Закономерные круги</h1>
+<p class="subtitle">Какой круг лишний и почему?</p>
+
+<div class="panel">
+    <h2>1. Выбери лишний круг</h2>
+    <div class="circles" id="circles"></div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="status" id="status">Нажми на круг, который, по-твоему, лишний.</div>
+</div>
+
+<div class="panel hidden" id="why-panel">
+    <h2>2. Почему он лишний?</h2>
+    <div class="reasons" id="reasons"></div>
+    <div class="status" id="why-status">Выбери верное объяснение.</div>
+</div>
+
+<script>
+// Числа в четвертях: левая верхняя, левая нижняя, правая нижняя, правая верхняя (против часовой стрелки)
+const CIRCLES = [
+    [2, 6, 18, 54],
+    [4, 7, 20, 43],
+    [3, 9, 27, 81],
+    [5, 15, 45, 135]
+];
+const ODD = 1;
+
+const REASONS = [
+    { text: 'Во втором круге сумма чисел меньше 100.', right: false,
+      hint: 'В первом круге сумма тоже меньше 100: 2 + 6 + 18 + 54 = 80.' },
+    { text: 'Во втором круге есть нечётные числа.', right: false,
+      hint: 'В третьем и четвёртом кругах все числа нечётные — значит, дело не в этом.' },
+    { text: 'В остальных кругах каждое следующее число (против часовой стрелки) в 3 раза больше предыдущего, а во втором — нет.', right: true }
+];
+
+const circlesEl = document.getElementById('circles');
+const statusEl = document.getElementById('status');
+const whyPanel = document.getElementById('why-panel');
+const reasonsEl = document.getElementById('reasons');
+const whyStatus = document.getElementById('why-status');
+let selected = null;
+let solved = false;
+
+function circleSvg(nums) {
+    const [tl, bl, br, tr] = nums;
+    return `
+    <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="74" fill="white" stroke="#2c3e50" stroke-width="3"/>
+        <line x1="80" y1="6" x2="80" y2="154" stroke="#2c3e50" stroke-width="3"/>
+        <line x1="6" y1="80" x2="154" y2="80" stroke="#2c3e50" stroke-width="3"/>
+        <text x="50" y="58" text-anchor="middle">${tl}</text>
+        <text x="50" y="118" text-anchor="middle">${bl}</text>
+        <text x="110" y="118" text-anchor="middle">${br}</text>
+        <text x="110" y="58" text-anchor="middle">${tr}</text>
+    </svg>`;
+}
+
+function chainHtml(nums) {
+    const parts = [];
+    for (let i = 1; i < nums.length; i++) {
+        const ok = nums[i - 1] * 3 === nums[i];
+        parts.push(`${nums[i - 1]}·3 = ${nums[i - 1] * 3} <span class="${ok ? 'ok' : 'bad'}">${ok ? '✓' : '≠ ' + nums[i]}</span>`);
+        if (!ok) break;
+    }
+    return parts.join('<br>');
+}
+
+function renderCircles(showChains) {
+    circlesEl.innerHTML = CIRCLES.map((nums, i) => {
+        let cls = 'circle-card';
+        if (solved && i === ODD) cls += ' odd';
+        else if (selected === i) cls += ' selected';
+        return `<div class="${cls}" data-i="${i}">
+            ${circleSvg(nums)}
+            <div class="label">${i + 1})</div>
+            <div class="chain">${showChains ? chainHtml(nums) : ''}</div>
+        </div>`;
+    }).join('');
+    circlesEl.querySelectorAll('.circle-card').forEach(el => el.addEventListener('click', () => {
+        if (solved) return;
+        selected = Number(el.dataset.i);
+        statusEl.className = 'status';
+        statusEl.textContent = `Выбран круг ${selected + 1}. Нажми «Проверить».`;
+        renderCircles(false);
+    }));
+}
+
+function renderReasons() {
+    reasonsEl.innerHTML = REASONS.map((r, i) => `<button class="reason" data-i="${i}">${r.text}</button>`).join('');
+    reasonsEl.querySelectorAll('.reason').forEach(btn => btn.addEventListener('click', () => {
+        const r = REASONS[Number(btn.dataset.i)];
+        if (r.right) {
+            btn.classList.add('right');
+            whyStatus.className = 'status success';
+            whyStatus.textContent = '🎉 Точно! Посмотри на проверку под каждым кругом.';
+            reasonsEl.querySelectorAll('.reason').forEach(b => { b.disabled = true; });
+            renderCircles(true);
+        } else {
+            btn.classList.add('wrong');
+            whyStatus.className = 'status error';
+            whyStatus.textContent = r.hint;
+        }
+    }));
+}
+
+function check() {
+    if (selected === null) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Сначала нажми на один из кругов.';
+        return;
+    }
+    if (selected === ODD) {
+        solved = true;
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно, второй круг лишний! А теперь объясни почему.';
+        renderCircles(false);
+        whyPanel.classList.remove('hidden');
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Этот круг подчиняется тому же правилу, что и большинство. Попробуй прочитать числа по кругу против часовой стрелки, начиная с левой верхней четверти.';
+    }
+}
+
+function showAnswer() {
+    solved = true;
+    selected = ODD;
+    renderCircles(true);
+    whyPanel.classList.add('hidden');
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: 2 круг лишний. В остальных кругах следующее (против часовой стрелки) число получается умножением предыдущего на 3: 2·3 = 6, 6·3 = 18, 18·3 = 54. Во втором круге 4·3 = 12, а не 7.';
+}
+
+function reset() {
+    selected = null;
+    solved = false;
+    whyPanel.classList.add('hidden');
+    whyStatus.className = 'status';
+    whyStatus.textContent = 'Выбери верное объяснение.';
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажми на круг, который, по-твоему, лишний.';
+    renderCircles(false);
+    renderReasons();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

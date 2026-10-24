@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Урок информатики</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .conditions { flex: 1 1 380px; }
+    .board { flex: 1 1 440px; }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .conditions ul { padding-left: 20px; margin: 8px 0; }
+    .conditions li { margin-bottom: 6px; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table.grid {
+        border-collapse: collapse;
+        margin: 0 auto;
+        font-size: 15px;
+    }
+
+    table.grid th, table.grid td {
+        border: 1px solid #bdc3c7;
+        width: 62px;
+        height: 40px;
+        text-align: center;
+    }
+
+    table.grid th { background: #f8f9fa; color: #2c3e50; }
+    table.grid th.name { width: 90px; text-align: left; padding-left: 8px; }
+
+    table.grid td.cell {
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+        user-select: none;
+        transition: background 0.15s;
+    }
+
+    table.grid td.cell:hover { background: #f5eef8; }
+    table.grid td.cell.allowed { background: #f5eef8; }
+    table.grid td.cell.impossible { background: #f2f3f4; color: #bdc3c7; }
+    table.grid td.cell.picked { background: #8e44ad; color: white; }
+
+    table.grid tr.row-bad th.name { background: #fdecea; color: #c0392b; }
+    table.grid tr.row-ok th.name { background: #eafaf1; color: #27ae60; }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .hints { margin-top: 12px; }
+
+    .hint {
+        background: #fff8e1;
+        border-left: 4px solid #f1c40f;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>👩‍🏫 Задача: Урок информатики</h1>
+
+<div class="container">
+    <div class="panel conditions">
+        <h2>Условие</h2>
+        <p>Про пятерых восьмиклассников известно следующее:</p>
+        <ul>
+            <li><b>Аня</b> — отличница, она получает только «пятёрки».</li>
+            <li><b>Борис</b> может либо получить «пятёрку», либо пропустить занятие.</li>
+            <li><b>Василий</b> получает только «четвёрки» или «тройки».</li>
+            <li>Для <b>Григория</b> возможны все оценки и даже пропуск занятий.</li>
+            <li><b>Дмитрий</b> способен или пропустить занятие, или получить «тройку».</li>
+        </ul>
+        <p>Прошёл урок информатики. <b>Какая оценка у каждого из перечисленных восьмиклассников, если один из них отсутствовал на занятии, а все остальные получили различные оценки?</b></p>
+    </div>
+
+    <div class="panel board">
+        <h2>Заполни таблицу</h2>
+        <p style="font-size:14px; color:#555; margin-top:0;">Нажми на клетку, чтобы выбрать оценку ученика. Н — отсутствовал на занятии.</p>
+        <div class="table-wrap">
+            <table class="grid" id="grid"></table>
+        </div>
+        <div class="buttons">
+            <button class="btn-check" id="btn-check">Проверить</button>
+            <button class="btn-hint" id="btn-hint">💡 Подсказка</button>
+            <button class="btn-hint" id="btn-answer">Показать ответ</button>
+            <button class="btn-reset" id="btn-reset">Очистить</button>
+        </div>
+        <div class="status" id="status">Начни с того, у кого меньше всего вариантов.</div>
+        <div class="hints" id="hints"></div>
+    </div>
+</div>
+
+<script>
+const OPTIONS = ['5', '4', '3', '2', 'Н'];
+const PEOPLE = [
+    { name: 'Аня', allowed: ['5'], rule: 'Аня получает только «пятёрки»' },
+    { name: 'Борис', allowed: ['5', 'Н'], rule: 'Борис может только получить «5» или пропустить занятие' },
+    { name: 'Василий', allowed: ['4', '3'], rule: 'Василий получает только «4» или «3»' },
+    { name: 'Григорий', allowed: ['5', '4', '3', '2', 'Н'], rule: '' },
+    { name: 'Дмитрий', allowed: ['3', 'Н'], rule: 'Дмитрий может только получить «3» или пропустить занятие' }
+];
+const ANSWER = { 'Аня': '5', 'Борис': 'Н', 'Василий': '4', 'Григорий': '2', 'Дмитрий': '3' };
+
+const HINTS = [
+    'Запишем, какие варианты возможны у каждого: Аня — только 5; Борис — 5 или Н; Василий — 4 или 3; Григорий — 5, 4, 3, 2 или Н; Дмитрий — 3 или Н. Возможные варианты подсвечены в таблице.',
+    'Аня точно получила 5 — других вариантов у неё нет. Борис не мог получить 5, так как оценки разные, а 5 уже у Ани. Значит, Борис отсутствовал.',
+    'Отсутствовал только один человек, поэтому Дмитрий был на уроке и получил 3. Тогда Василий не мог получить 3 — у него 4.',
+    'Григорий присутствовал (отсутствующий уже есть). Оценки 5, 4 и 3 заняты, поэтому у Григория 2.'
+];
+
+const gridEl = document.getElementById('grid');
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+let state = {};
+let hintsShown = 0;
+let showAllowed = false;
+
+function render() {
+    let html = '<tr><th class="name"></th>' + OPTIONS.map(o => `<th>${o}</th>`).join('') + '</tr>';
+    PEOPLE.forEach(p => {
+        html += `<tr data-person="${p.name}"><th class="name">${p.name}</th>`;
+        OPTIONS.forEach(o => {
+            let cls = 'cell';
+            if (state[p.name] === o) cls += ' picked';
+            else if (showAllowed) cls += p.allowed.includes(o) ? ' allowed' : ' impossible';
+            const mark = state[p.name] === o ? '✔' : (showAllowed && !p.allowed.includes(o) ? '✖' : '');
+            html += `<td class="${cls}" data-person="${p.name}" data-option="${o}">${mark}</td>`;
+        });
+        html += '</tr>';
+    });
+    gridEl.innerHTML = html;
+}
+
+gridEl.addEventListener('click', e => {
+    const td = e.target.closest('td.cell');
+    if (!td) return;
+    const { person, option } = td.dataset;
+    state[person] = state[person] === option ? null : option;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Когда заполнишь все строки, нажми «Проверить».';
+    render();
+});
+
+function markRow(name, ok) {
+    const tr = gridEl.querySelector(`tr[data-person="${name}"]`);
+    tr.classList.add(ok ? 'row-ok' : 'row-bad');
+}
+
+function check() {
+    render();
+    const empty = PEOPLE.filter(p => !state[p.name]);
+    if (empty.length) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Не заполнены строки: ${empty.map(p => p.name).join(', ')}.`;
+        return;
+    }
+    const broken = PEOPLE.find(p => !p.allowed.includes(state[p.name]));
+    if (broken) {
+        markRow(broken.name, false);
+        statusEl.className = 'status error';
+        statusEl.textContent = `Так не может быть: ${broken.rule}.`;
+        return;
+    }
+    const absent = PEOPLE.filter(p => state[p.name] === 'Н');
+    if (absent.length !== 1) {
+        absent.forEach(p => markRow(p.name, false));
+        statusEl.className = 'status error';
+        statusEl.textContent = absent.length === 0
+            ? 'По условию один из учеников отсутствовал на занятии.'
+            : 'Отсутствовал только один ученик, а у тебя — несколько.';
+        return;
+    }
+    const grades = PEOPLE.filter(p => state[p.name] !== 'Н');
+    const dup = grades.find((p, i) => grades.findIndex(q => state[q.name] === state[p.name]) !== i);
+    if (dup) {
+        grades.filter(p => state[p.name] === state[dup.name]).forEach(p => markRow(p.name, false));
+        statusEl.className = 'status error';
+        statusEl.textContent = `Оценки у присутствовавших должны быть разными, а «${state[dup.name]}» получили несколько человек.`;
+        return;
+    }
+    PEOPLE.forEach(p => markRow(p.name, true));
+    statusEl.className = 'status success';
+    statusEl.textContent = '🎉 Верно! Аня — «5», Борис — отсутствовал, Василий — «4», Григорий — «2», Дмитрий — «3».';
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.innerHTML = `💡 <b>Подсказка ${hintsShown + 1}.</b> ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+    if (hintsShown === 1) {
+        showAllowed = true;
+        render();
+    }
+    document.getElementById('btn-hint').disabled = hintsShown >= HINTS.length;
+}
+
+function showAnswer() {
+    state = { ...ANSWER };
+    showAllowed = true;
+    check();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: Аня — «5», Григорий — «2», Борис — пропуск, Дмитрий — «3», Василий — «4».';
+}
+
+function reset() {
+    state = {};
+    PEOPLE.forEach(p => { state[p.name] = null; });
+    hintsShown = 0;
+    showAllowed = false;
+    hintsEl.innerHTML = '';
+    document.getElementById('btn-hint').disabled = false;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Начни с того, у кого меньше всего вариантов.';
+    render();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

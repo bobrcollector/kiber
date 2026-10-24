@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Нас ссорили поезда</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h2 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        color: #2980b9;
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+    }
+
+    .answer-row input {
+        width: 80px;
+        padding: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+
+    .track {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .track text { font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+    .stats {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 12px;
+        font-size: 16px;
+    }
+
+    .stats b { color: #2980b9; font-size: 20px; }
+
+    .legend {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 8px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .legend span::before {
+        content: '';
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -1px;
+        background: var(--c);
+    }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .slider-row input { flex: 1; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-play { background-color: #2980b9; }
+    .btn-play:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🚂 Задача: Нас ссорили поезда</h1>
+<p class="subtitle">Из Москвы во Владивосток каждый день выходит поезд. Так же каждый день из Владивостока в Москву выходит поезд. Переезд длится 10 дней.
+    Если вы выехали из Владивостока в Москву, то сколько поездов, идущих в обратном направлении, встретится вам во время поездки?</p>
+
+<div class="panel">
+    <h2>1. Твой ответ</h2>
+    <div class="answer-row">
+        Нам встретится
+        <input type="number" id="answer-input" min="0" inputmode="numeric">
+        поездов
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+    </div>
+    <div class="status" id="answer-status">Подумай: есть ли на дороге встречные поезда в момент, когда мы только отправляемся?</div>
+</div>
+
+<div class="panel">
+    <h2>2. Проверь на модели</h2>
+    <svg class="track" id="track" viewBox="0 0 700 170"></svg>
+    <div class="legend">
+        <span style="--c:#e74c3c">наш поезд</span>
+        <span style="--c:#2980b9">встречный, ещё не встретили</span>
+        <span style="--c:#bdc3c7">уже встретили</span>
+    </div>
+    <div class="stats">
+        <div>День пути: <b id="day">0</b> из 10</div>
+        <div>Встречено поездов: <b id="met">0</b></div>
+    </div>
+    <div class="slider-row">
+        Время:
+        <input type="range" id="slider" min="0" max="1000" value="0">
+    </div>
+
+    <div class="controls">
+        <button class="btn-play" id="btn-play">▶ Поехали</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+    <div class="status" id="sim-status"></div>
+</div>
+
+<script>
+const TRIP = 10;
+const ANSWER = 20;
+const MOSCOW_X = 70;
+const VLAD_X = 630;
+const TOP_Y = 60;
+const BOTTOM_Y = 110;
+// Поезда из Москвы выходят каждый день; наш поезд выходит в середине между их отправлениями
+const DEPARTURES = [];
+for (let k = -TRIP - 1; k <= TRIP; k++) DEPARTURES.push(k + 0.5);
+
+const trackEl = document.getElementById('track');
+const dayEl = document.getElementById('day');
+const metEl = document.getElementById('met');
+const slider = document.getElementById('slider');
+const btnPlay = document.getElementById('btn-play');
+const simStatus = document.getElementById('sim-status');
+const answerInput = document.getElementById('answer-input');
+const answerStatus = document.getElementById('answer-status');
+
+let time = 0;
+let playing = false;
+let lastFrame = null;
+
+function xFromMoscow(progress) {
+    return MOSCOW_X + progress * (VLAD_X - MOSCOW_X);
+}
+
+function meetTime(t) {
+    // Наш поезд: Владивосток → Москва за TRIP дней, встречный вышел из Москвы в момент t
+    return (TRIP + t) / 2;
+}
+
+function trainSvg(x, y, color, flip) {
+    const dir = flip ? -1 : 1;
+    return `<g transform="translate(${x},${y}) scale(${dir},1)">
+        <rect x="-16" y="-11" width="32" height="18" rx="4" fill="${color}"/>
+        <rect x="7" y="-11" width="9" height="18" rx="4" fill="rgba(0,0,0,0.18)"/>
+        <rect x="-12" y="-7" width="6" height="6" rx="1" fill="white" opacity="0.8"/>
+        <rect x="-3" y="-7" width="6" height="6" rx="1" fill="white" opacity="0.8"/>
+        <circle cx="-9" cy="9" r="3" fill="#2c3e50"/>
+        <circle cx="9" cy="9" r="3" fill="#2c3e50"/>
+    </g>`;
+}
+
+function countMet(tau) {
+    return DEPARTURES.filter(t => meetTime(t) >= 0 && meetTime(t) <= TRIP && meetTime(t) <= tau).length;
+}
+
+function render() {
+    let html = `
+        <text x="${MOSCOW_X}" y="28" text-anchor="middle" font-size="15" font-weight="bold" fill="#2c3e50">Москва</text>
+        <text x="${VLAD_X}" y="28" text-anchor="middle" font-size="15" font-weight="bold" fill="#2c3e50">Владивосток</text>
+        <line x1="${MOSCOW_X}" y1="${TOP_Y + 9}" x2="${VLAD_X}" y2="${TOP_Y + 9}" stroke="#95a5a6" stroke-width="3"/>
+        <line x1="${MOSCOW_X}" y1="${BOTTOM_Y + 9}" x2="${VLAD_X}" y2="${BOTTOM_Y + 9}" stroke="#95a5a6" stroke-width="3"/>
+        <rect x="${MOSCOW_X - 6}" y="38" width="12" height="90" rx="3" fill="#2c3e50"/>
+        <rect x="${VLAD_X - 6}" y="38" width="12" height="90" rx="3" fill="#2c3e50"/>
+        <text x="${(MOSCOW_X + VLAD_X) / 2}" y="${TOP_Y - 18}" text-anchor="middle" font-size="12" fill="#777">из Москвы во Владивосток →</text>
+        <text x="${(MOSCOW_X + VLAD_X) / 2}" y="${BOTTOM_Y + 38}" text-anchor="middle" font-size="12" fill="#777">← наш поезд из Владивостока в Москву</text>`;
+
+    for (const t of DEPARTURES) {
+        const age = time - t;
+        if (age < 0 || age > TRIP) continue;
+        const met = meetTime(t) <= time;
+        html += trainSvg(xFromMoscow(age / TRIP), TOP_Y, met ? '#bdc3c7' : '#2980b9', false);
+    }
+    html += trainSvg(xFromMoscow(1 - time / TRIP), BOTTOM_Y, '#e74c3c', true);
+    trackEl.innerHTML = html;
+
+    const met = countMet(time);
+    dayEl.textContent = time.toFixed(1).replace('.', ',');
+    metEl.textContent = met;
+    slider.value = Math.round(time / TRIP * 1000);
+
+    if (time === 0) {
+        simStatus.className = 'status';
+        simStatus.textContent = 'Мы только отправляемся — а сколько встречных поездов уже едет нам навстречу?';
+    } else if (time >= TRIP) {
+        simStatus.className = 'status success';
+        simStatus.textContent = `Приехали в Москву! Всего встретилось поездов: ${met}.`;
+    } else {
+        simStatus.className = 'status';
+        simStatus.textContent = 'Смотри, как каждый встречный поезд становится серым после встречи с нашим.';
+    }
+}
+
+function frame(ts) {
+    if (!playing) return;
+    if (lastFrame !== null) {
+        time = Math.min(TRIP, time + (ts - lastFrame) / 1200);
+    }
+    lastFrame = ts;
+    render();
+    if (time >= TRIP) {
+        stop();
+        return;
+    }
+    requestAnimationFrame(frame);
+}
+
+function play() {
+    if (playing) { stop(); return; }
+    if (time >= TRIP) time = 0;
+    playing = true;
+    lastFrame = null;
+    btnPlay.textContent = '⏸ Пауза';
+    requestAnimationFrame(frame);
+}
+
+function stop() {
+    playing = false;
+    btnPlay.textContent = '▶ Поехали';
+}
+
+function reset() {
+    stop();
+    time = 0;
+    render();
+}
+
+function checkAnswer() {
+    const v = Number(answerInput.value);
+    if (!answerInput.value.trim()) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число.';
+    } else if (v === ANSWER) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! Нам встретится 20 поездов.';
+    } else if (v === TRIP) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Это только поезда, которые выйдут из Москвы во время нашей поездки. А те, что уже в пути? Запусти модель!';
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Не так. Запусти модель ниже и посчитай встречные поезда.';
+    }
+}
+
+function showAnswer() {
+    answerInput.value = ANSWER;
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Ответ: 20 поездов. Мы встретим не только 10 поездов, которые выйдут из Москвы после нашего отправления, но и 10 поездов, которые к моменту нашего отъезда уже находились в пути.';
+}
+
+btnPlay.addEventListener('click', play);
+document.getElementById('btn-reset').addEventListener('click', reset);
+slider.addEventListener('input', () => {
+    stop();
+    time = Number(slider.value) / 1000 * TRIP;
+    render();
+});
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+answerInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+
+reset();
+</script>
+</body>
+</html>

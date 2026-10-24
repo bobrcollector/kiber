@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Исполнитель Муравей</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .layout {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .board {
+        --cell: 40px;
+        display: grid;
+        grid-template-columns: repeat(9, var(--cell));
+        grid-auto-rows: var(--cell);
+        border: 2px solid #2c3e50;
+        background: white;
+    }
+
+    .board div {
+        border: 1px solid #ccd5dd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    .board .head { background: #f8f9fa; }
+
+    .board .cell { cursor: pointer; position: relative; font-size: 24px; }
+    .board .cell:hover { background: #eaf2f8; }
+    .board .cell.chosen { box-shadow: inset 0 0 0 3px #f1c40f; background: #fff8dc; }
+    .board .cell.trail { background: #f1f4f7; }
+
+    .cube {
+        width: 80%;
+        height: 80%;
+        background: #7f8c8d;
+        border: 2px solid #2c3e50;
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+
+    .program {
+        font-family: 'Courier New', monospace;
+        font-size: 18px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 18px;
+        min-width: 220px;
+    }
+
+    .program div { padding: 3px 8px; border-radius: 5px; }
+    .program .indent { padding-left: 28px; }
+    .program .active { background: #f1c40f; font-weight: bold; }
+
+    .loop-info {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+        text-align: center;
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+        margin-top: 18px;
+    }
+
+    .answer-row .picked {
+        min-width: 50px;
+        padding: 8px 12px;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-step { background-color: #2980b9; }
+    .btn-step:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 480px) {
+        .board { --cell: 32px; }
+        .board .cell { font-size: 19px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🐜 Задача: Исполнитель Муравей</h1>
+<p class="subtitle">Исполнитель Муравей перемещается по полю, разделённому на клетки. Встретив кубик, он сдвигает его по направлению движения.
+    В какой клетке окажется кубик после выполнения алгоритма?</p>
+
+<div class="panel">
+    <div class="layout">
+        <div class="board" id="board"></div>
+        <div>
+            <div class="program" id="program">
+                <div>повтори 2 раз</div>
+                <div class="indent" data-cmd="0">вверх 1</div>
+                <div class="indent" data-cmd="1">влево 2</div>
+                <div class="indent" data-cmd="2">вниз 1</div>
+                <div>кц</div>
+            </div>
+            <div class="loop-info" id="loop-info"></div>
+        </div>
+    </div>
+
+    <div class="answer-row">
+        Кубик окажется в клетке
+        <span class="picked" id="picked">?</span>
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+    </div>
+    <div class="status" id="answer-status">Нажми на клетку поля, где, по-твоему, окажется кубик.</div>
+
+    <div class="controls">
+        <button class="btn-step" id="btn-step">Сделать шаг</button>
+        <button class="btn-step" id="btn-run">Выполнить всё</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+    <div class="status" id="run-status">Можно выполнить алгоритм по шагам и проверить себя.</div>
+</div>
+
+<script>
+const COLS = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З'];
+const ROWS = 8;
+const START_ANT = { x: 6, y: 4 };   // Ж4
+const START_CUBE = { x: 5, y: 5 };  // Е5
+const ANSWER = 'Б5';
+const DIRS = {
+    up: { dx: 0, dy: 1, name: 'вверх' },
+    down: { dx: 0, dy: -1, name: 'вниз' },
+    left: { dx: -1, dy: 0, name: 'влево' }
+};
+// Тело цикла по отдельным шагам: [номер команды, направление]
+const BODY = [[0, 'up'], [1, 'left'], [1, 'left'], [2, 'down']];
+const REPEATS = 2;
+
+const boardEl = document.getElementById('board');
+const pickedEl = document.getElementById('picked');
+const answerStatus = document.getElementById('answer-status');
+const runStatus = document.getElementById('run-status');
+const loopInfo = document.getElementById('loop-info');
+const btnStep = document.getElementById('btn-step');
+const btnRun = document.getElementById('btn-run');
+
+let ant, cube, step, chosen, trail, runTimer = null;
+
+function cellName(x, y) {
+    return COLS[x - 1] + y;
+}
+
+function render() {
+    let html = '';
+    for (let y = ROWS; y >= 1; y--) {
+        html += `<div class="head">${y}</div>`;
+        for (let x = 1; x <= COLS.length; x++) {
+            const name = cellName(x, y);
+            let cls = 'cell';
+            if (chosen === name) cls += ' chosen';
+            if (trail.has(name)) cls += ' trail';
+            let content = '';
+            if (cube.x === x && cube.y === y) content = '<span class="cube"></span>';
+            else if (ant.x === x && ant.y === y) content = '🐜';
+            html += `<div class="${cls}" data-name="${name}">${content}</div>`;
+        }
+    }
+    html += '<div class="head"></div>' + COLS.map(c => `<div class="head">${c}</div>`).join('');
+    boardEl.innerHTML = html;
+    boardEl.querySelectorAll('.cell').forEach(el => el.addEventListener('click', () => {
+        chosen = el.dataset.name;
+        pickedEl.textContent = chosen;
+        answerStatus.className = 'status';
+        answerStatus.textContent = `Выбрана клетка ${chosen}. Нажми «Проверить».`;
+        render();
+    }));
+
+    const total = BODY.length * REPEATS;
+    document.querySelectorAll('#program [data-cmd]').forEach(el => el.classList.remove('active'));
+    if (step > 0 && step <= total) {
+        const cmd = BODY[(step - 1) % BODY.length][0];
+        document.querySelector(`#program [data-cmd="${cmd}"]`).classList.add('active');
+    }
+    const iter = step === 0 ? 0 : Math.ceil(step / BODY.length);
+    loopInfo.textContent = `Повторение: ${iter} из ${REPEATS}`;
+    btnStep.disabled = step >= total;
+    btnRun.disabled = step >= total;
+}
+
+function doStep() {
+    const total = BODY.length * REPEATS;
+    if (step >= total) return;
+    const d = DIRS[BODY[step % BODY.length][1]];
+    const nx = ant.x + d.dx;
+    const ny = ant.y + d.dy;
+    trail.add(cellName(ant.x, ant.y));
+    let pushed = false;
+    if (cube.x === nx && cube.y === ny) {
+        cube = { x: cube.x + d.dx, y: cube.y + d.dy };
+        pushed = true;
+    }
+    ant = { x: nx, y: ny };
+    step++;
+
+    const where = `Муравей ${d.name} → ${cellName(ant.x, ant.y)}`;
+    if (step >= total) {
+        runStatus.className = 'status success';
+        runStatus.textContent = `Алгоритм выполнен! Кубик стоит в клетке ${cellName(cube.x, cube.y)}.`;
+    } else {
+        runStatus.className = 'status';
+        runStatus.textContent = pushed
+            ? `${where}. Он толкнул кубик в клетку ${cellName(cube.x, cube.y)}!`
+            : `${where}.`;
+    }
+    render();
+}
+
+function stopRun() {
+    if (runTimer) clearInterval(runTimer);
+    runTimer = null;
+}
+
+function runAll() {
+    stopRun();
+    runTimer = setInterval(() => {
+        doStep();
+        if (step >= BODY.length * REPEATS) stopRun();
+    }, 500);
+}
+
+function checkAnswer() {
+    if (!chosen) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Сначала нажми на клетку поля.';
+    } else if (chosen === ANSWER) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! Кубик окажется в клетке Б5.';
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Не так. Выполни алгоритм по шагам кнопкой «Сделать шаг» и следи за кубиком.';
+    }
+}
+
+function showAnswer() {
+    chosen = ANSWER;
+    pickedEl.textContent = ANSWER;
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Ответ: Б5. В каждом повторении муравей поднимается на одну клетку, дважды толкает кубик влево и опускается обратно. За два повторения кубик сдвигается на 4 клетки: Е5 → Б5.';
+    render();
+}
+
+function reset() {
+    stopRun();
+    ant = { ...START_ANT };
+    cube = { ...START_CUBE };
+    step = 0;
+    trail = new Set();
+    runStatus.className = 'status';
+    runStatus.textContent = 'Можно выполнить алгоритм по шагам и проверить себя.';
+    render();
+}
+
+btnStep.addEventListener('click', () => { stopRun(); doStep(); });
+btnRun.addEventListener('click', runAll);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-check').addEventListener('click', checkAnswer);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+
+chosen = null;
+reset();
+</script>
+</body>
+</html>

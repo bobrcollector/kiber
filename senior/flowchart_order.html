@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Вычисления по блок-схеме</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 800px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .diagram-panel, .controls-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    .diagram-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .controls-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 440px;
+    }
+
+    .panel-title {
+        font-weight: bold;
+        color: #8e44ad;
+        font-size: 17px;
+    }
+
+    svg.flow {
+        width: 420px;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .block {
+        fill: #ecf0f1;
+        stroke: #7f8c8d;
+        stroke-width: 2;
+        transition: all 0.3s ease;
+    }
+
+    .block.active {
+        fill: #f1c40f;
+        stroke: #e67e22;
+        stroke-width: 3;
+        filter: drop-shadow(0 0 5px rgba(241, 196, 15, 0.5));
+    }
+
+    .block-text {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        fill: #2c3e50;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        user-select: none;
+        pointer-events: none;
+    }
+
+    .label {
+        font-size: 12px;
+        font-style: italic;
+        fill: #7f8c8d;
+    }
+
+    .arrow {
+        stroke: #7f8c8d;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .arrow.head { marker-end: url(#arrowhead); }
+    .arrow.active { stroke: #e67e22; stroke-width: 3; }
+    .arrow.head.active { marker-end: url(#arrowhead-active); }
+
+    table.values {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+    }
+
+    table.values th, table.values td {
+        padding: 7px 10px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+
+    table.values th { background-color: #f8f9fa; }
+    table.values tbody tr { cursor: pointer; }
+    table.values tbody tr:hover { background: #f5eef8; }
+    table.values tr.current { background: #fff3cd !important; font-weight: bold; }
+    table.values td.res { color: #8e44ad; font-weight: bold; }
+
+    .var-display {
+        display: flex;
+        justify-content: space-around;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        color: #8e44ad;
+    }
+
+    .step-desc {
+        font-size: 14px;
+        color: #555;
+        font-style: italic;
+        min-height: 20px;
+        text-align: center;
+    }
+
+    .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .slots {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        border: 2px solid #2c3e50;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .slots div {
+        text-align: center;
+        border-right: 1px solid #bdc3c7;
+    }
+
+    .slots div:last-child { border-right: none; }
+
+    .slots .num {
+        font-size: 13px;
+        color: #777;
+        border-bottom: 1px solid #bdc3c7;
+        padding: 3px 0;
+        background: #f8f9fa;
+    }
+
+    .slots .slot {
+        height: 42px;
+        line-height: 42px;
+        font-size: 22px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #2c3e50;
+    }
+
+    .slots .slot:hover { background: #f5eef8; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-letter { background-color: #8e44ad; width: 46px; font-size: 18px; }
+    .btn-letter:hover { background-color: #6c3483; }
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🔢 Задача: Вычисления по блок-схеме</h1>
+<p class="subtitle">Выполни вычисления по блок-схеме. Расположи литеры начальных значений X в порядке убывания результатов вычислений.</p>
+
+<div class="container">
+    <div class="diagram-panel">
+        <svg class="flow" viewBox="0 0 420 535">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#7f8c8d" />
+                </marker>
+                <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#e67e22" />
+                </marker>
+            </defs>
+
+            <rect id="block-start" class="block" x="150" y="10" width="120" height="34" rx="17" ry="17" />
+            <text class="block-text" x="210" y="27">НАЧАЛО</text>
+            <path id="a-start" class="arrow head" d="M210,44 V64" />
+
+            <rect id="block-add4" class="block" x="135" y="64" width="150" height="34" />
+            <text class="block-text" x="210" y="81">X := X + 4</text>
+            <path id="a-add4" class="arrow head" d="M210,98 V118" />
+
+            <rect id="block-mul3" class="block" x="135" y="118" width="150" height="34" />
+            <text class="block-text" x="210" y="135">X := X · 3</text>
+            <path id="a-mul3" class="arrow head" d="M210,152 V172" />
+
+            <rect id="block-sub16" class="block" x="135" y="172" width="150" height="34" />
+            <text class="block-text" x="210" y="189">X := X − 16</text>
+            <path id="a-sub16" class="arrow head" d="M210,206 V226" />
+
+            <polygon id="block-cond" class="block" points="210,226 330,256 210,286 90,256" />
+            <text class="block-text" x="210" y="256">X — чётное?</text>
+
+            <path id="a-yes" class="arrow head" d="M90,256 H70 V300" />
+            <text class="label" x="48" y="250">Да</text>
+            <path id="a-no" class="arrow head" d="M330,256 H350 V300" />
+            <text class="label" x="345" y="250">Нет</text>
+
+            <rect id="block-add8" class="block" x="10" y="300" width="120" height="34" />
+            <text class="block-text" x="70" y="317">X := X + 8</text>
+            <path id="a-add8" class="arrow head" d="M70,334 V364" />
+            <rect id="block-div4" class="block" x="10" y="364" width="120" height="34" />
+            <text class="block-text" x="70" y="381">X := X / 4</text>
+
+            <rect id="block-sub7" class="block" x="290" y="300" width="120" height="34" />
+            <text class="block-text" x="350" y="317">X := X − 7</text>
+            <path id="a-sub7" class="arrow head" d="M350,334 V364" />
+            <rect id="block-div2" class="block" x="290" y="364" width="120" height="34" />
+            <text class="block-text" x="350" y="381">X := X / 2</text>
+
+            <path id="a-div4" class="arrow" d="M130,381 H210" />
+            <path id="a-div2" class="arrow" d="M290,381 H210" />
+            <path id="a-merge" class="arrow head" d="M210,381 V430" />
+
+            <polygon id="block-out" class="block" points="160,430 280,430 260,464 140,464" />
+            <text class="block-text" x="210" y="447">Вывод X</text>
+            <path id="a-out" class="arrow head" d="M210,464 V490" />
+
+            <rect id="block-end" class="block" x="150" y="490" width="120" height="34" rx="17" ry="17" />
+            <text class="block-text" x="210" y="507">КОНЕЦ</text>
+        </svg>
+    </div>
+
+    <div class="controls-panel">
+        <div class="panel-title">Начальные значения</div>
+        <table class="values">
+            <thead><tr><th>Литера</th><th>Начальное X</th><th>Результат</th></tr></thead>
+            <tbody id="values-body"></tbody>
+        </table>
+        <div style="font-size:13px; color:#777; margin-top:-8px;">Нажми на строку, чтобы выполнить блок-схему для этого значения по шагам.</div>
+
+        <div class="var-display">
+            <span>Литера: <span id="cur-letter">—</span></span>
+            <span>X = <span id="cur-x">—</span></span>
+        </div>
+        <div class="step-desc" id="step-desc"></div>
+        <div class="row">
+            <button class="btn-next" id="btn-step">Следующий шаг ▶</button>
+            <button class="btn-check" id="btn-finish">До конца ⏭</button>
+        </div>
+
+        <div class="panel-title">Порядок по убыванию результата</div>
+        <div class="slots" id="slots"></div>
+        <div class="row" id="letters"></div>
+        <div class="row">
+            <button class="btn-check" id="btn-check">Проверить</button>
+            <button class="btn-hint" id="btn-answer">Показать ответ</button>
+            <button class="btn-reset" id="btn-reset">Сбросить</button>
+        </div>
+        <div class="status" id="status">Нажимай на буквы, чтобы расставить их по порядку. Нажми на клетку, чтобы её очистить.</div>
+    </div>
+</div>
+
+<script>
+const ITEMS = [
+    { letter: 'А', x: 36 }, { letter: 'Б', x: 35 }, { letter: 'В', x: 32 },
+    { letter: 'Г', x: 31 }, { letter: 'Д', x: 28 }, { letter: 'Е', x: 27 }
+];
+
+// Список шагов выполнения блок-схемы для начального значения x
+function trace(x0) {
+    let x = x0;
+    const steps = [{ block: 'start', arrow: 'a-start', x, desc: 'Начинаем выполнение.' }];
+    const op = (block, arrow, f, text) => {
+        const before = x;
+        x = f(x);
+        steps.push({ block, arrow, x, desc: `${text}: ${before} → ${x}` });
+    };
+    op('add4', 'a-add4', v => v + 4, 'X := X + 4');
+    op('mul3', 'a-mul3', v => v * 3, 'X := X · 3');
+    op('sub16', 'a-sub16', v => v - 16, 'X := X − 16');
+    if (x % 2 === 0) {
+        steps.push({ block: 'cond', arrow: 'a-yes', x, desc: `${x} — чётное число, идём по ветке «Да».` });
+        op('add8', 'a-add8', v => v + 8, 'X := X + 8');
+        op('div4', 'a-div4', v => v / 4, 'X := X / 4');
+    } else {
+        steps.push({ block: 'cond', arrow: 'a-no', x, desc: `${x} — нечётное число, идём по ветке «Нет».` });
+        op('sub7', 'a-sub7', v => v - 7, 'X := X − 7');
+        op('div2', 'a-div2', v => v / 2, 'X := X / 2');
+    }
+    steps.push({ block: 'out', arrow: 'a-out', x, desc: `Выводим X = ${x}.` });
+    steps.push({ block: 'end', x, desc: 'Конец.' });
+    return steps;
+}
+
+const result = x0 => trace(x0).at(-1).x;
+const ANSWER = [...ITEMS].sort((a, b) => result(b.x) - result(a.x)).map(it => it.letter);
+
+const valuesBody = document.getElementById('values-body');
+const slotsEl = document.getElementById('slots');
+const lettersEl = document.getElementById('letters');
+const statusEl = document.getElementById('status');
+const curLetter = document.getElementById('cur-letter');
+const curX = document.getElementById('cur-x');
+const stepDesc = document.getElementById('step-desc');
+const btnStep = document.getElementById('btn-step');
+const btnFinish = document.getElementById('btn-finish');
+
+let results = {};
+let current = null;   // { item, steps, i }
+let order = [];
+
+function renderValues() {
+    valuesBody.innerHTML = ITEMS.map(it => `
+        <tr data-letter="${it.letter}" class="${current && current.item === it ? 'current' : ''}">
+            <td>${it.letter}</td><td>${it.x}</td><td class="res">${results[it.letter] ?? ''}</td>
+        </tr>`).join('');
+}
+
+function clearHighlight() {
+    document.querySelectorAll('.block, .arrow').forEach(el => el.classList.remove('active'));
+}
+
+function showStep() {
+    clearHighlight();
+    if (!current) {
+        curLetter.textContent = '—';
+        curX.textContent = '—';
+        stepDesc.textContent = 'Выбери строку в таблице.';
+        btnStep.disabled = true;
+        btnFinish.disabled = true;
+        return;
+    }
+    const s = current.steps[current.i];
+    document.getElementById(`block-${s.block}`).classList.add('active');
+    if (current.i > 0) {
+        const prev = current.steps[current.i - 1];
+        if (prev.arrow) document.getElementById(prev.arrow).classList.add('active');
+        if (s.block === 'out') document.getElementById('a-merge').classList.add('active');
+    }
+    curLetter.textContent = current.item.letter;
+    curX.textContent = s.x;
+    stepDesc.textContent = s.desc;
+    const done = current.i >= current.steps.length - 1;
+    btnStep.disabled = done;
+    btnFinish.disabled = done;
+    if (done) {
+        results[current.item.letter] = s.x;
+        renderValues();
+    }
+}
+
+function selectItem(letter) {
+    const item = ITEMS.find(it => it.letter === letter);
+    current = { item, steps: trace(item.x), i: 0 };
+    renderValues();
+    showStep();
+}
+
+function nextStep() {
+    if (!current || current.i >= current.steps.length - 1) return;
+    current.i++;
+    showStep();
+}
+
+function finish() {
+    if (!current) return;
+    current.i = current.steps.length - 1;
+    showStep();
+}
+
+function renderOrder() {
+    slotsEl.innerHTML =
+        [1, 2, 3, 4, 5, 6].map(n => `<div class="num">${n}</div>`).join('') +
+        [0, 1, 2, 3, 4, 5].map(i => `<div class="slot" data-i="${i}">${order[i] || ''}</div>`).join('');
+    lettersEl.innerHTML = ITEMS.map(it =>
+        `<button class="btn-letter" data-letter="${it.letter}" ${order.includes(it.letter) ? 'disabled' : ''}>${it.letter}</button>`
+    ).join('');
+}
+
+slotsEl.addEventListener('click', e => {
+    const slot = e.target.closest('.slot');
+    if (!slot) return;
+    order[Number(slot.dataset.i)] = undefined;
+    renderOrder();
+});
+
+lettersEl.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-letter');
+    if (!btn) return;
+    let i = order.findIndex(v => !v);
+    if (i === -1) i = order.length;
+    if (i >= ITEMS.length) return;
+    order[i] = btn.dataset.letter;
+    renderOrder();
+});
+
+valuesBody.addEventListener('click', e => {
+    const tr = e.target.closest('tr');
+    if (tr) selectItem(tr.dataset.letter);
+});
+
+function check() {
+    const filled = [0, 1, 2, 3, 4, 5].every(i => order[i]);
+    if (!filled) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Расставь все шесть литер.';
+        return;
+    }
+    const right = ANSWER.filter((l, i) => order[i] === l).length;
+    if (right === ANSWER.length) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! Б (47), Г (41), Е (35), А (28), В (25), Д (22).';
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = `На своих местах ${right} из 6 литер. Проверь вычисления — нажми на строку таблицы и пройди схему по шагам.`;
+    }
+}
+
+function showAnswer() {
+    ITEMS.forEach(it => { results[it.letter] = result(it.x); });
+    order = [...ANSWER];
+    renderValues();
+    renderOrder();
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: Б Г Е А В Д. Результаты: Б = 47, Г = 41, Е = 35, А = 28, В = 25, Д = 22.';
+}
+
+function reset() {
+    results = {};
+    current = null;
+    order = [];
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажимай на буквы, чтобы расставить их по порядку. Нажми на клетку, чтобы её очистить.';
+    renderValues();
+    renderOrder();
+    showStep();
+}
+
+btnStep.addEventListener('click', nextStep);
+btnFinish.addEventListener('click', finish);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+reset();
+</script>
+</body>
+</html>

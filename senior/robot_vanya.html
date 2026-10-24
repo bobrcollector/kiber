@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Робот-Ваня</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 800px;
+    }
+
+    .container {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    svg.maze {
+        width: 420px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        user-select: none;
+    }
+
+    .maze .cell { fill: white; cursor: pointer; }
+    .maze .cell:hover { fill: #f5eef8; }
+    .maze .cell.chosen { fill: #fff3cd; }
+    .maze .grid { stroke: #ccd5dd; stroke-width: 1; }
+    .maze .wall { stroke: #2c3e50; stroke-width: 5; stroke-linecap: round; }
+    .maze .axis { font-family: Georgia, serif; font-size: 18px; fill: #2c3e50; text-anchor: middle; dominant-baseline: middle; }
+    .maze .emoji { font-size: 30px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .maze .path { stroke: #e67e22; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
+
+    .modes {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .modes label { cursor: pointer; }
+
+    .program {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 14px;
+        line-height: 1.6;
+    }
+
+    .program div { padding: 0 6px; border-radius: 4px; white-space: pre; }
+    .program .active { background: #f1c40f; font-weight: bold; }
+
+    .side {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 400px;
+        max-width: 100%;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .results {
+        margin-top: 10px;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🤖 Задача: Робот-Ваня</h1>
+<p class="subtitle">Робот-Ваня опаздывает на праздник к детям! Он заблудился в прямоугольном лабиринте, и заряда ему хватит только чтобы выполнить этот алгоритм.
+    С каких клеток лабиринта (где стоят роботы) можно начать движение Роботу-Ване, чтобы достичь батарейки?</p>
+
+<div class="container">
+    <div class="panel">
+        <div class="modes">
+            <label><input type="radio" name="mode" value="answer" checked> 🖊 Отмечаю ответ</label>
+            <label><input type="radio" name="mode" value="run"> ▶ Запускаю робота</label>
+        </div>
+        <svg class="maze" id="maze" viewBox="0 0 400 400"></svg>
+    </div>
+
+    <div class="side">
+        <div class="panel">
+            <h2>Алгоритм</h2>
+            <div class="program" id="program"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Ответ</h2>
+            <div id="mode-help" style="font-size:14px; color:#555;"></div>
+            <div class="buttons">
+                <button class="btn-check" id="btn-check">Проверить</button>
+                <button class="btn-hint" id="btn-answer">Показать ответ</button>
+                <button class="btn-reset" id="btn-reset">Сбросить</button>
+            </div>
+            <div class="status" id="status">Отметь роботов, которые доберутся до батарейки.</div>
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const COLS = 'ABCDEF';
+const SIZE = 6;
+const CELL = 60;
+const OX = 30;            // отступ слева под номера строк
+const OY = 10;
+const BATTERY = 'F6';
+const CANDIDATES = ['B1', 'D2', 'A3', 'C5'];
+const ANSWER = ['B1', 'D2'];
+// Стена снизу от клетки и стена справа от клетки
+const WALL_BELOW = new Set(['A2', 'D1', 'D3', 'E3', 'B4', 'C4']);
+const WALL_RIGHT = new Set(['C2', 'E3', 'C4', 'E5', 'C6']);
+
+const PROGRAM = [
+    'НАЧАЛО',
+    'ПОКА снизу свободно ИЛИ справа свободно',
+    '  ПОКА справа свободно',
+    '    вправо',
+    '  КОНЕЦ ПОКА',
+    '  вниз',
+    'КОНЕЦ ПОКА',
+    'КОНЕЦ'
+];
+
+const mazeEl = document.getElementById('maze');
+const programEl = document.getElementById('program');
+const statusEl = document.getElementById('status');
+const resultsEl = document.getElementById('results');
+const modeHelp = document.getElementById('mode-help');
+
+let chosen = new Set();
+let robot = null;       // текущая позиция робота при запуске
+let path = [];
+let crashed = false;
+let timer = null;
+
+const name = (c, r) => COLS[c] + r;
+const parse = s => ({ c: COLS.indexOf(s[0]), r: Number(s.slice(1)) });
+const rightFree = (c, r) => c < SIZE - 1 && !WALL_RIGHT.has(name(c, r));
+const downFree = (c, r) => r < SIZE && !WALL_BELOW.has(name(c, r));
+
+// Выполняет алгоритм, возвращает список шагов: { line, c, r, crash }
+function simulate(start) {
+    let { c, r } = parse(start);
+    const steps = [{ line: 0, c, r }];
+    while (true) {
+        steps.push({ line: 1, c, r });
+        if (!(downFree(c, r) || rightFree(c, r))) break;
+        while (true) {
+            steps.push({ line: 2, c, r });
+            if (!rightFree(c, r)) break;
+            c++;
+            steps.push({ line: 3, c, r });
+        }
+        steps.push({ line: 4, c, r });
+        if (!downFree(c, r)) {
+            steps.push({ line: 5, c, r, crash: true });
+            return steps;
+        }
+        r++;
+        steps.push({ line: 5, c, r });
+        steps.push({ line: 6, c, r });
+    }
+    steps.push({ line: 7, c, r });
+    return steps;
+}
+
+function outcome(start) {
+    const steps = simulate(start);
+    const last = steps[steps.length - 1];
+    if (last.crash) return { ok: false, text: `💥 врезается в стену, пытаясь пойти вниз из клетки ${name(last.c, last.r)}` };
+    if (name(last.c, last.r) === BATTERY) return { ok: true, text: '🔋 добирается до батарейки' };
+    return { ok: false, text: `останавливается в клетке ${name(last.c, last.r)}, не дойдя до батарейки` };
+}
+
+function cx(c) { return OX + c * CELL + CELL / 2; }
+function cy(r) { return OY + (r - 1) * CELL + CELL / 2; }
+
+function render() {
+    let html = '';
+    for (let r = 1; r <= SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+            const n = name(c, r);
+            html += `<rect class="cell${chosen.has(n) ? ' chosen' : ''}" data-name="${n}" x="${OX + c * CELL}" y="${OY + (r - 1) * CELL}" width="${CELL}" height="${CELL}"/>`;
+        }
+    }
+    for (let i = 1; i < SIZE; i++) {
+        html += `<line class="grid" x1="${OX + i * CELL}" y1="${OY}" x2="${OX + i * CELL}" y2="${OY + SIZE * CELL}"/>`;
+        html += `<line class="grid" x1="${OX}" y1="${OY + i * CELL}" x2="${OX + SIZE * CELL}" y2="${OY + i * CELL}"/>`;
+    }
+    html += `<rect x="${OX + 5 * CELL}" y="${OY + 5 * CELL}" width="${CELL}" height="${CELL}" fill="#e5e8eb" pointer-events="none"/>`;
+    WALL_BELOW.forEach(n => {
+        const { c, r } = parse(n);
+        const y = OY + r * CELL;
+        html += `<line class="wall" x1="${OX + c * CELL}" y1="${y}" x2="${OX + (c + 1) * CELL}" y2="${y}"/>`;
+    });
+    WALL_RIGHT.forEach(n => {
+        const { c, r } = parse(n);
+        const x = OX + (c + 1) * CELL;
+        html += `<line class="wall" x1="${x}" y1="${OY + (r - 1) * CELL}" x2="${x}" y2="${OY + r * CELL}"/>`;
+    });
+    html += `<rect x="${OX}" y="${OY}" width="${SIZE * CELL}" height="${SIZE * CELL}" fill="none" stroke="#2c3e50" stroke-width="5"/>`;
+    for (let i = 0; i < SIZE; i++) {
+        html += `<text class="axis" x="${OX / 2}" y="${cy(i + 1)}">${i + 1}</text>`;
+        html += `<text class="axis" x="${cx(i)}" y="${OY + SIZE * CELL + 16}">${COLS[i]}</text>`;
+    }
+    html += `<text class="emoji" x="${cx(5)}" y="${cy(6)}">🔋</text>`;
+    if (path.length > 1) {
+        html += `<polyline class="path" points="${path.map(p => `${cx(p.c)},${cy(p.r)}`).join(' ')}"/>`;
+    }
+    CANDIDATES.forEach(n => {
+        if (robot && path.length) return;
+        const { c, r } = parse(n);
+        html += `<text class="emoji" x="${cx(c)}" y="${cy(r)}">🤖</text>`;
+    });
+    if (robot) {
+        html += `<text class="emoji" x="${cx(robot.c)}" y="${cy(robot.r)}">${crashed ? '💥' : '🤖'}</text>`;
+    }
+    mazeEl.innerHTML = html;
+}
+
+function renderProgram(active) {
+    programEl.innerHTML = PROGRAM.map((line, i) => `<div class="${i === active ? 'active' : ''}">${line}</div>`).join('');
+}
+
+function mode() {
+    return document.querySelector('input[name="mode"]:checked').value;
+}
+
+function stopRun() {
+    if (timer) clearInterval(timer);
+    timer = null;
+}
+
+function run(start) {
+    stopRun();
+    const steps = simulate(start);
+    const res = outcome(start);
+    let i = 0;
+    crashed = false;
+    robot = parse(start);
+    path = [{ ...robot }];
+    statusEl.className = 'status';
+    statusEl.textContent = `Ваня стартует из клетки ${start}…`;
+    timer = setInterval(() => {
+        const s = steps[i];
+        renderProgram(s.line);
+        if (s.crash) crashed = true;
+        if (s.c !== robot.c || s.r !== robot.r) {
+            robot = { c: s.c, r: s.r };
+            path.push({ ...robot });
+        }
+        render();
+        i++;
+        if (i >= steps.length) {
+            stopRun();
+            statusEl.className = 'status ' + (res.ok ? 'success' : 'error');
+            statusEl.textContent = `Из клетки ${start} Ваня ${res.text}.`;
+        }
+    }, 250);
+}
+
+function updateModeHelp() {
+    modeHelp.textContent = mode() === 'answer'
+        ? 'Нажимай на клетки с роботами, чтобы отметить ответ (можно несколько).'
+        : 'Нажми на любую клетку — Ваня выполнит алгоритм, начиная с неё.';
+}
+
+mazeEl.addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (!cell) return;
+    const n = cell.dataset.name;
+    if (mode() === 'run') {
+        run(n);
+        return;
+    }
+    if (!CANDIDATES.includes(n)) {
+        statusEl.className = 'status';
+        statusEl.textContent = 'Отмечать нужно клетки, где стоят роботы. Чтобы проверить любую клетку, переключись в режим запуска.';
+        return;
+    }
+    stopRun();
+    robot = null;
+    path = [];
+    renderProgram(-1);
+    if (chosen.has(n)) chosen.delete(n); else chosen.add(n);
+    statusEl.className = 'status';
+    statusEl.textContent = chosen.size ? `Отмечено: ${[...chosen].sort().join(', ')}.` : 'Отметь роботов, которые доберутся до батарейки.';
+    render();
+});
+
+function check() {
+    const picked = [...chosen].sort();
+    const missing = ANSWER.filter(n => !chosen.has(n));
+    const extra = picked.filter(n => !ANSWER.includes(n));
+    if (!picked.length) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Сначала отметь хотя бы одного робота.';
+    } else if (!missing.length && !extra.length) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! До батарейки доберутся роботы из клеток B1 и D2.';
+        showResults();
+    } else if (extra.length) {
+        statusEl.className = 'status error';
+        statusEl.textContent = `Робот из клетки ${extra[0]} до батарейки не доберётся. Запусти его и посмотри, что произойдёт!`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Отмечены не все подходящие клетки. Проверь остальных роботов.';
+    }
+}
+
+function showResults() {
+    resultsEl.innerHTML = CANDIDATES.map(n => {
+        const res = outcome(n);
+        return `<div>${res.ok ? '✅' : '❌'} <b>${n}</b>: ${res.text}</div>`;
+    }).join('');
+}
+
+function showAnswer() {
+    stopRun();
+    robot = null;
+    path = [];
+    chosen = new Set(ANSWER);
+    render();
+    renderProgram(-1);
+    statusEl.className = 'status';
+    statusEl.textContent = 'Ответ: D2, B1. Обрати внимание на C5: Ваня спускается в E6 и шагает вправо на батарейку, но после внутреннего цикла всегда идёт команда «вниз» — и он врезается в стену. А из A3 Ваня упирается в стену справа в E3, и снизу у него тоже стена.';
+    showResults();
+}
+
+function reset() {
+    stopRun();
+    chosen = new Set();
+    robot = null;
+    path = [];
+    crashed = false;
+    resultsEl.innerHTML = '';
+    statusEl.className = 'status';
+    statusEl.textContent = 'Отметь роботов, которые доберутся до батарейки.';
+    renderProgram(-1);
+    render();
+}
+
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', () => {
+    updateModeHelp();
+    stopRun();
+    robot = null;
+    path = [];
+    renderProgram(-1);
+    render();
+}));
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+updateModeHelp();
+reset();
+</script>
+</body>
+</html>
