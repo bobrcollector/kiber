@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Вкусненькая задачка</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .maker {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .box {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+        background: #c8a27a;
+        border: 4px solid #8d6e4c;
+        border-radius: 10px;
+    }
+
+    .box .slot {
+        width: 90px;
+        height: 90px;
+        background: #4e342e;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.15s;
+        position: relative;
+    }
+
+    .box .slot:hover { transform: scale(1.04); }
+    .box .slot.conflict { box-shadow: 0 0 0 4px #e74c3c; }
+    .box .slot .hint { color: #a1887f; font-size: 13px; }
+
+    .box.mini { padding: 4px; gap: 3px; border-width: 2px; border-radius: 6px; cursor: default; }
+    .box.mini .slot { width: 30px; height: 30px; border-radius: 4px; cursor: default; }
+    .box.mini .slot:hover { transform: none; }
+
+    .legend { font-size: 15px; line-height: 2; }
+    .legend svg { vertical-align: middle; }
+
+    .collection {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .collection .item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: #7f8c8d; animation: pop 0.3s ease; }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .empty { color: #95a5a6; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🍫 Задача: Вкусненькая задачка</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p><i>Внимание! Это задача не на программирование! Но она сложная.</i></p>
+        <p>София подготовила конфеты для подарка маме: часть из них в форме звезды, часть — круглые, а часть — квадратные.
+        Она хочет выбрать четыре конфеты и разложить их в коробку 2 × 2. Каждая ячейка имеет своё положение (верхняя левая, верхняя правая и т. д.),
+        поэтому разные расположения считаются разными, даже если коробку повернуть.</p>
+        <p>В каждую ячейку кладётся по одной конфете. При этом в любом горизонтальном и вертикальном ряду не должно быть двух конфет одинаковой формы.</p>
+        <p>Сколько существует различных способов выбрать четыре конфеты и разложить их в коробке?</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Собери коробку</h2>
+        <div class="maker">
+            <div class="box" id="box"></div>
+            <div class="legend">
+                Нажимай на ячейку, чтобы сменить конфету:<br>
+                <span id="legend"></span>
+            </div>
+        </div>
+        <div class="inputs" style="justify-content:center;">
+            <button class="btn-check" id="btn-save">➕ Добавить в коллекцию</button>
+            <button class="btn-reset" id="btn-clear">Очистить коробку</button>
+        </div>
+        <div class="status" id="make-status">Собери правильную коробку и добавь её в коллекцию.</div>
+
+        <h3>Коллекция разных раскладок: <span id="count">0</span></h3>
+        <div class="collection" id="collection"><div class="empty">Пока пусто</div></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответ</h2>
+        <div class="inputs">
+            <label>Всего способов: <input type="number" id="answer"></label>
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Впиши число способов.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Обозначим ячейки коробки так: <span class="math">a b</span> — верхний ряд, <span class="math">c d</span> — нижний.</p>
+            <p>Условие «в любом горизонтальном и вертикальном ряду нет двух одинаковых форм» означает:
+            <span class="math">a ≠ b</span>, <span class="math">a ≠ c</span>, <span class="math">b ≠ d</span>, <span class="math">c ≠ d</span>.</p>
+            <p>Рассмотрим два случая.</p>
+            <p><b>1. b = c.</b> Форму для b (и c) выбираем 3 способами. Тогда <span class="math">a ≠ b</span> и <span class="math">d ≠ b</span> — по 2 способа, а между a и d ограничений нет.
+            Итого <span class="math">3 · 2 · 2 = 12</span> раскладок.</p>
+            <p><b>2. b ≠ c.</b> Формы для b и c выбираем <span class="math">3 · 2 = 6</span> способами. Тогда существует ровно одна форма, отличная и от b, и от c, и именно она должна стоять и в a, и в d.
+            Получаем 6 раскладок.</p>
+            <p>Суммарно <span class="math">12 + 6 = 18</span>.</p>
+            <p><b>Ответ: 18.</b></p>
+            <button class="btn-gray" id="btn-all">Показать все 18 раскладок</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const SHAPES = ['star', 'round', 'square'];
+const SHAPE_NAMES = { star: 'звезда', round: 'круглая', square: 'квадратная' };
+const ANSWER = 18;
+
+function shapeSvg(shape, size) {
+    const fill = '#a0522d', stroke = '#6d3a1c';
+    let inner = '';
+    if (shape === 'star') {
+        const pts = [];
+        for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? 46 : 20;
+            const ang = -Math.PI / 2 + i * Math.PI / 5;
+            pts.push(`${50 + r * Math.cos(ang)},${53 + r * Math.sin(ang)}`);
+        }
+        inner = `<polygon points="${pts.join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="4" stroke-linejoin="round"/>`;
+    } else if (shape === 'round') {
+        inner = `<circle cx="50" cy="50" r="38" fill="${fill}" stroke="${stroke}" stroke-width="4"/>
+                 <ellipse cx="38" cy="36" rx="12" ry="7" fill="#c97a4a" opacity="0.7"/>`;
+    } else if (shape === 'square') {
+        inner = `<rect x="16" y="16" width="68" height="68" rx="8" fill="${fill}" stroke="${stroke}" stroke-width="4"/>`;
+    }
+    return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">${inner}</svg>`;
+}
+
+// Ячейки: 0 = a (верх-лево), 1 = b (верх-право), 2 = c (низ-лево), 3 = d (низ-право)
+const PAIRS_TO_CHECK = [[0, 1], [0, 2], [1, 3], [2, 3]];
+let cells = [null, null, null, null];
+let collection = [];
+
+function conflicts(c) {
+    const bad = new Set();
+    PAIRS_TO_CHECK.forEach(([i, j]) => {
+        if (c[i] && c[i] === c[j]) { bad.add(i); bad.add(j); }
+    });
+    return bad;
+}
+
+function renderBox() {
+    const bad = conflicts(cells);
+    const box = document.getElementById('box');
+    box.innerHTML = cells.map((s, i) =>
+        `<div class="slot${bad.has(i) ? ' conflict' : ''}" data-i="${i}">${s ? shapeSvg(s, 74) : '<span class="hint">пусто</span>'}</div>`).join('');
+    box.querySelectorAll('.slot').forEach(el => el.addEventListener('click', () => {
+        const i = Number(el.dataset.i);
+        const idx = cells[i] === null ? 0 : (SHAPES.indexOf(cells[i]) + 1) % SHAPES.length;
+        cells[i] = SHAPES[idx];
+        const st = document.getElementById('make-status');
+        st.className = 'status';
+        st.textContent = conflicts(cells).size
+            ? 'В одном ряду оказались две одинаковые конфеты — так нельзя.'
+            : 'Собери правильную коробку и добавь её в коллекцию.';
+        renderBox();
+    }));
+}
+
+function miniBox(c) {
+    return `<div class="box mini">${c.map(s => `<div class="slot">${shapeSvg(s, 26)}</div>`).join('')}</div>`;
+}
+
+function renderCollection() {
+    document.getElementById('count').textContent = collection.length;
+    const el = document.getElementById('collection');
+    el.innerHTML = collection.length
+        ? collection.map((k, i) => `<div class="item">${miniBox(k.split(','))}${i + 1}</div>`).join('')
+        : '<div class="empty">Пока пусто</div>';
+}
+
+function save() {
+    const st = document.getElementById('make-status');
+    if (cells.includes(null)) {
+        st.className = 'status error';
+        st.textContent = 'Положи конфеты во все четыре ячейки.';
+        return;
+    }
+    if (conflicts(cells).size) {
+        st.className = 'status error';
+        st.textContent = 'В одном ряду есть две одинаковые конфеты — такую коробку собирать нельзя.';
+        return;
+    }
+    const k = cells.join(',');
+    if (collection.includes(k)) {
+        st.className = 'status';
+        st.textContent = 'Такая раскладка уже есть в коллекции. Попробуй другую!';
+        return;
+    }
+    collection.push(k);
+    renderCollection();
+    st.className = 'status success';
+    st.textContent = collection.length === ANSWER
+        ? '🎉 В коллекции все возможные раскладки!'
+        : '✅ Новая раскладка добавлена в коллекцию!';
+}
+
+function allLayouts() {
+    const res = [];
+    for (const a of SHAPES) for (const b of SHAPES) for (const c of SHAPES) for (const d of SHAPES) {
+        if (conflicts([a, b, c, d]).size === 0) res.push([a, b, c, d].join(','));
+    }
+    return res;
+}
+
+function check() {
+    const st = document.getElementById('status');
+    const v = document.getElementById('answer').value.trim();
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (Number(v) === ANSWER) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Существует 18 способов разложить конфеты.';
+    } else if (Number(v) === 6 || Number(v) === 12) {
+        st.className = 'status error';
+        st.textContent = 'Это только часть раскладок. Разбери два случая: одинаковые или разные конфеты лежат по диагонали b и c?';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Собери несколько коробок в тренажёре и посмотри, какие конфеты могут стоять по диагонали.';
+    }
+}
+
+document.getElementById('legend').innerHTML = SHAPES.map(s => `${shapeSvg(s, 30)} ${SHAPE_NAMES[s]}`).join('<br>');
+document.getElementById('btn-save').addEventListener('click', save);
+document.getElementById('btn-clear').addEventListener('click', () => {
+    cells = [null, null, null, null];
+    renderBox();
+});
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('answer').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+document.getElementById('btn-all').addEventListener('click', () => {
+    collection = allLayouts();
+    renderCollection();
+});
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+console.assert(allLayouts().length === ANSWER);
+renderBox();
+renderCollection();
+</script>
+</body>
+</html>

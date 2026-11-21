@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Очередь за билетами</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; text-align: center; }
+
+    .people {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .person {
+        background: #eaf2f8;
+        border: 2px solid #2980b9;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-size: 17px;
+        font-weight: bold;
+        color: #2c3e50;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.15s, opacity 0.2s;
+    }
+
+    .person:hover { transform: translateY(-2px); }
+    .person.used { opacity: 0.3; cursor: default; transform: none; }
+    .person .face { font-size: 26px; display: block; text-align: center; }
+
+    .queue {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .cashbox {
+        background: #2c3e50;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .cashbox span { font-size: 28px; }
+
+    .slot {
+        width: 110px;
+        min-height: 90px;
+        border: 2px dashed #bdc3c7;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        font-weight: bold;
+        font-size: 17px;
+        color: #2c3e50;
+        background: #fafbfc;
+    }
+
+    .slot .num {
+        position: absolute;
+        top: 4px;
+        left: 8px;
+        font-size: 12px;
+        color: #95a5a6;
+    }
+
+    .slot.filled { border-style: solid; border-color: #2980b9; background: #eaf2f8; }
+    .slot .face { font-size: 28px; }
+
+    .conds {
+        list-style: none;
+        padding: 0;
+        margin: 20px auto 0;
+        max-width: 520px;
+    }
+
+    .conds li {
+        padding: 8px 12px;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        font-size: 15px;
+    }
+
+    .conds li.ok { background: #eafaf1; border-color: #2ecc71; }
+    .conds li.bad { background: #fdecea; border-color: #e74c3c; }
+
+    .found {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .found .item {
+        background: #eafaf1;
+        border: 1px solid #2ecc71;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-weight: bold;
+        color: #27ae60;
+        animation: pop 0.3s ease;
+    }
+
+    .found .empty { color: #95a5a6; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 560px) {
+        .slot { width: 70px; min-height: 76px; font-size: 14px; }
+        .cashbox { width: 100%; flex-direction: row; gap: 8px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🎟️ Задача: Очередь за билетами</h1>
+<p class="subtitle">В очереди за билетами в кинотеатр стоят Юля, Маша, Витя и Олег.
+    Кто за кем стоит, если известно, что Юля купит билет раньше Маши, но позже Олега, а Витя и Олег не стоят рядом?
+    <br><i>У этой задачи несколько вариантов ответа — найди их все!</i></p>
+
+<div class="panel">
+    <h3>Нажми на ребят по очереди, чтобы поставить их в очередь</h3>
+    <div class="people" id="people"></div>
+
+    <div class="queue" id="queue">
+        <div class="cashbox"><span>🎬</span>Касса</div>
+    </div>
+
+    <ul class="conds" id="conds">
+        <li data-c="0">Юля купит билет раньше Маши</li>
+        <li data-c="1">Юля купит билет позже Олега</li>
+        <li data-c="2">Витя и Олег не стоят рядом</li>
+    </ul>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-reset" id="btn-clear">Очистить очередь</button>
+    </div>
+    <div class="status" id="status">Нажми на место в очереди, чтобы убрать оттуда человека.</div>
+</div>
+
+<div class="panel">
+    <h3>Найденные варианты: <span id="found-count">0</span> из 2</h3>
+    <div class="found" id="found"><div class="empty">Пока ни одного</div></div>
+    <div class="controls">
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Начать заново</button>
+    </div>
+    <div class="status hidden-status" id="answer-status" style="display:none"></div>
+</div>
+
+<script>
+const PEOPLE = [
+    { name: 'Юля', face: '👧' },
+    { name: 'Маша', face: '👩' },
+    { name: 'Витя', face: '👦' },
+    { name: 'Олег', face: '🧑' }
+];
+const ANSWERS = ['Олег,Юля,Витя,Маша', 'Олег,Юля,Маша,Витя'];
+
+const peopleEl = document.getElementById('people');
+const queueEl = document.getElementById('queue');
+const statusEl = document.getElementById('status');
+const foundEl = document.getElementById('found');
+const foundCountEl = document.getElementById('found-count');
+const answerStatus = document.getElementById('answer-status');
+
+let queue = [null, null, null, null];
+let found = [];
+
+function faceOf(name) {
+    return PEOPLE.find(p => p.name === name).face;
+}
+
+function render() {
+    peopleEl.innerHTML = '';
+    PEOPLE.forEach(p => {
+        const el = document.createElement('div');
+        const used = queue.includes(p.name);
+        el.className = 'person' + (used ? ' used' : '');
+        el.innerHTML = `<span class="face">${p.face}</span>${p.name}`;
+        if (!used) el.addEventListener('click', () => addPerson(p.name));
+        peopleEl.appendChild(el);
+    });
+
+    queueEl.querySelectorAll('.slot').forEach(s => s.remove());
+    queue.forEach((name, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot' + (name ? ' filled' : '');
+        slot.innerHTML = `<span class="num">${i + 1}-й</span>` +
+            (name ? `<span class="face">${faceOf(name)}</span>${name}` : '');
+        slot.addEventListener('click', () => removePerson(i));
+        queueEl.appendChild(slot);
+    });
+
+    renderConds();
+}
+
+function pos(name) {
+    return queue.indexOf(name);
+}
+
+function condState() {
+    const y = pos('Юля'), m = pos('Маша'), v = pos('Витя'), o = pos('Олег');
+    return [
+        y < 0 || m < 0 ? null : y < m,
+        y < 0 || o < 0 ? null : y > o,
+        v < 0 || o < 0 ? null : Math.abs(v - o) !== 1
+    ];
+}
+
+function renderConds() {
+    const st = condState();
+    document.querySelectorAll('#conds li').forEach((li, i) => {
+        li.classList.toggle('ok', st[i] === true);
+        li.classList.toggle('bad', st[i] === false);
+    });
+}
+
+function addPerson(name) {
+    const i = queue.indexOf(null);
+    if (i < 0) return;
+    queue[i] = name;
+    statusEl.className = 'status';
+    statusEl.textContent = queue.includes(null)
+        ? 'Нажми на место в очереди, чтобы убрать оттуда человека.'
+        : 'Все в очереди! Нажми «Проверить».';
+    render();
+}
+
+function removePerson(i) {
+    if (!queue[i]) return;
+    queue[i] = null;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажми на место в очереди, чтобы убрать оттуда человека.';
+    render();
+}
+
+function renderFound() {
+    foundCountEl.textContent = found.length;
+    foundEl.innerHTML = found.length
+        ? found.map((f, i) => `<div class="item">${i + 1}) ${f.split(',').join(', ')}</div>`).join('')
+        : '<div class="empty">Пока ни одного</div>';
+}
+
+function check() {
+    if (queue.includes(null)) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Сначала поставь в очередь всех четверых.';
+        return;
+    }
+    const st = condState();
+    if (st.includes(false)) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Не все условия выполнены — посмотри на красные строчки.';
+        return;
+    }
+    const key = queue.join(',');
+    if (found.includes(key)) {
+        statusEl.className = 'status';
+        statusEl.textContent = 'Этот вариант уже есть в списке. Попробуй найти другой!';
+        return;
+    }
+    found.push(key);
+    renderFound();
+    if (found.length === ANSWERS.length) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Отлично! Найдены оба варианта очереди!';
+    } else {
+        statusEl.className = 'status success';
+        statusEl.textContent = '✅ Верно! Это подходящий вариант. А есть ещё один — найди его!';
+    }
+}
+
+function showAnswer() {
+    found = [...ANSWERS];
+    renderFound();
+    answerStatus.style.display = '';
+    answerStatus.className = 'status';
+    answerStatus.innerHTML = 'Из условия про Юлю следует, что трое стоят так: <b>Олег, Юля, Маша</b>. ' +
+        'Витя не может стоять рядом с Олегом, значит, он стоит между Юлей и Машей или в конце очереди.<br>' +
+        'Ответ: <b>Олег, Юля, Витя, Маша</b> или <b>Олег, Юля, Маша, Витя</b>.';
+}
+
+function clearQueue() {
+    queue = [null, null, null, null];
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажми на место в очереди, чтобы убрать оттуда человека.';
+    render();
+}
+
+function reset() {
+    found = [];
+    renderFound();
+    answerStatus.style.display = 'none';
+    clearQueue();
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-clear').addEventListener('click', clearQueue);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+render();
+</script>
+</body>
+</html>

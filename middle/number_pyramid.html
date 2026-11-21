@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Пирамида Числопса</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .pyramid {
+        --w: 96px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .row { display: flex; gap: 4px; }
+
+    .brick {
+        width: var(--w);
+        height: 50px;
+        background: #f1f4f7;
+        border: 2px solid #2c3e50;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+        box-sizing: border-box;
+        font-family: 'Cambria', 'Times New Roman', serif;
+        transition: background 0.2s;
+    }
+
+    .brick.unknown { background: #fff8dc; border-color: #f39c12; font-style: italic; color: #e67e22; font-size: 24px; }
+    .brick.lit { background: #d6eaf8; }
+    .brick.lit-top { background: #fdebd0; }
+    .brick.right { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-style: normal; font-size: 20px; }
+
+    .answer-row {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 22px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .answer-row label { display: flex; align-items: center; gap: 8px; }
+
+    .answer-row input {
+        width: 110px;
+        padding: 8px 10px;
+        font-size: 18px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        text-align: center;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+    .answer-row input.ok { border-color: #2ecc71; background: #eafaf1; }
+    .answer-row input.bad { border-color: #e74c3c; background: #fdecea; }
+
+    .hints {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hint {
+        background: #fff8dc;
+        border-left: 4px solid #f1c40f;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 15px;
+        animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-hint { background-color: #2980b9; }
+    .btn-hint:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 480px) {
+        .pyramid { --w: 70px; }
+        .brick { font-size: 16px; height: 44px; }
+        .brick.unknown { font-size: 20px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🏛️ Задача: Пирамида Числопса</h1>
+<p class="subtitle">Посмотри внимательно на числовую пирамиду. Найди закономерность в расстановке чисел
+    и определи, какие значения скрываются под <b>X</b> и <b>Y</b>.</p>
+
+<div class="panel">
+    <div class="pyramid" id="pyramid"></div>
+
+    <div class="answer-row">
+        <label>X = <input type="number" inputmode="numeric" id="x-input"></label>
+        <label>Y = <input type="number" inputmode="numeric" id="y-input"></label>
+    </div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-hint" id="btn-hint">Подсказка</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="hints" id="hints"></div>
+    <div class="status" id="status">Наведи на кирпичик, чтобы увидеть, на каких двух соседях снизу он стоит.</div>
+</div>
+
+<script>
+// Ряды сверху вниз
+const ROWS = [
+    ['X'],
+    [1125, 'Y'],
+    [451, 684, 686],
+    [198, 263, 431, 265]
+];
+const X = 2475;
+const Y = 1360;
+const HINTS = [
+    'Каждый кирпичик стоит на двух соседях снизу. Сравни число на кирпичике с суммой этих двух соседей.',
+    'Например: 198 + 263 = 461, а на кирпичике над ними написано 451. На сколько отличаются эти числа? Проверь на других кирпичиках.',
+    'Правило: сумма двух соседей снизу на 10 больше самого числа. Сначала найди Y (он стоит на 684 и 686), а потом X.'
+];
+
+const pyramidEl = document.getElementById('pyramid');
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+const xInput = document.getElementById('x-input');
+const yInput = document.getElementById('y-input');
+const bricks = [];
+let hintsShown = 0;
+
+function build() {
+    ROWS.forEach((row, r) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+        bricks[r] = [];
+        row.forEach((val, c) => {
+            const b = document.createElement('div');
+            b.className = 'brick' + (typeof val === 'string' ? ' unknown' : '');
+            b.textContent = val;
+            b.addEventListener('mouseenter', () => highlight(r, c));
+            b.addEventListener('mouseleave', clearHighlight);
+            rowEl.appendChild(b);
+            bricks[r][c] = b;
+        });
+        pyramidEl.appendChild(rowEl);
+    });
+}
+
+function highlight(r, c) {
+    if (r === ROWS.length - 1) return;
+    bricks[r][c].classList.add('lit-top');
+    bricks[r + 1][c].classList.add('lit');
+    bricks[r + 1][c + 1].classList.add('lit');
+}
+
+function clearHighlight() {
+    document.querySelectorAll('.brick').forEach(b => b.classList.remove('lit', 'lit-top'));
+}
+
+function setStatus(cls, text) {
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = text;
+}
+
+function check() {
+    const xs = xInput.value.trim(), ys = yInput.value.trim();
+    if (xs === '' || ys === '') {
+        setStatus('error', 'Впиши оба числа: и X, и Y.');
+        return;
+    }
+    const x = Number(xs), y = Number(ys);
+    xInput.classList.toggle('ok', x === X);
+    xInput.classList.toggle('bad', x !== X);
+    yInput.classList.toggle('ok', y === Y);
+    yInput.classList.toggle('bad', y !== Y);
+
+    if (x === X && y === Y) {
+        setStatus('success', '🎉 Верно! X = 2475, Y = 1360.');
+        markSolved();
+    } else if (y === 1370 || x === 2495 || x === 2485) {
+        setStatus('error', 'Похоже, ты просто складываешь соседей. Проверь: 198 + 263 = 461, а на кирпичике 451 — не совпадает!');
+    } else if (y === Y) {
+        setStatus('error', 'Y найден верно! А X стоит на кирпичиках 1125 и Y — примени то же правило.');
+    } else {
+        setStatus('error', 'Пока не так. Сравни числа в нижних рядах с теми, что стоят над ними.');
+    }
+}
+
+function markSolved() {
+    bricks[0][0].textContent = X;
+    bricks[1][1].textContent = Y;
+    bricks[0][0].classList.add('right');
+    bricks[1][1].classList.add('right');
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.textContent = `💡 ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+    document.getElementById('btn-hint').disabled = hintsShown >= HINTS.length;
+}
+
+function showAnswer() {
+    xInput.value = X;
+    yInput.value = Y;
+    xInput.className = 'ok';
+    yInput.className = 'ok';
+    markSolved();
+    setStatus('', 'Сумма двух соседей снизу на 10 больше самого числа. ' +
+        'Y: 684 + 686 = 1370, 1370 − 10 = 1360. X: 1125 + 1360 = 2485, 2485 − 10 = 2475.');
+}
+
+function reset() {
+    xInput.value = '';
+    yInput.value = '';
+    xInput.className = '';
+    yInput.className = '';
+    hintsEl.innerHTML = '';
+    hintsShown = 0;
+    document.getElementById('btn-hint').disabled = false;
+    bricks[0][0].textContent = 'X';
+    bricks[1][1].textContent = 'Y';
+    bricks[0][0].classList.remove('right');
+    bricks[1][1].classList.remove('right');
+    setStatus('', 'Наведи на кирпичик, чтобы увидеть, на каких двух соседях снизу он стоит.');
+}
+
+[xInput, yInput].forEach(inp => inp.addEventListener('input', () => inp.classList.remove('ok', 'bad')));
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+build();
+</script>
+</body>
+</html>

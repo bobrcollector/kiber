@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Билеты в кино</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .timeline-wrap { overflow-x: auto; }
+    svg.timeline { display: block; min-width: 700px; width: 100%; height: auto; }
+
+    .axis { stroke: #bdc3c7; stroke-width: 1; }
+    .tick-label { font-size: 11px; fill: #7f8c8d; text-anchor: middle; }
+    .row-label { font-size: 13px; font-weight: bold; fill: #2c3e50; }
+    .blk { stroke: white; stroke-width: 1.5; }
+    .blk-text { font-size: 12px; fill: white; font-weight: bold; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .blk.you { fill: #f1c40f !important; }
+    .blk-text.you { fill: #2c3e50; }
+    .blk.ghost { opacity: 0.25; }
+    .you-line { stroke: #e67e22; stroke-width: 2; stroke-dasharray: 5 4; }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+
+    .slider-row input[type=range] { width: 260px; accent-color: #8e44ad; }
+
+    table.answers {
+        border-collapse: collapse;
+        font-size: 17px;
+        margin: 10px 0;
+    }
+
+    .answers th, .answers td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 18px;
+        text-align: center;
+    }
+
+    .answers th { background: #f5eef8; }
+    .answers td:first-child { font-family: 'Cambria', 'Times New Roman', serif; font-size: 19px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🎬 Задача: Билеты в кино</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p><i>Внимание! Это задача не на программирование! Но она сложная.</i></p>
+        <p>Сегодня премьера нового фильма. Ты приходишь к открытию кассы, а перед тобой в очереди уже стоят <b>n</b> человек.
+        Билеты продают три кассира. Первый кассир обслуживает одного посетителя за <b>30</b> секунд, второй — за <b>50</b> секунд, третий — за <b>75</b> секунд.
+        Очередь за билетами одна, и стоящий в начале очереди отправляется к первому освободившемуся кассиру. Все кассиры начинают работать одновременно.
+        Сколько времени тебе нужно ждать в очереди?</p>
+        <p>Например, если n = 4, то придётся ждать 50 секунд: первые три человека уйдут к трём кассирам, через 30 секунд освободится первый кассир и к нему уйдёт четвёртый человек из очереди,
+        а через 50 секунд освободится второй кассир, и ты попадёшь к нему.</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: работа кассиров</h2>
+        <p>Каждый прямоугольник — один покупатель у кассира, число в нём — его номер в очереди. Жёлтый — это ты.</p>
+        <div class="slider-row">
+            Перед тобой человек: n =
+            <input type="range" id="slider" min="0" max="20" value="4">
+            <span id="slider-val">4</span>
+        </div>
+        <div class="timeline-wrap"><svg class="timeline" id="timeline" viewBox="0 0 900 190"></svg></div>
+        <div class="status" id="sim-status"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Заполни таблицу</h2>
+        <table class="answers">
+            <tr><th>n</th><th>Время ожидания, с</th></tr>
+            <tr><td>5</td><td><input type="number" class="ans" data-n="5"></td></tr>
+            <tr><td>6</td><td><input type="number" class="ans" data-n="6"></td></tr>
+            <tr><td>10</td><td><input type="number" class="ans" data-n="10"></td></tr>
+            <tr><td>33</td><td><input type="number" class="ans" data-n="33"></td></tr>
+            <tr><td>108</td><td><input type="number" class="ans" data-n="108"></td></tr>
+        </table>
+        <div class="inputs">
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Для n = 33 и n = 108 тренажёра не хватит — поищи закономерность.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Для маленьких значений n ответ можно получить моделированием процесса вручную. К первому кассиру покупатели будут подходить каждые 30 секунд, то есть через 0, 30, 60, 90, 120, 150, … секунд после начала продажи билетов.
+            Ко второму кассиру — через 0, 50, 100, 150, … секунд. К третьему — через 0, 75, 150, … секунд.
+            Если объединить все эти списки и упорядочить их, то мы получим время ожидания для разных значений n:</p>
+            <p><span class="math">0, 0, 0, 30, 50, 60, 75, 90, 100, 120, 150, 150, 150, 180, …</span></p>
+            <p>Через 150 секунд освободятся все три кассира, так как 150 — наименьшее общее кратное чисел 30, 50 и 75. За это время кассиры вместе обслужат
+            <span class="math">5 + 3 + 2 = 10</span> покупателей. Дальше всё повторяется: при увеличении n на 10 время ожидания увеличивается на 150 секунд.</p>
+            <p>Поэтому ответ для n = 33 равен <span class="math">3 · 150 + 30 = 480</span>, а для n = 108 — <span class="math">10 · 150 + 100 = 1600</span>.</p>
+            <p><b>Ответ: 60, 75, 150, 480, 1600.</b></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const DUR = [30, 50, 75];
+const COLORS = ['#2980b9', '#16a085', '#8e44ad'];
+const T_MAX = 330;
+const X0 = 115, SCALE = 2.35, ROW_H = 40, Y0 = 20;
+
+// Время, когда n-й по счёту (с нуля) человек подойдёт к кассе, и к какому кассиру
+function schedule(count) {
+    const free = [0, 0, 0];
+    const res = [];
+    for (let i = 0; i < count; i++) {
+        let c = 0;
+        for (let j = 1; j < 3; j++) if (free[j] < free[c]) c = j;
+        res.push({ start: free[c], cashier: c });
+        free[c] += DUR[c];
+    }
+    return res;
+}
+
+function waitTime(n) {
+    return schedule(n + 1)[n].start;
+}
+
+function renderTimeline() {
+    const n = Number(document.getElementById('slider').value);
+    document.getElementById('slider-val').textContent = n;
+    const people = schedule(40).filter(p => p.start < T_MAX);
+    let html = '';
+    for (let t = 0; t <= T_MAX; t += 30) {
+        const x = X0 + t * SCALE;
+        html += `<line class="axis" x1="${x}" y1="${Y0 - 6}" x2="${x}" y2="${Y0 + 3 * ROW_H + 4}"/>`;
+        html += `<text class="tick-label" x="${x}" y="${Y0 + 3 * ROW_H + 18}">${t} с</text>`;
+    }
+    DUR.forEach((d, c) => {
+        html += `<text class="row-label" x="6" y="${Y0 + c * ROW_H + ROW_H / 2 + 4}">Кассир ${c + 1} (${d} с)</text>`;
+    });
+    people.forEach((p, i) => {
+        const x = X0 + p.start * SCALE;
+        const w = Math.min(DUR[p.cashier], T_MAX - p.start) * SCALE;
+        const y = Y0 + p.cashier * ROW_H + 4;
+        const you = i === n;
+        const ghost = i > n;
+        html += `<rect class="blk${you ? ' you' : ''}${ghost ? ' ghost' : ''}" x="${x}" y="${y}" width="${w}" height="${ROW_H - 8}" rx="4" fill="${COLORS[p.cashier]}"/>`;
+        html += `<text class="blk-text${you ? ' you' : ''}" x="${x + Math.min(w, DUR[p.cashier] * SCALE) / 2}" y="${y + (ROW_H - 8) / 2}">${you ? 'ТЫ' : i + 1}</text>`;
+    });
+    const wt = waitTime(n);
+    const yx = X0 + wt * SCALE;
+    html += `<line class="you-line" x1="${yx}" y1="${Y0 - 10}" x2="${yx}" y2="${Y0 + 3 * ROW_H + 4}"/>`;
+    document.getElementById('timeline').innerHTML = html;
+    const st = document.getElementById('sim-status');
+    st.innerHTML = `Перед тобой ${n} чел., ты — ${n + 1}-й в очереди. Ты подойдёшь к кассе через <b>${wt} с</b>.`;
+}
+
+function check() {
+    let wrong = 0, empty = 0;
+    document.querySelectorAll('.ans').forEach(inp => {
+        const v = inp.value.trim();
+        inp.classList.remove('ok', 'bad');
+        if (v === '') { empty++; return; }
+        const ok = Number(v) === waitTime(Number(inp.dataset.n));
+        inp.classList.add(ok ? 'ok' : 'bad');
+        if (!ok) wrong++;
+    });
+    const st = document.getElementById('status');
+    if (wrong) {
+        st.className = 'status error';
+        st.textContent = `Ошибок: ${wrong}. Подсказка: через сколько секунд все три кассира впервые освободятся одновременно? Сколько покупателей они обслужат за это время?`;
+    } else if (empty) {
+        st.className = 'status';
+        st.textContent = `Пока всё верно! Осталось заполнить: ${empty}.`;
+    } else {
+        st.className = 'status success';
+        st.textContent = '🎉 Всё верно! 60, 75, 150, 480 и 1600 секунд.';
+    }
+}
+
+document.getElementById('slider').addEventListener('input', renderTimeline);
+document.getElementById('btn-check').addEventListener('click', check);
+document.querySelectorAll('.ans').forEach(inp => inp.addEventListener('input', () => inp.classList.remove('ok', 'bad')));
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+console.assert([5, 6, 10, 33, 108].map(waitTime).join() === '60,75,150,480,1600');
+renderTimeline();
+</script>
+</body>
+</html>

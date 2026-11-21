@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Робот в лабиринте</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 780px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 900px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; text-align: center; }
+
+    .layout {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    svg { width: 100%; max-width: 400px; height: auto; display: block; }
+
+    .grid-line { stroke: #ccd5dd; stroke-width: 1; }
+    .wall { stroke: #2c3e50; stroke-width: 6; stroke-linecap: square; }
+    .exit-label { font-size: 13px; fill: #27ae60; font-weight: bold; text-anchor: middle; }
+    .trail { fill: none; stroke: #2980b9; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; }
+    .robot-text { font-size: 34px; font-weight: bold; font-family: 'Times New Roman', serif; text-anchor: middle; dominant-baseline: central; }
+    .robot-bg { fill: #f1c40f; stroke: #2c3e50; stroke-width: 2; }
+    .robot-bg.crash { fill: #e74c3c; }
+    .robot-bg.out { fill: #2ecc71; }
+
+    .side { flex: 1; min-width: 260px; max-width: 400px; }
+
+    .commands {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .program-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        font-size: 22px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 3px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    .program-input:focus { border-color: #2980b9; }
+
+    .count { font-size: 13px; color: #7f8c8d; margin: 4px 0 10px; }
+
+    .pad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        max-width: 240px;
+        margin: 0 auto;
+    }
+
+    .pad button {
+        background: #eaf2f8;
+        color: #2c3e50;
+        padding: 10px 0;
+        font-size: 16px;
+    }
+
+    .pad button:hover { background: #d6eaf8; }
+    .pad .up { grid-column: 2; }
+    .pad .left { grid-column: 1; grid-row: 2; }
+    .pad .down { grid-column: 2; grid-row: 2; }
+    .pad .right { grid-column: 3; grid-row: 2; }
+    .pad .del { grid-column: 3; grid-row: 1; background: #fdecea; }
+
+    .found {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .found .item {
+        background: #eafaf1;
+        border: 1px solid #2ecc71;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 17px;
+        font-weight: bold;
+        color: #27ae60;
+        letter-spacing: 2px;
+        cursor: pointer;
+        animation: pop 0.3s ease;
+    }
+
+    .found .item.from-slide { border-width: 2px; }
+    .found .empty { color: #95a5a6; }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+
+    button {
+        padding: 11px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-step { background-color: #2980b9; }
+    .btn-step:hover { background-color: #216a94; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 14px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🤖 Задача: Робот в лабиринте</h1>
+<p class="subtitle">Робот (<b>Р</b>) ходит по лабиринту на клеточной доске, выполняя команды.
+    Если при выполнении очередного шага робот сталкивается со стеной, то он разрушается.
+    Какой набор команд выведет робота из лабиринта по кратчайшему пути?
+    <br><i>У этой задачи несколько правильных вариантов ответа.</i></p>
+
+<div class="panel">
+    <div class="layout">
+        <svg id="maze" viewBox="0 0 464 464"></svg>
+
+        <div class="side">
+            <div class="commands">
+                <b>Команды:</b> 1 — вверх, 2 — вниз, 3 — вправо, 4 — влево.
+            </div>
+
+            <input class="program-input" id="program" type="text" inputmode="numeric" placeholder="например, 1423..." autocomplete="off">
+            <div class="count" id="count">Команд: 0</div>
+
+            <div class="pad">
+                <button class="up" data-cmd="1">↑ 1</button>
+                <button class="del" id="btn-del">⌫</button>
+                <button class="left" data-cmd="4">← 4</button>
+                <button class="down" data-cmd="2">↓ 2</button>
+                <button class="right" data-cmd="3">→ 3</button>
+            </div>
+
+            <div class="controls">
+                <button class="btn-step" id="btn-run">▶ Запустить</button>
+                <button class="btn-reset" id="btn-clear">Очистить</button>
+            </div>
+            <div class="status" id="status">Набери команды и нажми «Запустить».</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <h3>Найденные кратчайшие пути: <span id="found-count">0</span></h3>
+    <div class="found" id="found"><div class="empty">Пока ни одного</div></div>
+    <div class="controls">
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Начать заново</button>
+    </div>
+    <div class="status" id="answer-status" style="display:none"></div>
+</div>
+
+<script>
+const N = 6;
+const CELL = 64;
+const PAD = 40;
+const START = { x: 4, y: 3 };   // столбец, строка (от верхнего левого угла)
+// Стена над клеткой (x, y); y = 6 — нижняя граница
+const H_WALLS = new Set(['0,0', '2,0', '3,0', '4,0', '5,0', '0,1', '2,1', '3,1', '3,2', '4,2', '3,4', '0,5', '5,5',
+    '0,6', '1,6', '2,6', '3,6', '4,6', '5,6']);
+// Стена слева от клетки (x, y); x = 6 — правая граница
+const V_WALLS = new Set(['0,0', '0,1', '0,2', '0,4', '0,5', '1,1', '1,3', '1,5', '2,1', '2,2', '2,4', '3,2', '4,3',
+    '5,2', '5,3', '5,4', '6,0', '6,1', '6,2', '6,3', '6,4', '6,5']);
+const MOVES = { 1: [0, -1], 2: [0, 1], 3: [1, 0], 4: [-1, 0] };
+const SLIDE_ANSWERS = ['142442414', '142441111', '224441414'];
+
+const svg = document.getElementById('maze');
+const programEl = document.getElementById('program');
+const countEl = document.getElementById('count');
+const statusEl = document.getElementById('status');
+const answerStatus = document.getElementById('answer-status');
+const foundEl = document.getElementById('found');
+const foundCountEl = document.getElementById('found-count');
+const btnRun = document.getElementById('btn-run');
+
+let robot = { ...START };
+let trail = [{ ...START }];
+let robotState = '';   // '', 'crash', 'out'
+let timer = null;
+let found = [];
+
+function blocked(x, y, c) {
+    if (c === '1') return H_WALLS.has(`${x},${y}`);
+    if (c === '2') return H_WALLS.has(`${x},${y + 1}`);
+    if (c === '4') return V_WALLS.has(`${x},${y}`);
+    return V_WALLS.has(`${x + 1},${y}`);
+}
+
+function inside(x, y) {
+    return x >= 0 && y >= 0 && x < N && y < N;
+}
+
+function shortestPaths() {
+    // Поиск в ширину: все кратчайшие наборы команд до выхода
+    let layer = [{ x: START.x, y: START.y, p: '' }];
+    const dist = { [`${START.x},${START.y}`]: 0 };
+    while (layer.length) {
+        const res = [], next = [];
+        for (const s of layer) {
+            for (const c of ['1', '2', '3', '4']) {
+                if (blocked(s.x, s.y, c)) continue;
+                const nx = s.x + MOVES[c][0], ny = s.y + MOVES[c][1];
+                if (!inside(nx, ny)) { res.push(s.p + c); continue; }
+                const k = `${nx},${ny}`;
+                if (dist[k] !== undefined && dist[k] < s.p.length + 1) continue;
+                dist[k] = s.p.length + 1;
+                next.push({ x: nx, y: ny, p: s.p + c });
+            }
+        }
+        if (res.length) return res;
+        layer = next;
+    }
+    return [];
+}
+
+const SHORTEST = shortestPaths();
+const MIN_LEN = SHORTEST[0].length;
+
+function cx(x) { return PAD + x * CELL + CELL / 2; }
+function cy(y) { return PAD + y * CELL + CELL / 2; }
+
+function render() {
+    let html = '';
+    for (let i = 0; i <= N; i++) {
+        html += `<line class="grid-line" x1="${PAD}" y1="${PAD + i * CELL}" x2="${PAD + N * CELL}" y2="${PAD + i * CELL}"/>`;
+        html += `<line class="grid-line" x1="${PAD + i * CELL}" y1="${PAD}" x2="${PAD + i * CELL}" y2="${PAD + N * CELL}"/>`;
+    }
+    H_WALLS.forEach(k => {
+        const [x, y] = k.split(',').map(Number);
+        html += `<line class="wall" x1="${PAD + x * CELL}" y1="${PAD + y * CELL}" x2="${PAD + (x + 1) * CELL}" y2="${PAD + y * CELL}"/>`;
+    });
+    V_WALLS.forEach(k => {
+        const [x, y] = k.split(',').map(Number);
+        html += `<line class="wall" x1="${PAD + x * CELL}" y1="${PAD + y * CELL}" x2="${PAD + x * CELL}" y2="${PAD + (y + 1) * CELL}"/>`;
+    });
+    html += `<text class="exit-label" x="${cx(1)}" y="${PAD - 12}">выход</text>`;
+    html += `<text class="exit-label" x="${PAD / 2}" y="${cy(3) + 4}">выход</text>`;
+
+    if (trail.length > 1) {
+        html += `<polyline class="trail" points="${trail.map(p => `${cx(p.x)},${cy(p.y)}`).join(' ')}"/>`;
+    }
+
+    const size = PAD * 2 + N * CELL;
+    const clamp = v => Math.max(22, Math.min(size - 22, v));
+    const rx = clamp(cx(robot.x)), ry = clamp(cy(robot.y));
+    html += `<rect class="robot-bg ${robotState}" x="${rx - 22}" y="${ry - 22}" width="44" height="44" rx="8"/>`;
+    html += `<text class="robot-text" x="${rx}" y="${ry + 1}">${robotState === 'crash' ? '💥' : 'Р'}</text>`;
+    svg.innerHTML = html;
+}
+
+function updateCount() {
+    countEl.textContent = `Команд: ${programEl.value.length}`;
+}
+
+function setStatus(cls, text) {
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = text;
+}
+
+function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+    btnRun.disabled = false;
+}
+
+function resetRobot() {
+    stop();
+    robot = { ...START };
+    trail = [{ ...START }];
+    robotState = '';
+    render();
+}
+
+function run(program) {
+    resetRobot();
+    if (!program) {
+        setStatus('error', 'Сначала набери команды.');
+        return;
+    }
+    let i = 0;
+    btnRun.disabled = true;
+    setStatus('', 'Робот выполняет команды...');
+    timer = setInterval(() => {
+        const c = program[i];
+        if (blocked(robot.x, robot.y, c)) {
+            robotState = 'crash';
+            render();
+            stop();
+            setStatus('error', `💥 Команда №${i + 1} (${c}): робот врезался в стену и разрушился!`);
+            return;
+        }
+        robot = { x: robot.x + MOVES[c][0], y: robot.y + MOVES[c][1] };
+        trail.push({ ...robot });
+        i++;
+        if (!inside(robot.x, robot.y)) {
+            robotState = 'out';
+            render();
+            stop();
+            finish(program, i);
+            return;
+        }
+        render();
+        if (i >= program.length) {
+            stop();
+            setStatus('error', 'Команды закончились, а робот всё ещё в лабиринте.');
+        }
+    }, 350);
+}
+
+function finish(program, used) {
+    if (used < program.length) {
+        setStatus('error', `Робот вышел из лабиринта уже после ${used}-й команды, а дальше ещё есть команды. Убери лишние.`);
+        return;
+    }
+    if (used > MIN_LEN) {
+        setStatus('error', `Робот выбрался за ${used} шагов. Это не самый короткий путь — найди покороче!`);
+        return;
+    }
+    if (found.includes(program)) {
+        setStatus('success', '✅ Кратчайший путь! Он уже есть в списке — попробуй найти другой.');
+        return;
+    }
+    found.push(program);
+    renderFound();
+    setStatus('success', `🎉 Кратчайший путь из ${MIN_LEN} команд! Есть и другие — попробуй найти ещё.`);
+}
+
+function renderFound() {
+    foundCountEl.textContent = found.length;
+    foundEl.innerHTML = found.length
+        ? found.map(p => `<div class="item${SLIDE_ANSWERS.includes(p) ? ' from-slide' : ''}" data-p="${p}">${p}</div>`).join('')
+        : '<div class="empty">Пока ни одного</div>';
+    foundEl.querySelectorAll('.item').forEach(el => el.addEventListener('click', () => {
+        programEl.value = el.dataset.p;
+        updateCount();
+        run(el.dataset.p);
+    }));
+}
+
+function showAnswer() {
+    found = [...SHORTEST];
+    renderFound();
+    answerStatus.style.display = '';
+    answerStatus.className = 'status';
+    answerStatus.innerHTML = `Кратчайший путь — <b>${MIN_LEN} команд</b>. Ответ с разбора: <b>${SLIDE_ANSWERS.join('</b>, <b>')}</b>. ` +
+        `Подходит любой из ${SHORTEST.length} путей в списке — нажми на путь, чтобы посмотреть его на поле.`;
+    programEl.value = SLIDE_ANSWERS[0];
+    updateCount();
+    run(SLIDE_ANSWERS[0]);
+}
+
+function resetAll() {
+    found = [];
+    renderFound();
+    answerStatus.style.display = 'none';
+    programEl.value = '';
+    updateCount();
+    resetRobot();
+    setStatus('', 'Набери команды и нажми «Запустить».');
+}
+
+programEl.addEventListener('input', () => {
+    programEl.value = programEl.value.replace(/[^1-4]/g, '');
+    updateCount();
+});
+programEl.addEventListener('keydown', e => { if (e.key === 'Enter') run(programEl.value); });
+document.querySelectorAll('.pad [data-cmd]').forEach(b => b.addEventListener('click', () => {
+    programEl.value += b.dataset.cmd;
+    updateCount();
+}));
+document.getElementById('btn-del').addEventListener('click', () => {
+    programEl.value = programEl.value.slice(0, -1);
+    updateCount();
+});
+btnRun.addEventListener('click', () => run(programEl.value));
+document.getElementById('btn-clear').addEventListener('click', () => {
+    programEl.value = '';
+    updateCount();
+    resetRobot();
+    setStatus('', 'Набери команды и нажми «Запустить».');
+});
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', resetAll);
+
+render();
+</script>
+</body>
+</html>

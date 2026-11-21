@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: От Земли до Луны через пятёрочку</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 900px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; text-align: center; }
+
+    svg { width: 100%; height: auto; display: block; user-select: none; }
+
+    .edge { stroke: #2c3e50; stroke-width: 2.5; fill: none; }
+    .edge.used { stroke: #2980b9; stroke-width: 5; }
+    .edge.dead { stroke: #d5dbdf; }
+
+    .node rect, .node circle { fill: white; stroke: #2c3e50; stroke-width: 2.5; transition: fill 0.2s; }
+    .node.planet circle { fill: #f1f4f7; }
+    .node text { font-size: 22px; font-family: 'Cambria', 'Times New Roman', serif; text-anchor: middle; dominant-baseline: central; fill: #2c3e50; pointer-events: none; }
+    .node.planet text { font-size: 17px; }
+    .node.on rect, .node.on circle { fill: #d6eaf8; stroke: #2980b9; }
+    .node.five rect { stroke: #e67e22; stroke-width: 4; }
+    .node.five.on rect { fill: #fdebd0; }
+    .node.next { cursor: pointer; }
+    .node.next rect, .node.next circle { fill: #eafaf1; stroke: #2ecc71; stroke-width: 4; }
+    .node.next:hover rect, .node.next:hover circle { fill: #d5f5e3; }
+
+    .count { font-size: 19px; font-weight: bold; fill: #e74c3c; text-anchor: middle; font-family: 'Segoe UI', sans-serif; }
+    .cross { stroke: #e74c3c; stroke-width: 4; stroke-linecap: round; }
+
+    .route {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2980b9;
+        min-height: 26px;
+        margin-top: 10px;
+    }
+
+    .found {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .found .item {
+        background: #eafaf1;
+        border: 1px solid #2ecc71;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 14px;
+        color: #27ae60;
+        font-weight: bold;
+        animation: pop 0.3s ease;
+    }
+
+    .found .empty { color: #95a5a6; }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 17px;
+        margin-top: 10px;
+    }
+
+    .answer-row input {
+        width: 90px;
+        padding: 8px 10px;
+        font-size: 18px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        text-align: center;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-step { background-color: #2980b9; }
+    .btn-step:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🚀 Задача: От Земли до Луны через пятёрочку</h1>
+<p class="subtitle">Сколькими способами можно долететь с Земли до Луны, двигаясь вдоль стрелок через космические станции,
+    если маршрут проходит через станцию номер <b>5</b>?</p>
+
+<div class="panel">
+    <h3>Проложи маршрут: нажимай на зелёные станции по стрелкам</h3>
+    <svg id="graph" viewBox="0 0 1000 430"></svg>
+    <div class="route" id="route"></div>
+
+    <div class="controls">
+        <button class="btn-step" id="btn-back">⟲ Шаг назад</button>
+        <button class="btn-reset" id="btn-new">Новый маршрут</button>
+    </div>
+    <div class="status" id="route-status">Полёт начинается на Земле. Выбери первую станцию.</div>
+</div>
+
+<div class="panel">
+    <h3>Найденные маршруты через станцию 5: <span id="found-count">0</span></h3>
+    <div class="found" id="found"><div class="empty">Пока ни одного</div></div>
+
+    <div class="answer-row">
+        Всего способов:
+        <input type="number" inputmode="numeric" id="answer-input">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+    </div>
+    <div class="status" id="answer-status">Перебирать все маршруты долго. Попробуй посчитать, сколькими способами можно добраться до каждой станции.</div>
+</div>
+
+<script>
+const NODES = {
+    E: { x: 110, y: 215, label: 'ЗЕМЛЯ', planet: true },
+    1: { x: 300, y: 95 },
+    2: { x: 300, y: 335 },
+    3: { x: 445, y: 215 },
+    4: { x: 595, y: 95 },
+    5: { x: 595, y: 335 },
+    6: { x: 740, y: 215 },
+    7: { x: 820, y: 335 },
+    M: { x: 905, y: 215, label: 'ЛУНА', planet: true }
+};
+const EDGES = [
+    ['E', '1'], ['E', '2'], ['1', '2'], ['1', '3'], ['1', '4'], ['2', '3'], ['2', '5'],
+    ['3', '4'], ['3', '5'], ['5', '4'], ['4', '6'], ['4', 'M'], ['5', '6'], ['5', '7'],
+    ['6', 'M'], ['7', 'M']
+];
+const ANSWER = 20;
+// Число способов (как на слайде-разборе) и место подписи
+const COUNTS = {
+    1: { n: '1 способ', dx: 0, dy: -48 },
+    2: { n: '2 способа', dx: 0, dy: 58 },
+    3: { n: '3 способа', dx: 0, dy: 58 },
+    5: { n: '5 способов', dx: 0, dy: 58 },
+    4: { n: '5 способов', dx: 0, dy: -48 },
+    6: { n: '10 способов', dx: 0, dy: -46 },
+    7: { n: '5 способов', dx: 40, dy: 58 },
+    M: { n: '5 + 10 + 5 = 20', dx: -10, dy: -78 }
+};
+const DEAD_EDGES = ['1-4', '3-4'];
+const HALF = 28;   // половина стороны квадрата станции
+const R = 58;      // радиус планеты
+
+const svg = document.getElementById('graph');
+const routeEl = document.getElementById('route');
+const routeStatus = document.getElementById('route-status');
+const answerStatus = document.getElementById('answer-status');
+const foundEl = document.getElementById('found');
+const foundCountEl = document.getElementById('found-count');
+
+let route = ['E'];
+let found = [];
+let answerShown = false;
+
+function nameOf(id) {
+    return id === 'E' ? 'Земля' : id === 'M' ? 'Луна' : id;
+}
+
+function routeText(r) {
+    return r.map(nameOf).join(' → ');
+}
+
+function edgeEnd(from, to) {
+    // Точка на границе фигуры `from` в направлении `to`
+    const a = NODES[from], b = NODES[to];
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len;
+    let d;
+    if (a.planet) d = R;
+    else d = Math.min(HALF / Math.abs(ux || 1e-9), HALF / Math.abs(uy || 1e-9));
+    return { x: a.x + ux * d, y: a.y + uy * d };
+}
+
+function render() {
+    const usedEdges = new Set();
+    for (let i = 1; i < route.length; i++) usedEdges.add(route[i - 1] + '-' + route[i]);
+    const last = route[route.length - 1];
+    const nextNodes = last === 'M' ? [] : EDGES.filter(e => e[0] === last).map(e => e[1]);
+
+    let html = `<defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2c3e50"/></marker>
+        <marker id="arrow-used" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2980b9"/></marker>
+        <marker id="arrow-dead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#d5dbdf"/></marker>
+    </defs>`;
+
+    EDGES.forEach(([f, t]) => {
+        const key = f + '-' + t;
+        const p1 = edgeEnd(f, t);
+        const p2b = edgeEnd(t, f);
+        const used = usedEdges.has(key);
+        const dead = answerShown && DEAD_EDGES.includes(key);
+        const cls = 'edge' + (used ? ' used' : dead ? ' dead' : '');
+        const marker = used ? 'arrow-used' : dead ? 'arrow-dead' : 'arrow';
+        html += `<line class="${cls}" x1="${p1.x}" y1="${p1.y}" x2="${p2b.x}" y2="${p2b.y}" marker-end="url(#${marker})"/>`;
+        if (dead) {
+            const mx = (p1.x + p2b.x) / 2, my = (p1.y + p2b.y) / 2;
+            html += `<line class="cross" x1="${mx - 10}" y1="${my - 10}" x2="${mx + 10}" y2="${my + 10}"/>` +
+                    `<line class="cross" x1="${mx + 10}" y1="${my - 10}" x2="${mx - 10}" y2="${my + 10}"/>`;
+        }
+    });
+
+    Object.entries(NODES).forEach(([id, n]) => {
+        let cls = 'node' + (n.planet ? ' planet' : '');
+        if (id === '5') cls += ' five';
+        if (route.includes(id)) cls += ' on';
+        if (nextNodes.includes(id)) cls += ' next';
+        const shape = n.planet
+            ? `<circle cx="${n.x}" cy="${n.y}" r="${R}"/>`
+            : `<rect x="${n.x - HALF}" y="${n.y - HALF}" width="${HALF * 2}" height="${HALF * 2}"/>`;
+        html += `<g class="${cls}" data-id="${id}">${shape}<text x="${n.x}" y="${n.y}">${n.label || id}</text></g>`;
+    });
+
+    if (answerShown) {
+        Object.entries(COUNTS).forEach(([id, c]) => {
+            const n = NODES[id];
+            html += `<text class="count" x="${n.x + c.dx}" y="${n.y + c.dy}">${c.n}</text>`;
+        });
+    }
+
+    svg.innerHTML = html;
+    svg.querySelectorAll('.node.next').forEach(g => g.addEventListener('click', () => go(g.dataset.id)));
+
+    routeEl.textContent = routeText(route);
+    document.getElementById('btn-back').disabled = route.length <= 1;
+}
+
+function go(id) {
+    route.push(id);
+    if (id === 'M') {
+        finishRoute();
+    } else {
+        routeStatus.className = 'status';
+        routeStatus.textContent = id === '5'
+            ? 'Отлично, маршрут проходит через станцию 5! Летим дальше.'
+            : 'Выбери следующую станцию.';
+    }
+    render();
+}
+
+function finishRoute() {
+    if (!route.includes('5')) {
+        routeStatus.className = 'status error';
+        routeStatus.textContent = 'Долетели до Луны, но не через станцию 5. Такой маршрут не подходит.';
+        return;
+    }
+    const key = route.join(',');
+    if (found.includes(key)) {
+        routeStatus.className = 'status';
+        routeStatus.textContent = 'Такой маршрут уже есть в списке. Попробуй другой!';
+        return;
+    }
+    found.push(key);
+    renderFound();
+    routeStatus.className = 'status success';
+    routeStatus.textContent = '✅ Новый маршрут через станцию 5! Нажми «Новый маршрут», чтобы найти ещё.';
+}
+
+function renderFound() {
+    foundCountEl.textContent = found.length;
+    foundEl.innerHTML = found.length
+        ? found.map(k => `<div class="item">${routeText(k.split(','))}</div>`).join('')
+        : '<div class="empty">Пока ни одного</div>';
+}
+
+function allRoutes() {
+    const res = [];
+    (function dfs(path) {
+        const last = path[path.length - 1];
+        if (last === 'M') { if (path.includes('5')) res.push(path.join(',')); return; }
+        EDGES.filter(e => e[0] === last).forEach(e => dfs([...path, e[1]]));
+    })(['E']);
+    return res;
+}
+
+function back() {
+    if (route.length <= 1) return;
+    route.pop();
+    routeStatus.className = 'status';
+    routeStatus.textContent = 'Выбери следующую станцию.';
+    render();
+}
+
+function newRoute() {
+    route = ['E'];
+    routeStatus.className = 'status';
+    routeStatus.textContent = 'Полёт начинается на Земле. Выбери первую станцию.';
+    render();
+}
+
+function check() {
+    const v = document.getElementById('answer-input').value.trim();
+    if (v === '') {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Впиши число способов.';
+    } else if (Number(v) === ANSWER) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! Через станцию 5 можно долететь до Луны 20 способами.';
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Не так. Подсказка: сначала посчитай, сколькими способами можно долететь до станции 5, а потом — сколькими способами от неё до Луны.';
+    }
+}
+
+function showAnswer() {
+    answerShown = true;
+    found = allRoutes();
+    renderFound();
+    document.getElementById('answer-input').value = ANSWER;
+    answerStatus.className = 'status';
+    answerStatus.innerHTML = 'Ответ: <b>20 способов</b>. Считаем, сколькими способами можно попасть в каждую станцию: ' +
+        'в 1 — одним, во 2 — двумя (с Земли и через 1), в 3 — тремя (1 + 2), в 5 — пятью (2 + 3). ' +
+        'Маршрут обязан пройти через 5, поэтому стрелки 1 → 4 и 3 → 4 не используем: в 4 попадаем только из 5 — тоже 5 способов. ' +
+        'В 6 — 5 + 5 = 10, в 7 — 5. В Луну: 5 (из 4) + 10 (из 6) + 5 (из 7) = <b>20</b>.';
+    render();
+}
+
+document.getElementById('btn-back').addEventListener('click', back);
+document.getElementById('btn-new').addEventListener('click', newRoute);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('answer-input').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+console.assert(allRoutes().length === ANSWER);
+render();
+</script>
+</body>
+</html>

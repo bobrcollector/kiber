@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Великий уравнитель</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .layout {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .layout > .chart { flex: 1.2; min-width: 300px; }
+    .layout > .side { flex: 1; min-width: 260px; }
+
+    svg.flow { width: 100%; height: auto; display: block; }
+    .blk { fill: white; stroke: #2c3e50; stroke-width: 2; transition: fill 0.2s; }
+    .blk.active { fill: #f9e79f; stroke: #b7950b; stroke-width: 3; }
+    .ln { stroke: #2c3e50; stroke-width: 1.8; fill: none; }
+    .lbl { font-size: 15px; text-anchor: middle; dominant-baseline: central; font-family: 'Cambria', 'Times New Roman', serif; fill: #2c3e50; }
+    .yn { font-size: 13px; fill: #555; font-family: 'Segoe UI', sans-serif; }
+
+    .vars {
+        display: flex;
+        gap: 20px;
+        font-size: 22px;
+        font-family: 'Courier New', monospace;
+        margin: 10px 0;
+    }
+
+    .vars b { color: #8e44ad; }
+
+    .log {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 8px 12px;
+        max-height: 170px;
+        overflow-y: auto;
+        white-space: pre-line;
+    }
+
+    select {
+        padding: 7px 10px;
+        font-size: 16px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+    }
+
+    .grid-wrap { overflow-x: auto; }
+
+    table.grid {
+        border-collapse: collapse;
+        font-size: 17px;
+        margin: 0 auto;
+    }
+
+    .grid th, .grid td {
+        border: 1px solid #bdc3c7;
+        padding: 6px 10px;
+        text-align: center;
+    }
+
+    .grid th { background: #f5eef8; font-family: 'Cambria', 'Times New Roman', serif; font-style: italic; }
+    .grid td:first-child { font-weight: bold; white-space: nowrap; }
+    .grid input { width: 18px; height: 18px; accent-color: #8e44ad; cursor: pointer; }
+    .grid tr.ok td { background: #eafaf1; }
+    .grid tr.bad td { background: #fdecea; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>⚖️ Задача: Великий уравнитель</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p>Какие результаты, полученные при выполнении алгоритма, соответствуют приведённым исходным данным? Отметь в таблице соответствующие значения (1–6).</p>
+        <div class="layout">
+            <div class="chart">
+                <svg class="flow" id="flow" viewBox="0 0 560 400">
+                    <defs>
+                        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 z" fill="#2c3e50"/>
+                        </marker>
+                    </defs>
+                    <!-- связи -->
+                    <line class="ln" x1="200" y1="44" x2="200" y2="66" marker-end="url(#ar)"/>
+                    <line class="ln" x1="200" y1="100" x2="200" y2="135" marker-end="url(#ar)"/>
+                    <polyline class="ln" points="125,165 40,165 40,212" marker-end="url(#ar)"/>
+                    <line class="ln" x1="40" y1="246" x2="40" y2="290" marker-end="url(#ar)"/>
+                    <polyline class="ln" points="275,165 380,165 380,212" marker-end="url(#ar)"/>
+                    <polyline class="ln" points="310,240 270,240 270,296" marker-end="url(#ar)"/>
+                    <polyline class="ln" points="450,240 470,240 470,296" marker-end="url(#ar)"/>
+                    <polyline class="ln" points="270,330 270,360 370,360"/>
+                    <polyline class="ln" points="470,330 470,360 370,360"/>
+                    <polyline class="ln" points="370,360 370,380 540,380 540,118 205,118" marker-end="url(#ar)"/>
+                    <text class="yn" x="90" y="152">Да</text>
+                    <text class="yn" x="315" y="152">Нет</text>
+                    <text class="yn" x="285" y="226">Да</text>
+                    <text class="yn" x="455" y="226">Нет</text>
+
+                    <!-- блоки -->
+                    <rect class="blk" id="b-start" x="145" y="10" width="110" height="34" rx="17"/>
+                    <text class="lbl" x="200" y="27">Начало</text>
+
+                    <polygon class="blk" id="b-input" points="165,66 255,66 235,100 145,100"/>
+                    <text class="lbl" x="200" y="83"><tspan font-style="italic">a, b</tspan></text>
+
+                    <polygon class="blk" id="b-eq" points="200,137 275,165 200,193 125,165"/>
+                    <text class="lbl" x="200" y="165"><tspan font-style="italic">a = b</tspan></text>
+
+                    <polygon class="blk" id="b-out" points="20,212 80,212 60,246 0,246"/>
+                    <text class="lbl" x="40" y="229" font-style="italic">a</text>
+
+                    <rect class="blk" id="b-end" x="5" y="290" width="80" height="34" rx="17"/>
+                    <text class="lbl" x="45" y="307">Конец</text>
+
+                    <polygon class="blk" id="b-gt" points="380,214 450,240 380,266 310,240"/>
+                    <text class="lbl" x="380" y="240" font-style="italic">a &gt; b</text>
+
+                    <rect class="blk" id="b-suba" x="215" y="296" width="110" height="34"/>
+                    <text class="lbl" x="270" y="313" font-style="italic">a := a − b</text>
+
+                    <rect class="blk" id="b-subb" x="415" y="296" width="110" height="34"/>
+                    <text class="lbl" x="470" y="313" font-style="italic">b := b − a</text>
+                </svg>
+            </div>
+
+            <div class="side">
+                <h3 style="margin-top:0;">🔬 Выполни алгоритм</h3>
+                <div class="inputs">
+                    <label>Исходные данные: <select id="pair"></select></label>
+                </div>
+                <div class="vars" id="vars"></div>
+                <div class="inputs">
+                    <button class="btn-check" id="btn-step">Шаг</button>
+                    <button class="btn-next" id="btn-run">▶ До конца</button>
+                    <button class="btn-reset" id="btn-restart">Сначала</button>
+                </div>
+                <div class="log" id="log"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Отметь результаты</h2>
+        <div class="grid-wrap"><table class="grid" id="grid"></table></div>
+        <div class="inputs" style="justify-content:center;">
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">В каждой строке выбери один результат.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Алгоритм каждый раз вычитает из большего числа меньшее, пока числа не станут равными. Это <b>алгоритм Евклида</b>: в конце получается наибольший общий делитель (НОД) чисел a и b.</p>
+            <p>15, 10 → 5, 10 → 5, 5 → <b>5</b><br>
+               24, 18 → 6, 18 → 6, 12 → 6, 6 → <b>6</b><br>
+               15, 9 → 6, 9 → 6, 3 → 3, 3 → <b>3</b><br>
+               12, 16 → 12, 4 → 8, 4 → 4, 4 → <b>4</b><br>
+               3, 14 → 3, 11 → 3, 8 → 3, 5 → 3, 2 → 1, 2 → 1, 1 → <b>1</b><br>
+               2, 2 → сразу <b>2</b></p>
+            <button class="btn-gray" id="btn-fill">Отметить ответ в таблице</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const PAIRS = [[15, 10], [24, 18], [15, 9], [12, 16], [3, 14], [2, 2]];
+
+function gcdBySub(a, b) {
+    while (a !== b) {
+        if (a > b) a -= b;
+        else b -= a;
+    }
+    return a;
+}
+
+const ANSWERS = PAIRS.map(([a, b]) => gcdBySub(a, b));
+
+// ===== Трассировка =====
+const pairSel = document.getElementById('pair');
+const logEl = document.getElementById('log');
+const btnStep = document.getElementById('btn-step');
+const btnRun = document.getElementById('btn-run');
+let a, b, block, finished, timer = null;
+
+function setActive(id) {
+    document.querySelectorAll('#flow .blk').forEach(el => el.classList.toggle('active', el.id === id));
+}
+
+function showVars() {
+    document.getElementById('vars').innerHTML = a === null
+        ? '<span>a = <b>?</b></span><span>b = <b>?</b></span>'
+        : `<span>a = <b>${a}</b></span><span>b = <b>${b}</b></span>`;
+}
+
+function log(text) {
+    logEl.textContent += (logEl.textContent ? '\n' : '') + text;
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+function restart() {
+    stop();
+    a = null; b = null;
+    block = 'b-start';
+    finished = false;
+    logEl.textContent = '';
+    setActive(block);
+    showVars();
+    btnStep.disabled = btnRun.disabled = false;
+}
+
+function step() {
+    if (finished) return;
+    const [ia, ib] = PAIRS[Number(pairSel.value)];
+    switch (block) {
+        case 'b-start':
+            block = 'b-input';
+            a = ia; b = ib;
+            log(`Ввод: a = ${a}, b = ${b}`);
+            break;
+        case 'b-input':
+        case 'b-suba':
+        case 'b-subb':
+            block = 'b-eq';
+            log(`${a} = ${b}? ${a === b ? 'Да' : 'Нет'}`);
+            break;
+        case 'b-eq':
+            if (a === b) {
+                block = 'b-out';
+                log(`Вывод: ${a}`);
+            } else {
+                block = 'b-gt';
+                log(`${a} > ${b}? ${a > b ? 'Да' : 'Нет'}`);
+            }
+            break;
+        case 'b-gt':
+            if (a > b) {
+                block = 'b-suba';
+                log(`a := ${a} − ${b} = ${a - b}`);
+                a -= b;
+            } else {
+                block = 'b-subb';
+                log(`b := ${b} − ${a} = ${b - a}`);
+                b -= a;
+            }
+            break;
+        case 'b-out':
+            block = 'b-end';
+            finished = true;
+            log('Конец');
+            btnStep.disabled = btnRun.disabled = true;
+            stop();
+            break;
+    }
+    setActive(block);
+    showVars();
+}
+
+function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+}
+
+function runAll() {
+    stop();
+    timer = setInterval(() => {
+        step();
+        if (finished) stop();
+    }, 350);
+}
+
+// ===== Таблица =====
+function buildGrid() {
+    let html = '<tr><th>Исходные данные</th>' + [1, 2, 3, 4, 5, 6].map(n => `<th>${n}</th>`).join('') + '</tr>';
+    PAIRS.forEach(([pa, pb], i) => {
+        html += `<tr id="row${i}"><td>${pa}, ${pb}</td>` +
+            [1, 2, 3, 4, 5, 6].map(n => `<td><input type="radio" name="r${i}" value="${n}"></td>`).join('') + '</tr>';
+    });
+    document.getElementById('grid').innerHTML = html;
+    document.querySelectorAll('#grid input').forEach(r => r.addEventListener('change', () => {
+        r.closest('tr').classList.remove('ok', 'bad');
+    }));
+}
+
+function check() {
+    let empty = 0, wrong = 0;
+    PAIRS.forEach((_, i) => {
+        const row = document.getElementById('row' + i);
+        const sel = document.querySelector(`input[name="r${i}"]:checked`);
+        row.classList.remove('ok', 'bad');
+        if (!sel) { empty++; return; }
+        const ok = Number(sel.value) === ANSWERS[i];
+        row.classList.add(ok ? 'ok' : 'bad');
+        if (!ok) wrong++;
+    });
+    const st = document.getElementById('status');
+    if (wrong) {
+        st.className = 'status error';
+        st.textContent = `Ошибок: ${wrong}. Выполни алгоритм для красных строк по шагам.`;
+    } else if (empty) {
+        st.className = 'status';
+        st.textContent = `Пока всё верно! Осталось строк: ${empty}.`;
+    } else {
+        st.className = 'status success';
+        st.textContent = '🎉 Всё верно! Алгоритм находит наибольший общий делитель двух чисел.';
+    }
+}
+
+function fill() {
+    ANSWERS.forEach((ans, i) => {
+        document.querySelector(`input[name="r${i}"][value="${ans}"]`).checked = true;
+    });
+    check();
+}
+
+PAIRS.forEach(([pa, pb], i) => pairSel.insertAdjacentHTML('beforeend', `<option value="${i}">${pa}, ${pb}</option>`));
+pairSel.addEventListener('change', restart);
+btnStep.addEventListener('click', () => { stop(); step(); });
+btnRun.addEventListener('click', runAll);
+document.getElementById('btn-restart').addEventListener('click', restart);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-fill').addEventListener('click', fill);
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+console.assert(ANSWERS.join() === '5,6,3,4,1,2');
+buildGrid();
+restart();
+</script>
+</body>
+</html>

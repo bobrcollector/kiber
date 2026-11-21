@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Компьютер-хаус</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .facts {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .fact {
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 15px;
+        text-align: center;
+        border: 2px solid;
+    }
+
+    .fact b { font-size: 24px; display: block; }
+    .fact.desk { border-color: #2980b9; background: #eaf2f8; color: #1f618d; }
+    .fact.lap { border-color: #e67e22; background: #fdf2e9; color: #a04000; }
+    .fact.both { border-color: #8e44ad; background: #f4ecf7; color: #6c3483; }
+
+    svg { width: 100%; max-width: 560px; height: auto; display: block; margin: 0 auto; }
+
+    .circle-desk { fill: rgba(41, 128, 185, 0.18); stroke: #2980b9; stroke-width: 3; }
+    .circle-lap { fill: rgba(230, 126, 34, 0.18); stroke: #e67e22; stroke-width: 3; }
+    .venn-title { font-size: 18px; font-weight: bold; text-anchor: middle; }
+    .venn-num { font-size: 30px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #2c3e50; }
+    .venn-num.unknown { fill: #bdc3c7; }
+    .venn-sub { font-size: 13px; text-anchor: middle; fill: #555; }
+
+    .answer-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 17px;
+        margin-top: 18px;
+    }
+
+    .answer-row input {
+        width: 100px;
+        padding: 8px 10px;
+        font-size: 18px;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        text-align: center;
+        outline: none;
+    }
+
+    .answer-row input:focus { border-color: #2980b9; }
+
+    .hints {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hint {
+        background: #fff8dc;
+        border-left: 4px solid #f1c40f;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 15px;
+        animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-hint { background-color: #2980b9; }
+    .btn-hint:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>💻 Задача: Компьютер-хаус</h1>
+<p class="subtitle">У каждой семьи в доме есть компьютеры. 104 семьи имеют настольный компьютер, у 35 семей есть ноутбук,
+    причём у 19 семей есть и настольный компьютер, и ноутбук. Сколько семей живёт в доме?</p>
+
+<div class="panel">
+    <div class="facts">
+        <div class="fact desk"><b>104</b>🖥️ настольный</div>
+        <div class="fact lap"><b>35</b>💻 ноутбук</div>
+        <div class="fact both"><b>19</b>🖥️ + 💻 оба</div>
+    </div>
+
+    <svg viewBox="0 0 560 330" id="venn">
+        <circle class="circle-desk" cx="215" cy="180" r="135"/>
+        <circle class="circle-lap" cx="365" cy="180" r="110"/>
+        <text class="venn-title" x="160" y="30" fill="#2980b9">🖥️ Настольный — 104</text>
+        <text class="venn-title" x="420" y="55" fill="#e67e22">💻 Ноутбук — 35</text>
+        <text class="venn-num unknown" id="only-desk" x="155" y="180">?</text>
+        <text class="venn-sub" x="155" y="212">только настольный</text>
+        <text class="venn-num" x="295" y="180">19</text>
+        <text class="venn-sub" x="295" y="212">оба</text>
+        <text class="venn-num unknown" id="only-lap" x="415" y="180">?</text>
+        <text class="venn-sub" x="415" y="212">только ноутбук</text>
+    </svg>
+
+    <div class="answer-row">
+        В доме живёт
+        <input type="number" inputmode="numeric" id="answer-input">
+        семей
+        <button class="btn-check" id="btn-check">Проверить</button>
+    </div>
+
+    <div class="controls">
+        <button class="btn-hint" id="btn-hint">Подсказка</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="hints" id="hints"></div>
+    <div class="status" id="status">Посмотри на круги: семьи, у которых есть оба устройства, попали в оба круга сразу.</div>
+</div>
+
+<script>
+const ANSWER = 120;
+const HINTS = [
+    'Если просто сложить 104 + 35, то 19 семей с обоими устройствами посчитаются два раза — и в синем круге, и в оранжевом.',
+    'Посчитай, у скольких семей есть только настольный компьютер (104 − 19) и только ноутбук (35 − 19). Числа появились на кругах!',
+    'Теперь сложи все три части кругов: только настольный + оба + только ноутбук.'
+];
+
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+const input = document.getElementById('answer-input');
+let hintsShown = 0;
+
+function revealParts() {
+    const d = document.getElementById('only-desk');
+    const l = document.getElementById('only-lap');
+    d.textContent = 104 - 19;
+    l.textContent = 35 - 19;
+    d.classList.remove('unknown');
+    l.classList.remove('unknown');
+}
+
+function hideParts() {
+    ['only-desk', 'only-lap'].forEach(id => {
+        const el = document.getElementById(id);
+        el.textContent = '?';
+        el.classList.add('unknown');
+    });
+}
+
+function check() {
+    const v = input.value.trim();
+    if (v === '') {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Впиши число семей.';
+        return;
+    }
+    const n = Number(v);
+    if (n === ANSWER) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Верно! В доме живёт 120 семей: 104 + 35 − 19 = 120.';
+        revealParts();
+    } else if (n === 139) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '104 + 35 = 139, но так 19 семей посчитаны дважды! Их нужно вычесть один раз.';
+    } else if (n === 158) {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Похоже, 19 семей прибавлены ещё раз. А их, наоборот, нужно вычесть: они уже посчитаны дважды.';
+    } else if (n === 101) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '19 семей вычтены два раза. Посчитали дважды — значит, вычесть нужно один раз.';
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Пока не так. Нажми «Подсказка», если нужна помощь.';
+    }
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.textContent = `💡 ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+    if (hintsShown >= 2) revealParts();
+    document.getElementById('btn-hint').disabled = hintsShown >= HINTS.length;
+}
+
+function showAnswer() {
+    input.value = ANSWER;
+    revealParts();
+    statusEl.className = 'status';
+    statusEl.innerHTML = 'Ответ: <b>120 семей</b>. Если сложить семьи с настольными компьютерами и с ноутбуками, ' +
+        '<b>19 семей мы посчитаем дважды</b>, потому что у них есть оба устройства. Поэтому вычитаем эти 19 семей один раз: ' +
+        '<b>104 + 35 − 19 = 120</b>. Или по частям: 85 + 19 + 16 = 120.';
+}
+
+function reset() {
+    input.value = '';
+    hideParts();
+    hintsEl.innerHTML = '';
+    hintsShown = 0;
+    document.getElementById('btn-hint').disabled = false;
+    statusEl.className = 'status';
+    statusEl.textContent = 'Посмотри на круги: семьи, у которых есть оба устройства, попали в оба круга сразу.';
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+</script>
+</body>
+</html>

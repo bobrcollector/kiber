@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Робот-чистюля</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .algo {
+        font-family: 'Courier New', monospace;
+        font-size: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 14px;
+        line-height: 1.7;
+    }
+
+    .algo div { padding: 0 8px; border-radius: 5px; }
+    .algo .i1 { padding-left: 30px; }
+    .algo .i2 { padding-left: 60px; }
+    .algo .active { background: #f1c40f; font-weight: bold; }
+
+    .strip-wrap { overflow-x: auto; padding: 4px 0 8px; }
+
+    .strip {
+        display: flex;
+        width: max-content;
+        margin: 0 auto;
+    }
+
+    .cell {
+        width: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cell .bot { height: 30px; font-size: 22px; line-height: 30px; }
+    .cell .box {
+        width: 30px;
+        height: 34px;
+        border: 1px solid #2c3e50;
+        margin-left: -1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .cell .box.empty { background: #f1f4f7; }
+    .cell .box.just { background: #fdebd0; }
+    .cell .num { font-size: 11px; color: #95a5a6; margin-top: 2px; }
+    .cell.here .box { box-shadow: inset 0 0 0 3px #8e44ad; }
+
+    .counters {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+
+    .counters b { color: #8e44ad; font-size: 20px; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🧹 Задача: Робот-чистюля</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p>Робот собирает детали конструктора на клетчатой дорожке, действуя по алгоритму:</p>
+        <div class="algo" id="algo">
+            <div data-l="start">НАЧАЛО</div>
+            <div class="i1" data-l="0">ПОКА на клетке, где стоит Робот, есть деталь</div>
+            <div class="i2" data-l="1">СОБРАТЬ деталь с клетки, где стоит Робот</div>
+            <div class="i2" data-l="2">ПЕРЕМЕСТИТЬСЯ ВПРАВО на 12 клеток</div>
+            <div class="i2" data-l="3">СОБРАТЬ деталь с клетки, где стоит Робот</div>
+            <div class="i2" data-l="4">ПЕРЕМЕСТИТЬСЯ ВЛЕВО на 10 клеток</div>
+            <div class="i1" data-l="loop-end">КОНЕЦ ЦИКЛА</div>
+            <div data-l="end">КОНЕЦ</div>
+        </div>
+        <p>Сколько деталей конструктора соберёт Робот после выполнения этого алгоритма, если на каждой клетке дорожки лежит одна деталь?</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: дорожка</h2>
+        <p style="font-size:14px;color:#555;">Дорожка бесконечная в обе стороны, здесь показан её кусок. Клетки пронумерованы от места, где Робот стоит в начале.</p>
+        <div class="strip-wrap"><div class="strip" id="strip"></div></div>
+        <div class="counters">
+            <span>Собрано деталей: <b id="collected">0</b></span>
+            <span>Повторений цикла: <b id="iters">0</b></span>
+        </div>
+        <div class="inputs" style="justify-content:center;">
+            <button class="btn-check" id="btn-step">Шаг</button>
+            <button class="btn-next" id="btn-run">▶ Выполнить всё</button>
+            <button class="btn-reset" id="btn-reset">Сначала</button>
+        </div>
+        <div class="status" id="run-status">Нажимай «Шаг», чтобы выполнять алгоритм по одной команде.</div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответ</h2>
+        <div class="inputs">
+            <label>Робот соберёт деталей: <input type="number" id="answer"></label>
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Попробуй сначала решить без тренажёра.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Пусть Робот стоит на клетке 0. За одно повторение цикла он собирает деталь на своей клетке, уходит на 12 вправо, собирает там деталь и возвращается на 10 влево — то есть в итоге сдвигается на <span class="math">12 − 10 = 2</span> клетки вправо.</p>
+            <p>Значит, в начале повторений он стоит на клетках 0, 2, 4, 6, 8, 10, 12, … и собирает детали на них, а «дальние» детали — на клетках 12, 14, 16, 18, 20, 22, …</p>
+            <p>Первое повторение собирает детали с клеток 0 и 12, второе — 2 и 14, …, шестое — 10 и 22. В начале седьмого повторения Робот приходит на клетку 12, деталь с которой он уже собрал в первом повторении. Условие цикла не выполняется — алгоритм заканчивается.</p>
+            <p>Всего 6 повторений по 2 детали: <b>12 деталей</b>.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+const FROM = -3, TO = 26;
+const ANSWER = 12;
+
+const stripEl = document.getElementById('strip');
+const runStatus = document.getElementById('run-status');
+const btnStep = document.getElementById('btn-step');
+const btnRun = document.getElementById('btn-run');
+
+let parts, pos, line, collected, iters, done, lastCollected, timer = null;
+
+function reset() {
+    stopRun();
+    parts = new Set();
+    for (let i = FROM; i <= TO; i++) parts.add(i);
+    pos = 0;
+    line = 0;
+    collected = 0;
+    iters = 0;
+    done = false;
+    lastCollected = null;
+    runStatus.className = 'status';
+    runStatus.textContent = 'Нажимай «Шаг», чтобы выполнять алгоритм по одной команде.';
+    render();
+}
+
+function render() {
+    let html = '';
+    for (let i = FROM; i <= TO; i++) {
+        const has = parts.has(i);
+        html += `<div class="cell${i === pos ? ' here' : ''}">
+            <div class="bot">${i === pos ? '🤖' : ''}</div>
+            <div class="box${has ? '' : ' empty'}${i === lastCollected ? ' just' : ''}">${has ? '🔩' : ''}</div>
+            <div class="num">${i}</div>
+        </div>`;
+    }
+    stripEl.innerHTML = html;
+    document.getElementById('collected').textContent = collected;
+    document.getElementById('iters').textContent = iters;
+    document.querySelectorAll('#algo div').forEach(d => d.classList.remove('active'));
+    const key = done ? 'end' : String(line);
+    document.querySelector(`#algo [data-l="${key}"]`).classList.add('active');
+    btnStep.disabled = done;
+    btnRun.disabled = done;
+    const here = stripEl.querySelector('.here');
+    const wrap = stripEl.parentElement;
+    if (here && wrap.scrollWidth > wrap.clientWidth) {
+        wrap.scrollLeft = here.offsetLeft - stripEl.offsetLeft - wrap.clientWidth / 2;
+    }
+}
+
+function collect() {
+    if (parts.has(pos)) {
+        parts.delete(pos);
+        collected++;
+        lastCollected = pos;
+        return `Собрал деталь с клетки ${pos}.`;
+    }
+    lastCollected = null;
+    return `На клетке ${pos} детали нет — собирать нечего.`;
+}
+
+function step() {
+    if (done) return;
+    let msg;
+    switch (line) {
+        case 0:
+            if (parts.has(pos)) {
+                msg = `На клетке ${pos} есть деталь — выполняем тело цикла.`;
+                iters++;
+                line = 1;
+            } else {
+                msg = `На клетке ${pos} детали нет — цикл закончился. Собрано деталей: ${collected}.`;
+                done = true;
+            }
+            break;
+        case 1:
+            msg = collect();
+            line = 2;
+            break;
+        case 2:
+            pos += 12;
+            msg = `Переместился вправо на 12 — клетка ${pos}.`;
+            line = 3;
+            break;
+        case 3:
+            msg = collect();
+            line = 4;
+            break;
+        case 4:
+            pos -= 10;
+            msg = `Переместился влево на 10 — клетка ${pos}.`;
+            line = 0;
+            break;
+    }
+    runStatus.className = 'status' + (done ? ' success' : '');
+    runStatus.textContent = msg;
+    render();
+}
+
+function stopRun() {
+    if (timer) clearInterval(timer);
+    timer = null;
+}
+
+function runAll() {
+    stopRun();
+    timer = setInterval(() => {
+        step();
+        if (done) stopRun();
+    }, 300);
+}
+
+function check() {
+    const st = document.getElementById('status');
+    const v = document.getElementById('answer').value.trim();
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (Number(v) === ANSWER) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! Робот соберёт 12 деталей.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подумай, на какую клетку Робот приходит в начале каждого повторения и когда он впервые наступит на уже пустую клетку.';
+    }
+}
+
+btnStep.addEventListener('click', () => { stopRun(); step(); });
+btnRun.addEventListener('click', runAll);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('answer').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Уфимские каникулы</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 780px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; text-align: center; }
+
+    .facts {
+        list-style: none;
+        padding: 0;
+        margin: 0 auto 20px;
+        max-width: 560px;
+        font-size: 15px;
+    }
+
+    .facts li { padding: 4px 0; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table.plan {
+        border-collapse: collapse;
+        margin: 0 auto;
+        font-size: 15px;
+    }
+
+    .plan th, .plan td {
+        border: 1px solid #ccd5dd;
+        padding: 0;
+        text-align: center;
+        width: 70px;
+        height: 52px;
+    }
+
+    .plan th { background: #f8f9fa; color: #2c3e50; padding: 6px; }
+    .plan th.event { width: auto; text-align: left; padding: 6px 12px; white-space: nowrap; }
+    .plan th.conflict { background: #fdecea; color: #c0392b; }
+
+    .plan td.closed { background: repeating-linear-gradient(45deg, #f4f4f4, #f4f4f4 6px, #eaeaea 6px, #eaeaea 12px); }
+    .plan td.open { background: #eafaf1; cursor: pointer; }
+    .plan td.open:hover { background: #d5f5e3; }
+    .plan td.chosen { background: #2ecc71; color: white; font-size: 24px; }
+    .plan td.chosen.conflict { background: #e74c3c; }
+
+    .legend {
+        display: flex;
+        gap: 18px;
+        justify-content: center;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #555;
+        margin-top: 10px;
+    }
+
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 18px; height: 14px; display: inline-block; border: 1px solid #ccd5dd; border-radius: 3px; }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 560px) {
+        .plan th, .plan td { width: 44px; height: 44px; font-size: 13px; }
+        .plan th.event { padding: 4px 6px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>📅 Задача: Уфимские каникулы</h1>
+<p class="subtitle">Ваня приехал на каникулы в Уфу во вторник и планирует пробыть там до воскресенья.
+    Он хочет встретиться с другом, сходить на хоккейный матч, посетить музей и сходить в театр.
+    На каждое мероприятие он хочет посвятить отдельный день. Назови день, когда Ваня сможет встретиться с другом.</p>
+
+<div class="panel">
+    <ul class="facts">
+        <li>🏒 Хоккейный матч проводится только в четверг.</li>
+        <li>🏛️ Музей работает со среды по субботу.</li>
+        <li>🎭 Спектакли в театре идут в среду и пятницу.</li>
+        <li>🤝 Друг свободен в четверг и пятницу.</li>
+    </ul>
+
+    <h3>Составь Ване план: нажми на клетку, чтобы выбрать день</h3>
+    <div class="table-wrap">
+        <table class="plan" id="plan"></table>
+    </div>
+    <div class="legend">
+        <span><i style="background:#eafaf1"></i>можно</span>
+        <span><i style="background:repeating-linear-gradient(45deg,#f4f4f4,#f4f4f4 3px,#eaeaea 3px,#eaeaea 6px)"></i>нельзя</span>
+        <span><i style="background:#2ecc71"></i>выбрано</span>
+        <span><i style="background:#e74c3c"></i>два дела в один день</span>
+    </div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+    <div class="status" id="status">В какой день Ваня встретится с другом? Отметь это в строке «Друг».</div>
+</div>
+
+<script>
+const DAYS = ['Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const EVENTS = [
+    { id: 'friend', name: '🤝 Друг', icon: '🤝', days: [2, 3] },
+    { id: 'hockey', name: '🏒 Хоккей', icon: '🏒', days: [2] },
+    { id: 'museum', name: '🏛️ Музей', icon: '🏛️', days: [1, 2, 3, 4] },
+    { id: 'theatre', name: '🎭 Театр', icon: '🎭', days: [1, 3] }
+];
+const SOLUTION = { friend: 3, hockey: 2, museum: 4, theatre: 1 };
+
+const planEl = document.getElementById('plan');
+const statusEl = document.getElementById('status');
+let plan = {};
+
+function conflictDays() {
+    const count = {};
+    Object.values(plan).forEach(d => { count[d] = (count[d] || 0) + 1; });
+    return new Set(Object.keys(count).filter(d => count[d] > 1).map(Number));
+}
+
+function render() {
+    const conflicts = conflictDays();
+    let html = '<tr><th class="event"></th>' +
+        DAYS.map((d, i) => `<th class="${conflicts.has(i) ? 'conflict' : ''}">${d}</th>`).join('') + '</tr>';
+    EVENTS.forEach(ev => {
+        html += `<tr><th class="event">${ev.name}</th>`;
+        DAYS.forEach((_, i) => {
+            if (!ev.days.includes(i)) {
+                html += '<td class="closed"></td>';
+            } else if (plan[ev.id] === i) {
+                html += `<td class="open chosen${conflicts.has(i) ? ' conflict' : ''}" data-ev="${ev.id}" data-day="${i}">${ev.icon}</td>`;
+            } else {
+                html += `<td class="open" data-ev="${ev.id}" data-day="${i}"></td>`;
+            }
+        });
+        html += '</tr>';
+    });
+    planEl.innerHTML = html;
+    planEl.querySelectorAll('td.open').forEach(td => td.addEventListener('click', () => {
+        const ev = td.dataset.ev, day = Number(td.dataset.day);
+        if (plan[ev] === day) delete plan[ev];
+        else plan[ev] = day;
+        statusEl.className = 'status';
+        statusEl.textContent = 'В какой день Ваня встретится с другом? Отметь это в строке «Друг».';
+        render();
+    }));
+}
+
+function setStatus(cls, text) {
+    statusEl.className = 'status' + (cls ? ' ' + cls : '');
+    statusEl.textContent = text;
+}
+
+function check() {
+    const conflicts = conflictDays();
+    if (plan.friend === undefined) {
+        setStatus('error', 'Выбери день для встречи с другом в строке «Друг».');
+        return;
+    }
+    if (conflicts.size > 0) {
+        setStatus('error', 'В один день получилось два дела, а Ваня хочет посвятить каждому мероприятию отдельный день. Посмотри на красные клетки.');
+        return;
+    }
+    if (plan.friend === 2) {
+        setStatus('error', 'В четверг не получится: в этот день хоккейный матч, а другого дня для хоккея нет.');
+        return;
+    }
+    const full = EVENTS.every(ev => plan[ev.id] === SOLUTION[ev.id]);
+    if (full) {
+        setStatus('success', '🎉 Верно! Ваня встретится с другом в пятницу. План: среда — театр, четверг — хоккей, пятница — друг, суббота — музей.');
+    } else {
+        setStatus('success', '🎉 Верно, в пятницу! А получится ли расставить по дням и остальные мероприятия?');
+    }
+}
+
+function showAnswer() {
+    plan = { ...SOLUTION };
+    render();
+    setStatus('', 'Ответ: пятница. Друг свободен только в четверг и пятницу, а в четверг проходит хоккейный матч — другого дня для него нет. ' +
+        'Значит, с другом Ваня встретится в пятницу, в театр пойдёт в среду, а в музей — в субботу.');
+}
+
+function reset() {
+    plan = {};
+    render();
+    setStatus('', 'В какой день Ваня встретится с другом? Отметь это в строке «Друг».');
+}
+
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Позвонить не вариант</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+
+    .slider-row input[type=range] { width: 260px; accent-color: #8e44ad; }
+
+    .sim {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .building { width: 280px; }
+
+    .building .roof {
+        height: 0;
+        border-left: 140px solid transparent;
+        border-right: 140px solid transparent;
+        border-bottom: 40px solid #8e44ad;
+    }
+
+    .building .body { border: 3px solid #2c3e50; border-top: none; background: #fdfefe; }
+
+    .flr {
+        display: flex;
+        align-items: center;
+        border-top: 2px solid #2c3e50;
+        height: 38px;
+        font-size: 14px;
+    }
+
+    .flr .fn {
+        width: 70px;
+        text-align: center;
+        font-weight: bold;
+        color: #2c3e50;
+        border-right: 2px solid #ddd;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .flr .range { flex: 1; text-align: center; font-family: 'Courier New', monospace; }
+    .flr.hit { background: #fff3cd; }
+    .flr.hit .range { font-weight: bold; color: #c0392b; }
+
+    .building .door {
+        text-align: center;
+        font-weight: bold;
+        padding: 6px;
+        background: #2c3e50;
+        color: white;
+    }
+
+    .building.wrong .door { background: #e74c3c; }
+    .building.right .door { background: #27ae60; }
+
+    .facts { flex: 1; min-width: 260px; font-size: 15px; }
+    .facts .line { margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🏢 Задача: Позвонить не вариант</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p>Миша пригласил Васю в гости. При этом он сказал, что живёт в <b>седьмом</b> подъезде в квартире № <b>462</b>, но забыл назвать этаж.
+        Подойдя к дому, Вася обнаружил, что дом <b>семиэтажный</b>. На каком этаже живёт Миша?</p>
+        <p style="font-size:14px;color:#555;"><i>На каждом этаже число квартир одинаково, номера квартир в доме начинаются с единицы.</i></p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: сколько квартир на этаже?</h2>
+        <p>Мы не знаем, сколько квартир на этаже. Попробуй разные варианты и посмотри, в какой подъезд попадает квартира 462.</p>
+        <div class="slider-row">
+            Квартир на этаже:
+            <input type="range" id="slider" min="1" max="15" value="6">
+            <span id="slider-val">6</span>
+        </div>
+        <div class="sim">
+            <div class="building" id="building">
+                <div class="roof"></div>
+                <div class="body" id="floors"></div>
+                <div class="door" id="door"></div>
+            </div>
+            <div class="facts" id="facts"></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответ</h2>
+        <div class="inputs">
+            <label>Миша живёт на этаже: <input type="number" id="answer" min="1" max="7"></label>
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Впиши номер этажа.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Так как в первых семи подъездах не меньше 462 квартир, в каждом подъезде не меньше <span class="math">462 : 7 = 66</span> квартир. Это означает, что на каждом этаже не меньше 9 квартир (<span class="math">66 : 7 &gt; 9</span>).</p>
+            <p>Пусть на каждой лестничной площадке по 9 квартир. Тогда в первых семи подъездах всего <span class="math">9 · 7 · 7 = 441</span> квартира, и квартира 462 окажется в восьмом подъезде, что противоречит условию.</p>
+            <p>Пусть на каждой площадке по 10 квартир. Тогда в первых семи подъездах <span class="math">10 · 7 · 7 = 490</span> квартир, а в первых шести — 420. Следовательно, квартира 462 находится в седьмом подъезде.
+            Она в нём 42-я по счёту (<span class="math">462 − 420 = 42</span>), и, поскольку на этаже по 10 квартир, расположена на пятом этаже.</p>
+            <p>Если бы на каждой площадке было по 11 квартир, то в первых шести подъездах оказалось бы <span class="math">11 · 7 · 6 = 462</span> квартиры, то есть квартира 462 была бы в шестом подъезде, что противоречит условию. При большем числе квартир — тем более.</p>
+            <p><b>Ответ: Миша живёт на пятом этаже.</b></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const FLAT = 462;
+const FLOORS = 7;
+const ENTRANCE = 7;
+const ANSWER = 5;
+
+function locate(k) {
+    const perEntrance = FLOORS * k;
+    const entrance = Math.ceil(FLAT / perEntrance);
+    const inEntrance = FLAT - (entrance - 1) * perEntrance;
+    const floor = Math.ceil(inEntrance / k);
+    return { perEntrance, entrance, inEntrance, floor };
+}
+
+function render() {
+    const k = Number(document.getElementById('slider').value);
+    document.getElementById('slider-val').textContent = k;
+    const r = locate(k);
+    const first = (r.entrance - 1) * r.perEntrance;
+
+    let html = '';
+    for (let f = FLOORS; f >= 1; f--) {
+        const a = first + (f - 1) * k + 1, b = first + f * k;
+        html += `<div class="flr${f === r.floor ? ' hit' : ''}"><div class="fn">${f} этаж</div>
+            <div class="range">${a === b ? a : a + '–' + b}${f === r.floor ? ' ← 462' : ''}</div></div>`;
+    }
+    document.getElementById('floors').innerHTML = html;
+    document.getElementById('door').textContent = `Подъезд № ${r.entrance}`;
+    const ok = r.entrance === ENTRANCE;
+    document.getElementById('building').className = 'building ' + (ok ? 'right' : 'wrong');
+
+    document.getElementById('facts').innerHTML = `
+        <div class="line">В одном подъезде: <span class="math">${FLOORS} · ${k} = ${r.perEntrance}</span> квартир.</div>
+        <div class="line">В первых шести подъездах: <span class="math">6 · ${r.perEntrance} = ${6 * r.perEntrance}</span>, в первых семи: <span class="math">7 · ${r.perEntrance} = ${7 * r.perEntrance}</span>.</div>
+        <div class="line">Квартира 462 попадает в <b>${r.entrance}-й подъезд</b>, ${r.inEntrance}-я по счёту в нём, на ${r.floor}-м этаже.</div>
+        <div class="status ${ok ? 'success' : 'error'}">${ok
+            ? '✅ Подъезд седьмой — этот вариант подходит!'
+            : `✗ Подъезд ${r.entrance}-й, а Миша сказал — седьмой. Такого не может быть.`}</div>`;
+}
+
+function check() {
+    const st = document.getElementById('status');
+    const v = document.getElementById('answer').value.trim();
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши номер этажа.';
+    } else if (Number(v) === ANSWER) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! На этаже по 10 квартир, и квартира 462 — на пятом этаже седьмого подъезда.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Найди в тренажёре, при каком числе квартир на этаже квартира 462 попадает в седьмой подъезд.';
+    }
+}
+
+document.getElementById('slider').addEventListener('input', render);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('answer').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+render();
+</script>
+</body>
+</html>

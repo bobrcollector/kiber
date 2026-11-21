@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Алгоритм с K и L</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    .layout {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .layout > div { flex: 1; min-width: 260px; }
+
+    .algo {
+        font-family: 'Cambria', 'Times New Roman', serif;
+        font-size: 21px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 14px;
+        line-height: 1.6;
+    }
+
+    .algo div { padding: 0 8px; border-radius: 5px; }
+    .algo .i1 { padding-left: 34px; }
+    .algo .i2 { padding-left: 64px; }
+    .algo .i3 { padding-left: 94px; }
+    .algo .active { background: #f1c40f; }
+    .algo .skip { opacity: 0.35; }
+
+    .trace-wrap { overflow-x: auto; margin-top: 10px; }
+
+    table.trace {
+        border-collapse: collapse;
+        font-size: 16px;
+        margin: 0 auto;
+    }
+
+    .trace th, .trace td {
+        border: 1px solid #bdc3c7;
+        padding: 5px 6px;
+        text-align: center;
+        min-width: 58px;
+    }
+
+    .trace th { background: #f5eef8; color: #2c3e50; }
+    .trace td.cond { font-size: 14px; color: #555; }
+    .trace td.cond.yes { color: #27ae60; font-weight: bold; }
+    .trace td.cond.no { color: #c0392b; font-weight: bold; }
+    .trace td.cur { background: #fff8dc; }
+    .trace input.num { width: 56px; padding: 5px; font-size: 15px; }
+    .trace .start { font-weight: bold; }
+
+    .vars {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        font-size: 20px;
+        font-family: 'Courier New', monospace;
+        margin-top: 10px;
+    }
+
+    .vars b { color: #8e44ad; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🔁 Задача: Алгоритм</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <div class="layout">
+            <div>
+                <p>Дан фрагмент алгоритма.</p>
+                <p>Определи результат работы этого фрагмента (чему будут равны <b>K</b> и <b>L</b>) при изначальных <b>K = 32</b>, <b>L = 4</b>.</p>
+                <div class="vars" id="vars"></div>
+            </div>
+            <div class="algo" id="algo">
+                <div data-l="for">для <i>X</i> от 0 до 5</div>
+                <div class="i1">нц</div>
+                <div class="i2" data-l="if">если <i>K</i> &lt; <i>L</i></div>
+                <div class="i3" data-l="then">то <i>L</i> := <i>L</i> − <i>K</i></div>
+                <div class="i3" data-l="else">иначе <i>K</i> := <i>K</i> / <i>L</i></div>
+                <div class="i2">все</div>
+                <div class="i1">кц</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Таблица трассировки</h2>
+        <p>Заполни значения K и L <b>после</b> каждого повторения цикла. Можно проверить таблицу или выполнять алгоритм по шагам.</p>
+        <div class="trace-wrap"><table class="trace" id="trace"></table></div>
+        <div class="inputs" style="justify-content:center;">
+            <button class="btn-check" id="btn-table-check">Проверить таблицу</button>
+            <button class="btn-next" id="btn-step">Шаг</button>
+            <button class="btn-reset" id="btn-reset">Сначала</button>
+        </div>
+        <div class="status" id="trace-status">Начальные значения: K = 32, L = 4.</div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответ</h2>
+        <div class="inputs">
+            <label>K = <input type="number" id="ans-k"></label>
+            <label>L = <input type="number" id="ans-l"></label>
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Впиши итоговые значения K и L.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p>Выполняем цикл шесть раз (X = 0, 1, 2, 3, 4, 5):</p>
+            <p>X = 0: <span class="math">32 &lt; 4</span> — нет, K = 32 / 4 = 8.<br>
+               X = 1: <span class="math">8 &lt; 4</span> — нет, K = 8 / 4 = 2.<br>
+               X = 2: <span class="math">2 &lt; 4</span> — да, L = 4 − 2 = 2.<br>
+               X = 3: <span class="math">2 &lt; 2</span> — нет, K = 2 / 2 = 1.<br>
+               X = 4: <span class="math">1 &lt; 2</span> — да, L = 2 − 1 = 1.<br>
+               X = 5: <span class="math">1 &lt; 1</span> — нет, K = 1 / 1 = 1.</p>
+            <p><b>Ответ: K = 1, L = 1.</b></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const START = { K: 32, L: 4 };
+const N = 6;
+
+// Эталонная трассировка
+const TRACE = [];
+(function () {
+    let K = START.K, L = START.L;
+    for (let x = 0; x < N; x++) {
+        const cond = K < L;
+        const before = { K, L };
+        if (cond) L = L - K;
+        else K = K / L;
+        TRACE.push({ x, cond, before, K, L });
+    }
+})();
+
+const traceEl = document.getElementById('trace');
+const traceStatus = document.getElementById('trace-status');
+let step = 0;   // сколько повторений выполнено в режиме «Шаг»
+
+function buildTable() {
+    let html = '<tr><th>X</th><th>начало</th>' + TRACE.map(t => `<th>${t.x}</th>`).join('') + '</tr>';
+    html += '<tr><th>K &lt; L ?</th><td></td>' + TRACE.map((t, i) => `<td class="cond" id="c${i}"></td>`).join('') + '</tr>';
+    html += `<tr><th>K</th><td class="start">${START.K}</td>` + TRACE.map((t, i) => `<td id="tdk${i}"><input class="num" id="k${i}" inputmode="numeric"></td>`).join('') + '</tr>';
+    html += `<tr><th>L</th><td class="start">${START.L}</td>` + TRACE.map((t, i) => `<td id="tdl${i}"><input class="num" id="l${i}" inputmode="numeric"></td>`).join('') + '</tr>';
+    traceEl.innerHTML = html;
+    traceEl.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => inp.classList.remove('ok', 'bad')));
+}
+
+function showVars(K, L) {
+    document.getElementById('vars').innerHTML = `<span>K = <b>${K}</b></span><span>L = <b>${L}</b></span>`;
+}
+
+function highlight(lines, skip) {
+    document.querySelectorAll('#algo div').forEach(d => {
+        d.classList.toggle('active', lines.includes(d.dataset.l));
+        d.classList.toggle('skip', skip.includes(d.dataset.l));
+    });
+}
+
+function doStep() {
+    if (step >= N) return;
+    const t = TRACE[step];
+    const cEl = document.getElementById('c' + step);
+    cEl.textContent = `${t.before.K} < ${t.before.L} — ${t.cond ? 'да' : 'нет'}`;
+    cEl.className = 'cond ' + (t.cond ? 'yes' : 'no');
+    const k = document.getElementById('k' + step), l = document.getElementById('l' + step);
+    k.value = t.K;
+    l.value = t.L;
+    k.className = l.className = 'num ok';
+    document.querySelectorAll('.trace td').forEach(td => td.classList.remove('cur'));
+    document.getElementById('tdk' + step).classList.add('cur');
+    document.getElementById('tdl' + step).classList.add('cur');
+    highlight(['for', 'if', t.cond ? 'then' : 'else'], [t.cond ? 'else' : 'then']);
+    showVars(t.K, t.L);
+    traceStatus.className = 'status';
+    traceStatus.textContent = t.cond
+        ? `X = ${t.x}: ${t.before.K} < ${t.before.L} — да, поэтому L := ${t.before.L} − ${t.before.K} = ${t.L}.`
+        : `X = ${t.x}: ${t.before.K} < ${t.before.L} — нет, поэтому K := ${t.before.K} / ${t.before.L} = ${t.K}.`;
+    step++;
+    if (step >= N) {
+        traceStatus.className = 'status success';
+        traceStatus.textContent += ` Цикл закончен: K = ${t.K}, L = ${t.L}.`;
+        document.getElementById('btn-step').disabled = true;
+    }
+}
+
+function checkTable() {
+    let empty = 0, wrong = 0;
+    TRACE.forEach((t, i) => {
+        [['k', t.K], ['l', t.L]].forEach(([p, val]) => {
+            const inp = document.getElementById(p + i);
+            const v = inp.value.trim();
+            inp.classList.remove('ok', 'bad');
+            if (v === '') { empty++; return; }
+            const ok = Number(v) === val;
+            inp.classList.add(ok ? 'ok' : 'bad');
+            if (!ok) wrong++;
+        });
+    });
+    if (wrong) {
+        traceStatus.className = 'status error';
+        traceStatus.textContent = `Ошибок: ${wrong}. Проверь условие K < L в каждом столбце — какая ветка выполняется?`;
+    } else if (empty) {
+        traceStatus.className = 'status';
+        traceStatus.textContent = `Пока всё верно! Осталось заполнить клеток: ${empty}.`;
+    } else {
+        traceStatus.className = 'status success';
+        traceStatus.textContent = '🎉 Таблица заполнена верно!';
+    }
+}
+
+function reset() {
+    step = 0;
+    buildTable();
+    highlight([], []);
+    showVars(START.K, START.L);
+    document.getElementById('btn-step').disabled = false;
+    traceStatus.className = 'status';
+    traceStatus.textContent = 'Начальные значения: K = 32, L = 4.';
+}
+
+function check() {
+    const st = document.getElementById('status');
+    const k = document.getElementById('ans-k').value.trim();
+    const l = document.getElementById('ans-l').value.trim();
+    const last = TRACE[N - 1];
+    if (k === '' || l === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши оба значения.';
+    } else if (Number(k) === last.K && Number(l) === last.L) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! K = 1, L = 1.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Заполни таблицу трассировки — цикл выполняется 6 раз (X от 0 до 5 включительно).';
+    }
+}
+
+document.getElementById('btn-step').addEventListener('click', doStep);
+document.getElementById('btn-table-check').addEventListener('click', checkTable);
+document.getElementById('btn-reset').addEventListener('click', reset);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+reset();
+</script>
+</body>
+</html>

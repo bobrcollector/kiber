@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Шифр</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 750px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 850px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .panel h3 { margin: 0 0 12px 0; color: #2c3e50; font-size: 17px; }
+
+    .layout {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    table.io-table {
+        border-collapse: collapse;
+        font-size: 20px;
+        min-width: 220px;
+    }
+
+    .io-table th, .io-table td {
+        border: 2px solid #2c3e50;
+        padding: 6px 22px;
+        text-align: center;
+    }
+
+    .io-table th { background: #f1f4f7; font-style: italic; font-weight: normal; }
+    .io-table td { font-weight: bold; color: #2c3e50; }
+    .io-table tr.lit td { background: #fff8dc; }
+
+    .tasks { flex: 1; min-width: 280px; }
+
+    .task {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+        font-size: 18px;
+    }
+
+    .task .label { font-size: 13px; color: #7f8c8d; width: 100%; margin-bottom: -6px; }
+    .task .word { font-weight: bold; font-family: 'Courier New', monospace; min-width: 130px; letter-spacing: 1px; }
+
+    .task input {
+        flex: 1;
+        min-width: 140px;
+        padding: 8px 10px;
+        font-size: 18px;
+        font-family: 'Courier New', monospace;
+        text-transform: uppercase;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        letter-spacing: 1px;
+    }
+
+    .task input:focus { border-color: #2980b9; }
+    .task input.ok { border-color: #2ecc71; background: #eafaf1; }
+    .task input.bad { border-color: #e74c3c; background: #fdecea; }
+
+    .alphabet {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+    }
+
+    .alphabet span {
+        width: 30px;
+        height: 34px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f1f4f7;
+        border: 1px solid #ccd5dd;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        color: #2c3e50;
+        position: relative;
+        transition: background 0.2s;
+    }
+
+    .alphabet span small {
+        font-size: 9px;
+        color: #95a5a6;
+        font-weight: normal;
+        line-height: 1;
+    }
+
+    .alphabet span.from { background: #d6eaf8; border-color: #2980b9; }
+    .alphabet span.to { background: #fdebd0; border-color: #e67e22; }
+    .alphabet span.between { background: #fef9e7; }
+
+    .pair-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .pair-buttons button { background: #eaf2f8; color: #2c3e50; padding: 8px 14px; }
+    .pair-buttons button:hover { background: #d6eaf8; }
+
+    .hints {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hint {
+        background: #fff8dc;
+        border-left: 4px solid #f1c40f;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 15px;
+        animation: pop 0.3s ease;
+    }
+
+    @keyframes pop {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-hint { background-color: #2980b9; }
+    .btn-hint:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 15px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    @media (max-width: 480px) {
+        .alphabet span { width: 26px; height: 32px; font-size: 14px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>🔐 Задача: Шифр</h1>
+<p class="subtitle">Обработчик настроен на шифровку сообщений. Попробуй по таблице отгадать его алгоритм
+    и с его помощью расшифровать и зашифровать слова.</p>
+
+<div class="panel">
+    <h3>Алфавит</h3>
+    <div class="alphabet" id="alphabet"></div>
+    <div class="pair-buttons" id="pair-buttons"></div>
+</div>
+
+<div class="panel">
+    <div class="layout">
+        <table class="io-table" id="io-table">
+            <tr><th>Вход</th><th>Выход</th></tr>
+        </table>
+
+        <div class="tasks">
+            <div class="task">
+                <span class="label">Расшифруй слово:</span>
+                <span class="word">1) НСФПСФ →</span>
+                <input type="text" id="a0" autocomplete="off">
+            </div>
+            <div class="task">
+                <span class="label">Расшифруй слово:</span>
+                <span class="word">2) КЗПОВ →</span>
+                <input type="text" id="a1" autocomplete="off">
+            </div>
+            <div class="task">
+                <span class="label">Зашифруй дату:</span>
+                <span class="word">3) 12 АПРЕЛЯ →</span>
+                <input type="text" id="a2" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-hint" id="btn-hint">Подсказка</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Сначала</button>
+    </div>
+
+    <div class="hints" id="hints"></div>
+    <div class="status" id="status">Нажми на пару букв под алфавитом — она подсветится. Что общего у всех пар?</div>
+</div>
+
+<script>
+const ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+const SHIFT = 3;
+const TABLE = [['1', '1'], ['И', 'Л'], ['25', '25'], ['Ю', 'Б'], ['Р', 'У']];
+const LETTER_PAIRS = TABLE.filter(([a]) => ALPHABET.includes(a));
+const ANSWERS = ['КОСМОС', 'ЗЕМЛЯ', '12 ГТУЗОВ'];
+const HINTS = [
+    'Цифры обработчик не меняет: 1 → 1, 25 → 25. Меняются только буквы.',
+    'Посчитай, на сколько букв вперёд по алфавиту сдвигается каждая буква: И → Л, Р → У. А после Я алфавит начинается сначала: Ю → Я → А → Б.',
+    'Чтобы расшифровать слово, сдвигай каждую букву на столько же шагов назад. Не забудь про букву Ё!'
+];
+
+const alphabetEl = document.getElementById('alphabet');
+const statusEl = document.getElementById('status');
+const hintsEl = document.getElementById('hints');
+let hintsShown = 0;
+
+function shift(text, n) {
+    return text.split('').map(ch => {
+        const i = ALPHABET.indexOf(ch);
+        if (i < 0) return ch;
+        return ALPHABET[(i + n + ALPHABET.length * 2) % ALPHABET.length];
+    }).join('');
+}
+
+function build() {
+    alphabetEl.innerHTML = ALPHABET.split('').map((ch, i) =>
+        `<span data-i="${i}">${ch}<small>${i + 1}</small></span>`).join('');
+
+    const table = document.getElementById('io-table');
+    TABLE.forEach(([a, b]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${a}</td><td>${b}</td>`;
+        tr.dataset.from = a;
+        table.appendChild(tr);
+    });
+
+    const pb = document.getElementById('pair-buttons');
+    LETTER_PAIRS.forEach(([a, b]) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${a} → ${b}`;
+        btn.addEventListener('click', () => showPair(a, b));
+        pb.appendChild(btn);
+    });
+}
+
+function showPair(a, b) {
+    const cells = alphabetEl.querySelectorAll('span');
+    cells.forEach(c => c.classList.remove('from', 'to', 'between'));
+    const ia = ALPHABET.indexOf(a), ib = ALPHABET.indexOf(b);
+    let i = ia;
+    while (true) {
+        i = (i + 1) % ALPHABET.length;
+        if (i === ib) break;
+        cells[i].classList.add('between');
+    }
+    cells[ia].classList.add('from');
+    cells[ib].classList.add('to');
+    document.querySelectorAll('#io-table tr').forEach(tr => tr.classList.toggle('lit', tr.dataset.from === a));
+}
+
+function normalize(s) {
+    return s.toUpperCase().replace(/\s+/g, ' ').trim();
+}
+
+function check() {
+    let right = 0, empty = 0;
+    ANSWERS.forEach((ans, i) => {
+        const input = document.getElementById('a' + i);
+        const v = normalize(input.value);
+        input.classList.remove('ok', 'bad');
+        if (!v) { empty++; return; }
+        const ok = v === ans || (i === 2 && v.replace(/\s/g, '') === ans.replace(/\s/g, ''));
+        input.classList.add(ok ? 'ok' : 'bad');
+        if (ok) right++;
+    });
+    if (right === ANSWERS.length) {
+        statusEl.className = 'status success';
+        statusEl.textContent = '🎉 Всё верно! Обработчик сдвигает каждую букву на 3 вперёд по алфавиту.';
+    } else if (right + empty === ANSWERS.length) {
+        statusEl.className = 'status';
+        statusEl.textContent = `Пока всё верно! Осталось заполнить: ${empty}.`;
+    } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'Есть ошибки — проверь красные поля. Внимательно считай буквы, особенно рядом с Ё.';
+    }
+}
+
+function showHint() {
+    if (hintsShown >= HINTS.length) return;
+    const div = document.createElement('div');
+    div.className = 'hint';
+    div.textContent = `💡 ${HINTS[hintsShown]}`;
+    hintsEl.appendChild(div);
+    hintsShown++;
+    document.getElementById('btn-hint').disabled = hintsShown >= HINTS.length;
+}
+
+function showAnswer() {
+    ANSWERS.forEach((ans, i) => {
+        const input = document.getElementById('a' + i);
+        input.value = ans;
+        input.classList.remove('bad');
+        input.classList.add('ok');
+    });
+    statusEl.className = 'status';
+    statusEl.innerHTML = 'Обработчик заменяет каждую букву на <b>третью букву после неё</b>: И→Й→К→<b>Л</b>, Ю→Я→А→<b>Б</b>, Р→С→Т→<b>У</b>. Цифры не меняются.<br>' +
+        'Ответ: 1) <b>КОСМОС</b>, 2) <b>ЗЕМЛЯ</b>, 3) <b>12 ГТУЗОВ</b>.';
+}
+
+function reset() {
+    ANSWERS.forEach((_, i) => {
+        const input = document.getElementById('a' + i);
+        input.value = '';
+        input.classList.remove('ok', 'bad');
+    });
+    hintsEl.innerHTML = '';
+    hintsShown = 0;
+    document.getElementById('btn-hint').disabled = false;
+    alphabetEl.querySelectorAll('span').forEach(c => c.classList.remove('from', 'to', 'between'));
+    document.querySelectorAll('#io-table tr').forEach(tr => tr.classList.remove('lit'));
+    statusEl.className = 'status';
+    statusEl.textContent = 'Нажми на пару букв под алфавитом — она подсветится. Что общего у всех пар?';
+}
+
+ANSWERS.forEach((_, i) => {
+    const input = document.getElementById('a' + i);
+    input.addEventListener('input', () => input.classList.remove('ok', 'bad'));
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+});
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+build();
+// Самопроверка: ответы совпадают с алгоритмом
+console.assert(shift('НСФПСФ', -SHIFT) === ANSWERS[0] && shift('КЗПОВ', -SHIFT) === ANSWERS[1] && shift('12 АПРЕЛЯ', SHIFT) === ANSWERS[2]);
+</script>
+</body>
+</html>

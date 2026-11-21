@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Шахматный робот</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .subtitle {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 20px;
+        text-align: center;
+        max-width: 780px;
+        line-height: 1.5;
+    }
+
+    .panel {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 900px;
+        box-sizing: border-box;
+        margin-bottom: 20px;
+    }
+
+    .layout {
+        display: flex;
+        gap: 25px;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .side { flex: 1; min-width: 260px; max-width: 380px; }
+
+    .commands {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .note {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin-top: 6px;
+    }
+
+    .program {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 14px;
+    }
+
+    .program span {
+        width: 26px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        font-family: 'Courier New', monospace;
+        border: 1px solid #ccd5dd;
+        border-radius: 5px;
+        background: white;
+    }
+
+    .program span.done { background: #eaf2f8; color: #7f8c8d; }
+    .program span.active { background: #f1c40f; border-color: #e1b000; }
+
+    .dirs-title { font-weight: bold; color: #2c3e50; margin-bottom: 8px; font-size: 15px; }
+
+    .dirs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .dirs button {
+        background: white;
+        color: #2c3e50;
+        border: 2px solid var(--c);
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .dirs button.sel { background: var(--c); color: white; }
+
+    .board {
+        --cell: 46px;
+        display: grid;
+        grid-template-columns: 24px repeat(8, var(--cell));
+        grid-template-rows: repeat(8, var(--cell)) 24px;
+        border-collapse: collapse;
+        user-select: none;
+    }
+
+    .board .head {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #2c3e50;
+        font-family: 'Cambria', 'Times New Roman', serif;
+        font-size: 17px;
+    }
+
+    .board .cell {
+        background: white;
+        border: 1px solid #2c3e50;
+        margin: 0 -1px -1px 0;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+    }
+
+    .board .cell.dark { background: #c8ccd0; }
+    .board .cell:hover { box-shadow: inset 0 0 0 3px #85c1e9; }
+    .board .cell.flag { box-shadow: inset 0 0 0 4px #f1c40f; }
+    .board .cell.flag::after { content: '🚩'; position: absolute; top: 0; right: 1px; font-size: 13px; }
+    .board .cell.start { box-shadow: inset 0 0 0 3px #2c3e50; }
+    .board .cell.flag.start { box-shadow: inset 0 0 0 4px #f1c40f; }
+
+    .dots {
+        position: absolute;
+        left: 3px;
+        bottom: 3px;
+        display: flex;
+        gap: 2px;
+    }
+
+    .dots i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: block;
+    }
+
+    .robot {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .robot .arrow {
+        position: absolute;
+        font-size: 16px;
+        font-weight: bold;
+        color: #c0392b;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        font-size: 13px;
+        color: #555;
+        margin-top: 8px;
+    }
+
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    .picked { font-weight: bold; color: #2c3e50; }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    button {
+        padding: 11px 18px;
+        font-size: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-step { background-color: #2980b9; }
+    .btn-step:hover { background-color: #216a94; }
+    .btn-check { background-color: #2ecc71; }
+    .btn-check:hover { background-color: #27ae60; }
+    .btn-answer { background-color: #95a5a6; }
+    .btn-answer:hover { background-color: #7f8c8d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+
+    .status {
+        margin-top: 12px;
+        font-size: 15px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-align: center;
+        line-height: 1.5;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .status ul { text-align: left; margin: 8px 0 0; padding-left: 20px; }
+
+    @media (max-width: 480px) {
+        .board { --cell: 34px; }
+        .board .cell { font-size: 20px; }
+        .dots i { width: 7px; height: 7px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Средние (9-11 лет)»</a>
+</nav>
+
+<h1>♟️ Задача: Шахматный робот</h1>
+<p class="subtitle">В начале пути робот находится на шахматной доске в клетке <b>D6</b>. Направление его взгляда неизвестно.
+    Определи, в каких клетках может оказаться робот, выполнив последовательность команд <b>123123221133</b>.</p>
+
+<div class="panel">
+    <div class="layout">
+        <div>
+            <div class="board" id="board"></div>
+            <div class="legend" id="legend"></div>
+        </div>
+
+        <div class="side">
+            <div class="commands">
+                <b>Команды робота:</b><br>
+                1 — вперёд на один шаг<br>
+                2 — влево на один шаг<br>
+                3 — вправо на один шаг
+                <div class="note">Робот не поворачивается: «влево» и «вправо» — это шаг в сторону от того направления, куда он смотрит.</div>
+            </div>
+
+            <div class="program" id="program"></div>
+
+            <div class="dirs-title">Куда робот смотрит в начале?</div>
+            <div class="dirs" id="dirs"></div>
+
+            <div class="controls">
+                <button class="btn-step" id="btn-step">Шаг</button>
+                <button class="btn-step" id="btn-run">Выполнить всё</button>
+                <button class="btn-reset" id="btn-restart">Сначала</button>
+            </div>
+            <div class="status" id="run-status">Выбери направление взгляда и проверь, куда придёт робот.</div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div style="text-align:center; font-size:16px;">
+        Нажми на клетки доски, где может оказаться робот (поставь 🚩).<br>
+        Твой ответ: <span class="picked" id="picked">—</span>
+    </div>
+    <div class="controls">
+        <button class="btn-check" id="btn-check">Проверить</button>
+        <button class="btn-answer" id="btn-answer">Ответ</button>
+        <button class="btn-reset" id="btn-reset">Начать заново</button>
+    </div>
+    <div class="status" id="answer-status">Подумай про все четыре направления взгляда.</div>
+</div>
+
+<script>
+const LETTERS = 'ABCDEFGH';
+const START = { x: 4, y: 6 };   // D6
+const PROGRAM = '123123221133';
+const DIRS = [
+    { id: 'up', name: 'Вверх', arrow: '↑', v: [0, 1], color: '#8e44ad' },
+    { id: 'right', name: 'Вправо', arrow: '→', v: [1, 0], color: '#2980b9' },
+    { id: 'down', name: 'Вниз', arrow: '↓', v: [0, -1], color: '#27ae60' },
+    { id: 'left', name: 'Влево', arrow: '←', v: [-1, 0], color: '#e67e22' }
+];
+const ANSWER = ['D2', 'H6'];
+
+const boardEl = document.getElementById('board');
+const programEl = document.getElementById('program');
+const runStatus = document.getElementById('run-status');
+const answerStatus = document.getElementById('answer-status');
+const pickedEl = document.getElementById('picked');
+const btnStep = document.getElementById('btn-step');
+const btnRun = document.getElementById('btn-run');
+
+let dir = null;        // выбранное направление
+let pos = null;        // текущая клетка робота
+let step = 0;
+let fell = false;
+let trails = {};       // id направления -> множество клеток
+let flags = new Set();
+let timer = null;
+
+function cellName(x, y) {
+    return LETTERS[x - 1] + y;
+}
+
+function moveVector(d, cmd) {
+    const [fx, fy] = d.v;
+    if (cmd === '1') return [fx, fy];
+    if (cmd === '2') return [-fy, fx];   // шаг влево
+    return [fy, -fx];                    // шаг вправо
+}
+
+function simulate(d) {
+    let x = START.x, y = START.y;
+    const path = [cellName(x, y)];
+    for (const cmd of PROGRAM) {
+        const [dx, dy] = moveVector(d, cmd);
+        x += dx; y += dy;
+        if (x < 1 || x > 8 || y < 1 || y > 8) return { path, fell: true };
+        path.push(cellName(x, y));
+    }
+    return { path, fell: false };
+}
+
+function render() {
+    let html = '';
+    for (let y = 8; y >= 1; y--) {
+        html += `<div class="head">${y}</div>`;
+        for (let x = 1; x <= 8; x++) {
+            const name = cellName(x, y);
+            let cls = 'cell';
+            if ((x + y) % 2 === 0) cls += ' dark';
+            if (flags.has(name)) cls += ' flag';
+            if (x === START.x && y === START.y) cls += ' start';
+            const dots = DIRS.filter(d => trails[d.id] && trails[d.id].has(name))
+                .map(d => `<i style="background:${d.color}"></i>`).join('');
+            let content = dots ? `<span class="dots">${dots}</span>` : '';
+            if (pos && pos.x === x && pos.y === y && !fell) {
+                const off = { up: 'top:-18px', right: 'right:-14px', down: 'bottom:-18px', left: 'left:-14px' }[dir.id];
+                content += `<span class="robot">🤖<span class="arrow" style="${off}">${dir.arrow}</span></span>`;
+            } else if (!pos && x === START.x && y === START.y) {
+                content += `<span class="robot">🤖</span>`;
+            }
+            html += `<div class="${cls}" data-name="${name}">${content}</div>`;
+        }
+    }
+    html += '<div class="head"></div>' + LETTERS.split('').map(l => `<div class="head">${l}</div>`).join('');
+    boardEl.innerHTML = html;
+    boardEl.querySelectorAll('.cell').forEach(el => el.addEventListener('click', () => toggleFlag(el.dataset.name)));
+
+    programEl.innerHTML = PROGRAM.split('').map((c, i) => {
+        let cls = '';
+        if (dir && i < step - 1) cls = 'done';
+        if (dir && i === step - 1) cls = 'active';
+        return `<span class="${cls}">${c}</span>`;
+    }).join('');
+
+    document.querySelectorAll('#dirs button').forEach(b => b.classList.toggle('sel', dir && b.dataset.id === dir.id));
+    const finished = !dir || fell || step >= PROGRAM.length;
+    btnStep.disabled = finished;
+    btnRun.disabled = finished;
+
+    pickedEl.textContent = flags.size ? [...flags].sort().join(', ') : '—';
+}
+
+function buildStatic() {
+    const dirsEl = document.getElementById('dirs');
+    DIRS.forEach(d => {
+        const b = document.createElement('button');
+        b.dataset.id = d.id;
+        b.style.setProperty('--c', d.color);
+        b.textContent = `${d.arrow} ${d.name}`;
+        b.addEventListener('click', () => chooseDir(d));
+        dirsEl.appendChild(b);
+    });
+    document.getElementById('legend').innerHTML = DIRS.map(d =>
+        `<span><i style="background:${d.color}"></i>${d.name.toLowerCase()}</span>`).join('');
+}
+
+function chooseDir(d) {
+    stopRun();
+    dir = d;
+    pos = { ...START };
+    step = 0;
+    fell = false;
+    trails[d.id] = new Set([cellName(START.x, START.y)]);
+    runStatus.className = 'status';
+    runStatus.textContent = `Робот смотрит ${d.name.toLowerCase()} (${d.arrow}). Нажимай «Шаг».`;
+    render();
+}
+
+function doStep() {
+    if (!dir || fell || step >= PROGRAM.length) return;
+    const cmd = PROGRAM[step];
+    const [dx, dy] = moveVector(dir, cmd);
+    const nx = pos.x + dx, ny = pos.y + dy;
+    step++;
+    const cmdName = cmd === '1' ? 'вперёд' : cmd === '2' ? 'влево' : 'вправо';
+    if (nx < 1 || nx > 8 || ny < 1 || ny > 8) {
+        fell = true;
+        runStatus.className = 'status error';
+        runStatus.textContent = `Команда ${cmd} (${cmdName}): робот вышел за доску из клетки ${cellName(pos.x, pos.y)}! При этом направлении программу выполнить нельзя.`;
+        stopRun();
+        render();
+        return;
+    }
+    pos = { x: nx, y: ny };
+    trails[dir.id].add(cellName(nx, ny));
+    if (step >= PROGRAM.length) {
+        runStatus.className = 'status success';
+        runStatus.textContent = `Программа выполнена! Робот остановился в клетке ${cellName(nx, ny)}.`;
+    } else {
+        runStatus.className = 'status';
+        runStatus.textContent = `Команда ${cmd} (${cmdName}) → ${cellName(nx, ny)}`;
+    }
+    render();
+}
+
+function stopRun() {
+    if (timer) clearInterval(timer);
+    timer = null;
+}
+
+function runAll() {
+    stopRun();
+    timer = setInterval(() => {
+        doStep();
+        if (fell || step >= PROGRAM.length) stopRun();
+    }, 350);
+}
+
+function restartDir() {
+    if (dir) chooseDir(dir);
+}
+
+function toggleFlag(name) {
+    if (flags.has(name)) flags.delete(name);
+    else flags.add(name);
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Когда отметишь все клетки, нажми «Проверить».';
+    render();
+}
+
+function check() {
+    if (flags.size === 0) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Сначала отметь клетки на доске.';
+        return;
+    }
+    const extra = [...flags].filter(n => !ANSWER.includes(n));
+    const missing = ANSWER.filter(n => !flags.has(n));
+    if (!extra.length && !missing.length) {
+        answerStatus.className = 'status success';
+        answerStatus.textContent = '🎉 Верно! Робот может оказаться в клетке H6 или D2.';
+    } else if (extra.length) {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = `Лишние клетки: ${extra.sort().join(', ')}. Проверь их, выполнив программу для каждого направления.`;
+    } else {
+        answerStatus.className = 'status error';
+        answerStatus.textContent = 'Отмеченные клетки верны, но найдены не все. Проверь все четыре направления взгляда.';
+    }
+}
+
+function showAnswer() {
+    stopRun();
+    DIRS.forEach(d => { trails[d.id] = new Set(simulate(d).path); });
+    flags = new Set(ANSWER);
+    dir = null;
+    pos = null;
+    step = 0;
+    fell = false;
+    const lines = DIRS.map(d => {
+        const r = simulate(d);
+        return r.fell
+            ? `<li><b>${d.name.toLowerCase()}</b> — после клетки ${r.path[r.path.length - 1]} робот выходит за доску;</li>`
+            : `<li><b>${d.name.toLowerCase()}</b> — робот придёт в клетку <b>${r.path[r.path.length - 1]}</b>;</li>`;
+    }).join('');
+    answerStatus.className = 'status';
+    answerStatus.innerHTML = `Ответ: <b>H6 или D2</b>. Направление движения зависит от того, куда робот смотрит в начале. Если робот смотрит<ul>${lines}</ul>`;
+    runStatus.className = 'status';
+    runStatus.textContent = 'На доске показаны пути робота для всех четырёх направлений.';
+    render();
+}
+
+function reset() {
+    stopRun();
+    dir = null;
+    pos = null;
+    step = 0;
+    fell = false;
+    trails = {};
+    flags = new Set();
+    runStatus.className = 'status';
+    runStatus.textContent = 'Выбери направление взгляда и проверь, куда придёт робот.';
+    answerStatus.className = 'status';
+    answerStatus.textContent = 'Подумай про все четыре направления взгляда.';
+    render();
+}
+
+btnStep.addEventListener('click', () => { stopRun(); doStep(); });
+btnRun.addEventListener('click', runAll);
+document.getElementById('btn-restart').addEventListener('click', restartDir);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('btn-answer').addEventListener('click', showAnswer);
+document.getElementById('btn-reset').addEventListener('click', reset);
+
+buildStatic();
+render();
+</script>
+</body>
+</html>

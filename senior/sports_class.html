@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задача: Класс спортсменов</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .site-nav {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .site-nav a {
+        text-decoration: none;
+        background: white;
+        color: #2c3e50;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background 0.2s;
+    }
+
+    .site-nav a:hover { background: #eaf2f8; }
+
+    h1 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        text-align: center;
+        font-size: 24px;
+    }
+
+    .page {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        line-height: 1.5;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+        color: #8e44ad;
+        margin: 0 0 12px;
+    }
+
+    .panel h3 {
+        font-size: 15px;
+        margin: 14px 0 4px;
+        color: #2c3e50;
+    }
+
+    .panel p { margin: 6px 0; }
+
+    .limit { font-size: 13px; color: #888; }
+
+    .note {
+        font-size: 13px;
+        background: #f5eef8;
+        border-left: 4px solid #8e44ad;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .inputs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .inputs label { font-weight: bold; }
+
+    input[type=number], input.num {
+        width: 100px;
+        padding: 7px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        border: 2px solid #bdc3c7;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    input[type=number]:focus, input.num:focus { border-color: #8e44ad; }
+    input.ok { border-color: #2ecc71 !important; background: #eafaf1; }
+    input.bad { border-color: #e74c3c !important; background: #fdecea; }
+
+    button {
+        padding: 9px 16px;
+        font-size: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    button:disabled { background-color: #bdc3c7 !important; cursor: not-allowed; }
+
+    .btn-check { background-color: #8e44ad; }
+    .btn-check:hover { background-color: #6c3483; }
+    .btn-next { background-color: #2ecc71; }
+    .btn-next:hover { background-color: #27ae60; }
+    .btn-hint { background-color: #f1c40f; color: #2c3e50; }
+    .btn-hint:hover { background-color: #d4ac0d; }
+    .btn-reset { background-color: #e74c3c; }
+    .btn-reset:hover { background-color: #c0392b; }
+    .btn-gray { background-color: #95a5a6; }
+    .btn-gray:hover { background-color: #7f8c8d; }
+
+    .status {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
+
+    .status.success { background: #eafaf1; border-color: #2ecc71; color: #27ae60; font-weight: bold; }
+    .status.error { background: #fdecea; border-color: #e74c3c; color: #c0392b; }
+
+    .explanation {
+        background-color: #fff8e1;
+        border: 2px solid #ffecb3;
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 15px;
+        margin-top: 10px;
+    }
+
+    .math {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-weight: bold;
+        color: #8e44ad;
+    }
+
+    .solution { display: none; }
+    .solution.open { display: block; }
+
+    svg { width: 100%; max-width: 620px; height: auto; display: block; margin: 0 auto; }
+    .class-rect { fill: #fbfcfc; stroke: #2c3e50; stroke-width: 2; }
+    .c-check { fill: rgba(231, 76, 60, 0.15); stroke: #e74c3c; stroke-width: 3; }
+    .c-chess { fill: rgba(41, 128, 185, 0.15); stroke: #2980b9; stroke-width: 3; }
+    .v-title { font-size: 17px; font-weight: bold; text-anchor: middle; }
+    .v-num { font-size: 30px; font-weight: bold; text-anchor: middle; dominant-baseline: central; fill: #2c3e50; }
+    .v-num.neg { fill: #e74c3c; }
+    .v-sub { font-size: 12px; text-anchor: middle; fill: #555; }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .slider-row input[type=range] { width: 260px; accent-color: #8e44ad; }
+
+    .total {
+        text-align: center;
+        font-size: 17px;
+        margin-top: 10px;
+    }
+
+    .total b { font-size: 22px; }
+    .total.good b { color: #27ae60; }
+    .total.bad b { color: #e74c3c; }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+    <a href="../index.html">🏠 Главная</a>
+    <a href="index.html">⬆ К уровню «Старшие (12-14 лет)»</a>
+</nav>
+
+<h1>🏆 Задача: Класс спортсменов</h1>
+
+<div class="page">
+    <div class="panel">
+        <h2>Условие</h2>
+        <p>В классе <b>25</b> обучающихся. Из них <b>5</b> человек не умеют играть ни в шашки, ни в шахматы.
+        <b>18</b> обучающихся играют в шашки, <b>20</b> — в шахматы.</p>
+        <p>Сколько человек из класса играют и в шашки, и в шахматы?</p>
+    </div>
+
+    <div class="panel">
+        <h2>🔬 Тренажёр: круги Эйлера</h2>
+        <p>Двигай ползунок — сколько человек играют в обе игры? Остальные области посчитаются сами.</p>
+        <svg viewBox="0 0 620 330">
+            <rect class="class-rect" x="10" y="10" width="600" height="310" rx="14"/>
+            <text x="30" y="38" font-size="15" font-weight="bold" fill="#2c3e50">Класс — 25 человек</text>
+            <circle class="c-check" cx="245" cy="180" r="115"/>
+            <circle class="c-chess" cx="375" cy="180" r="120"/>
+            <text class="v-title" x="190" y="58" fill="#e74c3c">⚪⚫ Шашки — 18</text>
+            <text class="v-title" x="440" y="52" fill="#2980b9">♞ Шахматы — 20</text>
+            <text class="v-num" id="only-check" x="185" y="180">0</text>
+            <text class="v-sub" x="185" y="210">только шашки</text>
+            <text class="v-num" id="both" x="310" y="180">0</text>
+            <text class="v-sub" x="310" y="210">обе игры</text>
+            <text class="v-num" id="only-chess" x="440" y="180">0</text>
+            <text class="v-sub" x="440" y="210">только шахматы</text>
+            <text class="v-num" x="560" y="280">5</text>
+            <text class="v-sub" x="545" y="305">ни во что</text>
+        </svg>
+
+        <div class="slider-row">
+            Играют в обе игры:
+            <input type="range" id="slider" min="0" max="18" value="0">
+            <span id="slider-val">0</span>
+        </div>
+        <div class="total" id="total"></div>
+    </div>
+
+    <div class="panel">
+        <h2>✍️ Ответ</h2>
+        <div class="inputs">
+            <label>И в шашки, и в шахматы играют: <input type="number" id="answer"></label>
+            <button class="btn-check" id="btn-check">Проверить</button>
+        </div>
+        <div class="status" id="status">Впиши число человек.</div>
+    </div>
+
+    <div class="panel">
+        <button class="btn-hint" id="btn-solution">💡 Показать решение</button>
+        <div class="solution" id="solution">
+            <p><span class="math">25 − 5 = 20</span> — столько человек умеют играть хотя бы в одну игру: в шашки или в шахматы.</p>
+            <p>В шахматы играют 20 человек — значит, это ровно все эти 20 человек. В шашки играют 18 человек, и все они тоже входят в эти 20, то есть все они играют и в шахматы.</p>
+            <p>Можно и формулой: <span class="math">18 + 20 − 20 = 18</span> (сумма двух кругов минус их объединение).</p>
+            <p><b>Ответ: 18 обучающихся.</b></p>
+        </div>
+    </div>
+</div>
+
+<script>
+const ANSWER = 18;
+const slider = document.getElementById('slider');
+
+function update() {
+    const x = Number(slider.value);
+    const oc = 18 - x, och = 20 - x;
+    document.getElementById('slider-val').textContent = x;
+    document.getElementById('both').textContent = x;
+    document.getElementById('only-check').textContent = oc;
+    document.getElementById('only-chess').textContent = och;
+    const total = oc + och + x + 5;
+    const t = document.getElementById('total');
+    t.className = 'total ' + (total === 25 ? 'good' : 'bad');
+    t.innerHTML = `Всего в классе получается: ${oc} + ${x} + ${och} + 5 = <b>${total}</b> ` +
+        (total === 25 ? '✅ ровно 25!' : total > 25 ? '(больше 25 — многовато)' : '(меньше 25)');
+}
+
+function check() {
+    const st = document.getElementById('status');
+    const v = document.getElementById('answer').value.trim();
+    if (v === '') {
+        st.className = 'status error';
+        st.textContent = 'Впиши число.';
+    } else if (Number(v) === ANSWER) {
+        st.className = 'status success';
+        st.textContent = '🎉 Верно! 18 человек играют в обе игры — все шашисты умеют играть и в шахматы.';
+    } else if (Number(v) === 13) {
+        st.className = 'status error';
+        st.textContent = '18 + 20 − 25 = 13 — но так не учтены 5 человек, которые не играют ни во что.';
+    } else {
+        st.className = 'status error';
+        st.textContent = 'Неверно. Подвигай ползунок в тренажёре, чтобы всего получилось 25 человек.';
+    }
+}
+
+slider.addEventListener('input', update);
+document.getElementById('btn-check').addEventListener('click', check);
+document.getElementById('answer').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+document.getElementById('btn-solution').addEventListener('click', () => {
+    const open = document.getElementById('solution').classList.toggle('open');
+    document.getElementById('btn-solution').textContent = open ? '🙈 Скрыть решение' : '💡 Показать решение';
+});
+
+update();
+</script>
+</body>
+</html>
